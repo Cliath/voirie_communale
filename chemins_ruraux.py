@@ -936,12 +936,12 @@ class CheminsRuraux:
 
         # Ordre désiré : index 0 = tout en haut du panneau
         canonical_order = [
-            f"Parcelles MAJIC {code_insee}",
             f"OSM Routes {code_insee} (C/R)",
             f"BD TOPO Routes numérotées ou nommées {code_insee}",
             f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
             f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
             f"Adresses BAN {code_insee}",
+            f"Parcelles MAJIC {code_insee}",
             f"Commune {code_insee}",
             f"Cadastre - {code_insee}",
             "SCAN 50\u00ae 1950",

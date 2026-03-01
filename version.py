@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.67"
-__version_info__ = (0, 9, 67)
+__version__ = "0.9.68"
+__version_info__ = (0, 9, 68)
 
 VERSION_HISTORY = {
+    "0.9.68": {
+        "date": "2026-03-01",
+        "changes": [
+            "Modifié : ordre canonique des couches — Parcelles MAJIC placées entre Adresses BAN et Commune."
+        ]
+    },
     "0.9.67": {
         "date": "2026-03-01",
         "changes": [

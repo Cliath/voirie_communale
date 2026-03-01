@@ -1,3 +1,6 @@
+# [0.9.68] - 2026-03-01
+### Modifié
+- Ordre canonique : **Parcelles MAJIC** déplacées entre Adresses BAN et Commune.
 # [0.9.67] - 2026-03-01
 ### Ajouté
 - Réordonnancement automatique des couches dans le panneau après chargement, quel que soit l'ordre de cobhage des cases. Ordre canonique (haut → bas) : Parcelles MAJIC → OSM → BD TOPO → Voirie comm. → Voirie dép. → BAN → Commune → Cadastre → SCAN 1950 → Cassini → État-Major → Waze. Méthode `_reorder_layers(code_insee)`.
