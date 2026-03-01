@@ -565,7 +565,10 @@ class CheminsRuraux:
                     layer.updateExtents()
                     layer_extent = layer.extent()
                     if not layer_extent.isEmpty():
-                        combined_extent = layer_extent if combined_extent is None else combined_extent.__ior__(layer_extent) or combined_extent
+                        if combined_extent is None:
+                            combined_extent = layer_extent
+                        else:
+                            combined_extent.combineExtentWith(layer_extent)
 
             # Priorité 2 : emprise des couches raster WMS
             if combined_extent is None:
@@ -573,7 +576,10 @@ class CheminsRuraux:
                     if layer.isValid() and isinstance(layer, QgsRasterLayer):
                         layer_extent = layer.extent()
                         if not layer_extent.isEmpty():
-                            combined_extent = layer_extent if combined_extent is None else combined_extent.__ior__(layer_extent) or combined_extent
+                            if combined_extent is None:
+                                combined_extent = layer_extent
+                            else:
+                                combined_extent.combineExtentWith(layer_extent)
 
             if combined_extent is not None and not combined_extent.isEmpty():
                 canvas = self.iface.mapCanvas()

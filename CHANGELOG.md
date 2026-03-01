@@ -1,3 +1,6 @@
+# [0.9.49] - 2026-03-01
+### Correction
+- `AttributeError: 'QgsRectangle' object has no attribute '__ior__'` dans `validate_and_load` — le calcul de l'emprise combinatoire utilisait l'opérateur `|=` non supporté par `QgsRectangle`. Remplacé par `combineExtentWith()`.
 # [0.9.48] - 2026-03-01
 ### Correction
 - OSM Routes : libellés de catégorisation incorrects — C = Voie communale, R = Chemin rural, CE = Chemin d'exploitation.

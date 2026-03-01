@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.48"
-__version_info__ = (0, 9, 48)
+__version__ = "0.9.49"
+__version_info__ = (0, 9, 49)
 
 VERSION_HISTORY = {
+    "0.9.49": {
+        "date": "2026-03-01",
+        "changes": [
+            "Corrigé : AttributeError 'QgsRectangle' has no attribute '__ior__' — remplacé par combineExtentWith()."
+        ]
+    },
     "0.9.48": {
         "date": "2026-03-01",
         "changes": [
