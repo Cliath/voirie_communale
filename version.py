@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.47"
-__version_info__ = (0, 9, 47)
+__version__ = "0.9.48"
+__version_info__ = (0, 9, 48)
 
 VERSION_HISTORY = {
+    "0.9.48": {
+        "date": "2026-03-01",
+        "changes": [
+            "Corrigé : libellés de catégorisation OSM — C = Voie communale, R = Chemin rural, CE = Chemin d'exploitation."
+        ]
+    },
     "0.9.47": {
         "date": "2026-03-01",
         "changes": [

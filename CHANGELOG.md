@@ -1,3 +1,6 @@
+# [0.9.48] - 2026-03-01
+### Correction
+- OSM Routes : libellés de catégorisation incorrects — C = Voie communale, R = Chemin rural, CE = Chemin d'exploitation.
 # [0.9.47] - 2026-03-01
 ### Correction
 - OSM Routes : la catégorisation (CE / C / R) était incorrecte pour les tronçons sans `ref` direct mais appartenant à une relation référencée. Le champ `ref` stocke désormais la meilleure référence disponible (`ref` direct, sinon `rel_ref`).

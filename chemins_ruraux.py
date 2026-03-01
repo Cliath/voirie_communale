@@ -1573,16 +1573,16 @@ class CheminsRuraux:
             'capstyle': 'round',
             'joinstyle': 'round'
         })
-        cat_c = QgsRendererCategory('C', sym_c, 'Chemin rural (C)')
+        cat_c = QgsRendererCategory('C', sym_c, 'Voie communale (C)')
 
-        # Route (R) - Rouge
+        # Chemin rural (R) - Rouge
         sym_r = QgsLineSymbol.createSimple({
             'color': '#d62728',
             'width': '0.6',
             'capstyle': 'round',
             'joinstyle': 'round'
         })
-        cat_r = QgsRendererCategory('R', sym_r, 'Route (R)')
+        cat_r = QgsRendererCategory('R', sym_r, 'Chemin rural (R)')
 
         # Autre - Gris (masqué par défaut)
         sym_autre = QgsLineSymbol.createSimple({'color': '#999999', 'width': '0.4'})
