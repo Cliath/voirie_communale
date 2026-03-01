@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.43"
-__version_info__ = (0, 9, 43)
+__version__ = "0.9.44"
+__version_info__ = (0, 9, 44)
 
 VERSION_HISTORY = {
+    "0.9.44": {
+        "date": "2026-03-01",
+        "changes": [
+            "Ajouté : Nouvelle source de données Surfaces non agricoles RPG (RPG.LATEST:SNA, WFS IGN Géoplateforme), filtrée sur l'emprise communale, rendu orange semi-transparent."
+        ]
+    },
     "0.9.43": {
         "date": "2026-03-01",
         "changes": [

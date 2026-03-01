@@ -10,7 +10,7 @@ from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.PyQt.QtWidgets import QAction, QMessageBox
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
                        Qgis, QgsLayerTreeGroup, QgsCoordinateTransform,
-                       QgsRendererCategory, QgsCategorizedSymbolRenderer,
+                       QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsSingleSymbolRenderer,
                        QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol, QgsFeature, QgsField,
                        QgsGeometry, QgsPointXY,
                        QgsPalLayerSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling,
@@ -402,9 +402,10 @@ class CheminsRuraux:
         voirie_dep_checked = self.dlg.chkVoirieDep.isChecked()
         osm_routes_checked = self.dlg.chkOsmRoutes.isChecked()
         bdtopo_routesnom_checked = hasattr(self.dlg, 'chkBDTopoRoutesNom') and self.dlg.chkBDTopoRoutesNom.isChecked()
+        rpg_sna_checked = hasattr(self.dlg, 'chkRpgSna') and self.dlg.chkRpgSna.isChecked()
         majic_checked = self.dlg.chkMajic.isChecked()
         
-        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not majic_checked:
+        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not rpg_sna_checked and not majic_checked:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Sélection requise",
@@ -430,7 +431,7 @@ class CheminsRuraux:
         
         # Récupérer l'emprise de la commune pour filtrer les voiries
         commune_bbox = None
-        if voirie_checked or voirie_dep_checked or osm_routes_checked or bdtopo_routesnom_checked:
+        if voirie_checked or voirie_dep_checked or osm_routes_checked or bdtopo_routesnom_checked or rpg_sna_checked:
             # Chercher d'abord si une commune existe déjà dans le projet
             if commune_layer is None:
                 for layer_id, layer in QgsProject.instance().mapLayers().items():
@@ -488,6 +489,12 @@ class CheminsRuraux:
             results.append(('BD TOPO Routes numérotées ou nommées', bdtopo_routesnom_success))
             if bdtopo_routesnom_layer:
                 loaded_layers.append(bdtopo_routesnom_layer)
+
+        if rpg_sna_checked:
+            rpg_sna_success, rpg_sna_layer = self.load_rpg_sna_wfs(code_insee, commune_bbox)
+            results.append(('Surfaces non agricoles RPG', rpg_sna_success))
+            if rpg_sna_layer:
+                loaded_layers.append(rpg_sna_layer)
 
         if majic_checked:
             majic_success, majic_layer = self.load_majic_parcelles(code_insee)
@@ -628,6 +635,68 @@ class CheminsRuraux:
                     self.iface.mainWindow(),
                     "BD TOPO Routes numérotées ou nommées non disponible",
                     f"Impossible de charger les routes numérotées ou nommées BD TOPO pour le code INSEE {code_insee}.\n\n"
+                    "Consultez le journal des messages pour plus de détails."
+                )
+
+        return success, layer
+
+    def load_rpg_sna_wfs(self, code_insee, bbox=None):
+        """Charge les surfaces non agricoles (SNA) du RPG depuis le WFS IGN Géoplateforme.
+
+        Args:
+            code_insee: Code INSEE de la commune
+            bbox: Emprise de la commune (xmin, ymin, xmax, ymax) en EPSG:4326
+
+        Returns:
+            tuple: (bool, QgsVectorLayer ou None)
+        """
+        if not bbox:
+            QMessageBox.warning(
+                self.iface.mainWindow(),
+                "Emprise communale manquante",
+                "Impossible de calculer le BBOX pour les surfaces non agricoles RPG.\n"
+                "Chargez l'emprise communale ou vérifiez le code INSEE."
+            )
+            return False, None
+
+        success, layer = self.load_wfs_layer(
+            typename="RPG.LATEST:SNA",
+            layer_name=f"Surfaces non agricoles RPG {code_insee}",
+            crs="EPSG:4326",
+            bbox=bbox,
+            geom_field="geom"
+        )
+
+        if layer and layer.isValid():
+            symbol = QgsFillSymbol.createSimple({
+                'color': '255,165,0,160',
+                'outline_color': '#CC6600',
+                'outline_width': '0.3',
+            })
+            layer.setRenderer(QgsSingleSymbolRenderer(symbol))
+            layer.triggerRepaint()
+
+        alone = not any([
+            self.dlg.chkCadastre.isChecked(),
+            self.dlg.chkCommune.isChecked(),
+            self.dlg.chkBAN.isChecked(),
+            self.dlg.chkVoirie.isChecked(),
+            self.dlg.chkVoirieDep.isChecked(),
+            self.dlg.chkOsmRoutes.isChecked(),
+            self.dlg.chkBDTopoRoutesNom.isChecked() if hasattr(self.dlg, 'chkBDTopoRoutesNom') else False,
+        ])
+        if alone:
+            if success:
+                QMessageBox.information(
+                    self.iface.mainWindow(),
+                    "SNA RPG chargées",
+                    f"Les surfaces non agricoles RPG de la commune {code_insee} ont été chargées avec succès."
+                )
+            else:
+                QMessageBox.warning(
+                    self.iface.mainWindow(),
+                    "SNA RPG non disponible",
+                    f"Impossible de charger les surfaces non agricoles RPG pour le code INSEE {code_insee}.\n\n"
                     "Consultez le journal des messages pour plus de détails."
                 )
 

@@ -1,3 +1,6 @@
+# [0.9.44] - 2026-03-01
+### Ajouté
+- Nouvelle source de données : **Surfaces non agricoles RPG** (`RPG.LATEST:SNA`, WFS IGN Géoplateforme), filtrée sur l'emprise communale, rendu orange semi-transparent. Case à cocher dédiée, intégrée dans Tout sélectionner/Désélectionner.
 # [0.9.43] - 2026-03-01
 ### Correction
 - Case "Routes numérotées ou nommées (BD TOPO)" absente du groupe Tout sélectionner/Désélectionner.
