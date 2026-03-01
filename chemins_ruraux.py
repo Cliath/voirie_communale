@@ -430,8 +430,10 @@ class CheminsRuraux:
         bdtopo_routesnom_checked = hasattr(self.dlg, 'chkBDTopoRoutesNom') and self.dlg.chkBDTopoRoutesNom.isChecked()
         rpg_sna_checked = hasattr(self.dlg, 'chkRpgSna') and self.dlg.chkRpgSna.isChecked()
         majic_checked = self.dlg.chkMajic.isChecked()
+        scan_etat_major_checked = hasattr(self.dlg, 'chkScanEtatMajor') and self.dlg.chkScanEtatMajor.isChecked()
+        scan_cassini_checked = hasattr(self.dlg, 'chkScanCassini') and self.dlg.chkScanCassini.isChecked()
         
-        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not rpg_sna_checked and not majic_checked:
+        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not rpg_sna_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Sélection requise",
@@ -448,7 +450,8 @@ class CheminsRuraux:
         steps = sum([
             cadastre_checked, commune_checked, ban_checked,
             voirie_checked, voirie_dep_checked, osm_routes_checked,
-            bdtopo_routesnom_checked, rpg_sna_checked, majic_checked
+            bdtopo_routesnom_checked, rpg_sna_checked, majic_checked,
+            scan_etat_major_checked, scan_cassini_checked
         ])
         # +1 pour le chargement éventuel de la commune (bbox)
         if (voirie_checked or voirie_dep_checked or osm_routes_checked or bdtopo_routesnom_checked or rpg_sna_checked) and not commune_checked:
@@ -573,6 +576,18 @@ class CheminsRuraux:
                     "Impossible de charger les parcelles MAJIC pour la commune sélectionnée.\n\n"
                     "Vérifiez la connexion internet, le code INSEE, ou consultez le journal des messages pour plus de détails."
                 )
+
+        if scan_etat_major_checked:
+            advance(f"Chargement Carte d'État-Major ({code_insee})...")
+            em_success, em_layers = self.load_scan_historique_wms('GEOGRAPHICALGRIDSYSTEMS.ETATMAJOR40', f"Carte d'État-Major")
+            results.append(("Carte d'État-Major", em_success))
+            loaded_layers.extend(em_layers)
+
+        if scan_cassini_checked:
+            advance(f"Chargement Carte de Cassini ({code_insee})...")
+            cassini_success, cassini_layers = self.load_scan_historique_wms('GEOGRAPHICALGRIDSYSTEMS.CASSINI', 'Carte de Cassini')
+            results.append(('Carte de Cassini', cassini_success))
+            loaded_layers.extend(cassini_layers)
 
         # Fermer la boîte de progression
         progress.setValue(steps)
@@ -828,7 +843,43 @@ class CheminsRuraux:
                     error_details
                 )
             return False, []
-    
+
+    def load_scan_historique_wms(self, layer_name_wms, display_name):
+        """Charge un scan historique IGN depuis la Géoplateforme (WMS raster).
+
+        Args:
+            layer_name_wms: Nom de la couche WMS (ex: GEOGRAPHICALGRIDSYSTEMS.ETATMAJOR40)
+            display_name: Nom affiché dans QGIS
+
+        Returns:
+            tuple: (bool, list) - (succès, liste des couches créées)
+        """
+        WMS_URL = "https://data.geopf.fr/wms-r"
+        crs = "EPSG:2154"
+        uri = f"crs={crs}&format=image/png&layers={layer_name_wms}&styles&url={WMS_URL}"
+
+        QgsMessageLog.logMessage(
+            f"Chargement scan historique WMS : {display_name}",
+            "CheminsRuraux", Qgis.Info
+        )
+
+        self._remove_layers_by_name(display_name)
+        wms_layer = QgsRasterLayer(uri, display_name, 'wms')
+
+        if wms_layer.isValid():
+            QgsProject.instance().addMapLayer(wms_layer)
+            QgsMessageLog.logMessage(
+                f"✓ {display_name} chargée avec succès",
+                "CheminsRuraux", Qgis.Success
+            )
+            return True, [wms_layer]
+        else:
+            QgsMessageLog.logMessage(
+                f"✗ Impossible de charger {display_name} : {wms_layer.error().message()}",
+                "CheminsRuraux", Qgis.Warning
+            )
+            return False, []
+
     # URL du service WFS IGN Géoplateforme (constante pour tous les services WFS)
     WFS_IGN_URL = "https://data.geopf.fr/wfs"
 

@@ -172,6 +172,26 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="chkScanEtatMajor">
+        <property name="text">
+         <string>Carte d'État-Major IGN (1820-1866) (Licence Ouverte 2.0)</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge le scan de la carte d'État-Major (relevés entre 1820 et 1866) depuis la Géoplateforme IGN</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkScanCassini">
+        <property name="text">
+         <string>Carte de Cassini IGN (XVIIIe siècle) (Licence Ouverte 2.0)</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge le scan de la carte de Cassini (première carte de France au 1/86400e, XVIIIe siècle) depuis la Géoplateforme IGN</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnLoadCadastre">
         <property name="text">
          <string>Charger les données</string>

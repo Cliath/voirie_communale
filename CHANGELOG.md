@@ -1,3 +1,6 @@
+# [0.9.60] - 2026-03-01
+### Ajouté
+- Section **Plans à charger** : cases **Carte d'État-Major IGN (1820-1866)** et **Carte de Cassini (XVIIIe siècle)**, chargées via WMS Géoplateforme IGN (`data.geopf.fr/wms-r`).
 # [0.9.59] - 2026-03-01
 ### Modifié
 - "Tout sélectionner / Désélectionner" déplacé au-dessus du label "Données à charger".

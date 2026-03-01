@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.59"
-__version_info__ = (0, 9, 59)
+__version__ = "0.9.60"
+__version_info__ = (0, 9, 60)
 
 VERSION_HISTORY = {
+    "0.9.60": {
+        "date": "2026-03-01",
+        "changes": [
+            "Ajouté : deux cases \"Plans à charger\" \u2014 Carte d'\u00c9tat-Major IGN (1820-1866) et Carte de Cassini (XVIIIe siècle) via WMS Géoplateforme IGN."
+        ]
+    },
     "0.9.59": {
         "date": "2026-03-01",
         "changes": [
