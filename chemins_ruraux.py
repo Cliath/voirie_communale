@@ -323,6 +323,13 @@ class CheminsRuraux:
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
 
+        self.add_action(
+            icon_path,
+            text=self.tr(u'ToDo'),
+            callback=self.show_todo,
+            add_to_toolbar=False,
+            parent=self.iface.mainWindow())
+
         # will be set False in run()
         self.first_start = True
 
@@ -350,6 +357,18 @@ class CheminsRuraux:
         )
         msg.setTextFormat(1)  # Qt::RichText
         msg.exec_()
+
+    def show_todo(self):
+        """Ouvre le fichier TODO.md dans l'éditeur système par défaut."""
+        todo_path = os.path.join(os.path.dirname(__file__), 'TODO.md')
+        if os.path.exists(todo_path):
+            os.startfile(todo_path)
+        else:
+            QMessageBox.warning(
+                self.iface.mainWindow(),
+                "ToDo",
+                f"Fichier TODO.md introuvable :\n{todo_path}"
+            )
 
     def validate_and_load(self):
         """Valide le code INSEE et charge les données selon le bouton radio sélectionné"""

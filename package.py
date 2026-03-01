@@ -23,6 +23,7 @@ FILES_TO_INCLUDE = [
     'icon.png',
     'README.md',
     'CHANGELOG.md',
+    'TODO.md',
 ]
 FOLDERS_TO_INCLUDE = [
     'i18n',  # Traductions (si présent)
@@ -49,6 +50,7 @@ FILES_TO_INCLUDE = [
     'icon.png',
     'README.md',
     'CHANGELOG.md',
+    'TODO.md',
 ]
 
 # Dossiers à inclure (récursif)

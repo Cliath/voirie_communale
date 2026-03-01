@@ -1,3 +1,6 @@
+# [0.9.52] - 2026-03-01
+### Ajouté
+- Entrée de menu **Extensions → Voirie Communale → ToDo** : ouvre `TODO.md` dans l'éditeur système par défaut.
 # [0.9.51] - 2026-03-01
 ### Modifié
 - Menu du plugin déplacé de **Vecteur** vers **Extensions** (`addPluginToMenu`).

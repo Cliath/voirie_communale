@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.51"
-__version_info__ = (0, 9, 51)
+__version__ = "0.9.52"
+__version_info__ = (0, 9, 52)
 
 VERSION_HISTORY = {
+    "0.9.52": {
+        "date": "2026-03-01",
+        "changes": [
+            "Ajouté : entrée de menu 'ToDo' (Extensions → Voirie Communale → ToDo) ouvrant TODO.md dans l'éditeur système."
+        ]
+    },
     "0.9.51": {
         "date": "2026-03-01",
         "changes": [

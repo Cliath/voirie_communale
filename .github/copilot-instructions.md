@@ -147,7 +147,7 @@ if self.first_start == True:
 ```
 
 ### Menu et toolbar
-- Plugin ajouté au menu Vector via `addPluginToVectorMenu()`
+- Plugin ajouté au menu Extensions via `addPluginToMenu()`
 - Icône référencée depuis les ressources compilées : `:/plugins/chemins_ruraux/icon.png`
 
 ## Commandes de build essentielles
