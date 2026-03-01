@@ -298,7 +298,7 @@ class CheminsRuraux:
             self.iface.addToolBarIcon(action)
 
         if add_to_menu:
-            self.iface.addPluginToVectorMenu(
+            self.iface.addPluginToMenu(
                 self.menu,
                 action)
 
@@ -329,7 +329,7 @@ class CheminsRuraux:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginVectorMenu(
+            self.iface.removePluginMenu(
                 self.tr(u'&Voirie Communale'),
                 action)
             self.iface.removeToolBarIcon(action)

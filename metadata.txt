@@ -2,7 +2,7 @@
 name=chemins_ruraux
 qgisMinimumVersion=3.0
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.9.50
+version=0.9.51
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -16,7 +16,9 @@ repository=https://github.com/Cliath/chemins_ruraux
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.9.50 (2026-03-01)
+changelog=    Version 0.9.51 (2026-03-01)
+    - Déplacé : menu du plugin de Vecteur vers Extensions.
+    Version 0.9.50 (2026-03-01)
     - Supprimé : catégorie 'Autre' inutile dans le renderer OSM.
     Version 0.9.49 (2026-03-01)
     - Corrigé : AttributeError QgsRectangle __ior__ — remplacé par combineExtentWith().

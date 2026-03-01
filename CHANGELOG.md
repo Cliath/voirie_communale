@@ -1,3 +1,6 @@
+# [0.9.51] - 2026-03-01
+### Modifié
+- Menu du plugin déplacé de **Vecteur** vers **Extensions** (`addPluginToMenu`).
 # [0.9.50] - 2026-03-01
 ### Supprimé
 - Catégorie "Autre" inutile dans le renderer OSM (les tronçons sont filtrés à la source — seuls C/R passent dans la couche).

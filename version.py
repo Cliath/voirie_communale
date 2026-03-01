@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.50"
-__version_info__ = (0, 9, 50)
+__version__ = "0.9.51"
+__version_info__ = (0, 9, 51)
 
 VERSION_HISTORY = {
+    "0.9.51": {
+        "date": "2026-03-01",
+        "changes": [
+            "Déplacé : menu du plugin de Vecteur vers Extensions (addPluginToMenu)."
+        ]
+    },
     "0.9.50": {
         "date": "2026-03-01",
         "changes": [
