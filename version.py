@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.58"
-__version_info__ = (0, 9, 58)
+__version__ = "0.9.59"
+__version_info__ = (0, 9, 59)
 
 VERSION_HISTORY = {
+    "0.9.59": {
+        "date": "2026-03-01",
+        "changes": [
+            "Déplacé : 'Tout sélectionner / Désélectionner' placé au-dessus du label 'Données à charger'."
+        ]
+    },
     "0.9.58": {
         "date": "2026-03-01",
         "changes": [

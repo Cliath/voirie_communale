@@ -1,3 +1,6 @@
+# [0.9.59] - 2026-03-01
+### Modifié
+- "Tout sélectionner / Désélectionner" déplacé au-dessus du label "Données à charger".
 # [0.9.58] - 2026-03-01
 ### Modifié
 - Case **Cadastre** déplacée de la section "Données à charger" vers la section "Plans à charger".

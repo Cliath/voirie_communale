@@ -55,22 +55,22 @@
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="labelChoixCouches">
-        <property name="text">
-         <string>Données à charger :</string>
-        </property>
-        <property name="styleSheet">
-         <string>font-weight: bold; margin-top: 10px;</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="chkToutSelectionner">
         <property name="text">
          <string>Tout sélectionner / Désélectionner</string>
         </property>
         <property name="styleSheet">
          <string>color: #555; font-style: italic;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelChoixCouches">
+        <property name="text">
+         <string>Données à charger :</string>
+        </property>
+        <property name="styleSheet">
+         <string>font-weight: bold; margin-top: 10px;</string>
         </property>
        </widget>
       </item>
