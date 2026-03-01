@@ -144,10 +144,10 @@
     <item>
      <widget class="QCheckBox" name="chkRpgSna">
       <property name="text">
-      <string>Surfaces non agricoles RPG (Licence Ouverte 2.0)</string>
+      <string>Surfaces non agricoles RPG (bientôt disponible)</string>
       </property>
       <property name="toolTip">
-       <string>Charge les surfaces non agricoles (SNA) du Registre Parcellaire Graphique (RPG.LATEST:SNA) filtrées sur l'emprise de la commune</string>
+       <string>Surfaces Non Agricoles (SNA) du RPG — flux WFS non encore disponible sur la Géoplateforme IGN</string>
       </property>
      </widget>
     </item>

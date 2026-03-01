@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.44"
-__version_info__ = (0, 9, 44)
+__version__ = "0.9.45"
+__version_info__ = (0, 9, 45)
 
 VERSION_HISTORY = {
+    "0.9.45": {
+        "date": "2026-03-01",
+        "changes": [
+            "SNA RPG : flux WFS non disponible sur la G\u00e9oplateforme IGN — la case reste pr\u00e9sente mais affiche un message d'information."
+        ]
+    },
     "0.9.44": {
         "date": "2026-03-01",
         "changes": [

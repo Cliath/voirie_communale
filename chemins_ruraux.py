@@ -641,66 +641,23 @@ class CheminsRuraux:
         return success, layer
 
     def load_rpg_sna_wfs(self, code_insee, bbox=None):
-        """Charge les surfaces non agricoles (SNA) du RPG depuis le WFS IGN Géoplateforme.
+        """Charge les surfaces non agricoles (SNA) du RPG.
 
-        Args:
-            code_insee: Code INSEE de la commune
-            bbox: Emprise de la commune (xmin, ymin, xmax, ymax) en EPSG:4326
+        NOTE : La couche SNA n'est pas encore disponible en flux WFS sur la
+        Géoplateforme IGN. Cette méthode affiche un message d'information et
+        retourne False en attendant la mise à disposition du flux.
 
         Returns:
-            tuple: (bool, QgsVectorLayer ou None)
+            tuple: (bool, None)
         """
-        if not bbox:
-            QMessageBox.warning(
-                self.iface.mainWindow(),
-                "Emprise communale manquante",
-                "Impossible de calculer le BBOX pour les surfaces non agricoles RPG.\n"
-                "Chargez l'emprise communale ou vérifiez le code INSEE."
-            )
-            return False, None
-
-        success, layer = self.load_wfs_layer(
-            typename="RPG.LATEST:SNA",
-            layer_name=f"Surfaces non agricoles RPG {code_insee}",
-            crs="EPSG:4326",
-            bbox=bbox,
-            geom_field="geom"
+        QMessageBox.information(
+            self.iface.mainWindow(),
+            "Surfaces non agricoles RPG — Non disponible",
+            "La couche Surfaces Non Agricoles (SNA) du RPG n'est pas encore "
+            "disponible en flux WFS sur la Géoplateforme IGN.\n\n"
+            "Cette fonctionnalité sera activée dès que le flux sera mis à disposition."
         )
-
-        if layer and layer.isValid():
-            symbol = QgsFillSymbol.createSimple({
-                'color': '255,165,0,160',
-                'outline_color': '#CC6600',
-                'outline_width': '0.3',
-            })
-            layer.setRenderer(QgsSingleSymbolRenderer(symbol))
-            layer.triggerRepaint()
-
-        alone = not any([
-            self.dlg.chkCadastre.isChecked(),
-            self.dlg.chkCommune.isChecked(),
-            self.dlg.chkBAN.isChecked(),
-            self.dlg.chkVoirie.isChecked(),
-            self.dlg.chkVoirieDep.isChecked(),
-            self.dlg.chkOsmRoutes.isChecked(),
-            self.dlg.chkBDTopoRoutesNom.isChecked() if hasattr(self.dlg, 'chkBDTopoRoutesNom') else False,
-        ])
-        if alone:
-            if success:
-                QMessageBox.information(
-                    self.iface.mainWindow(),
-                    "SNA RPG chargées",
-                    f"Les surfaces non agricoles RPG de la commune {code_insee} ont été chargées avec succès."
-                )
-            else:
-                QMessageBox.warning(
-                    self.iface.mainWindow(),
-                    "SNA RPG non disponible",
-                    f"Impossible de charger les surfaces non agricoles RPG pour le code INSEE {code_insee}.\n\n"
-                    "Consultez le journal des messages pour plus de détails."
-                )
-
-        return success, layer
+        return False, None
 
     def load_cadastre_wms(self, code_insee):
         """Charge les couches cadastrales WMS pour le code INSEE donné

@@ -1,3 +1,6 @@
+# [0.9.45] - 2026-03-01
+### Modifié
+- SNA RPG : le flux WFS n'est pas encore disponible sur la Géoplateforme IGN. La case à cocher est conservée mais affiche un message d'information en attendant la mise à disposition.
 # [0.9.44] - 2026-03-01
 ### Ajouté
 - Nouvelle source de données : **Surfaces non agricoles RPG** (`RPG.LATEST:SNA`, WFS IGN Géoplateforme), filtrée sur l'emprise communale, rendu orange semi-transparent. Case à cocher dédiée, intégrée dans Tout sélectionner/Désélectionner.
