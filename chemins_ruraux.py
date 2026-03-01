@@ -497,7 +497,7 @@ class CheminsRuraux:
             # Chercher d'abord si une commune existe déjà dans le projet
             if commune_layer is None:
                 for layer_id, layer in QgsProject.instance().mapLayers().items():
-                    if isinstance(layer, QgsVectorLayer) and layer.name().startswith(f"Commune {code_insee}"):
+                    if isinstance(layer, QgsVectorLayer) and layer.name() == f"Commune {code_insee}":
                         commune_layer = layer
                         QgsMessageLog.logMessage(
                             f"Couche commune existante trouvée : {layer.name()}",
@@ -613,7 +613,7 @@ class CheminsRuraux:
             zoom_commune = commune_layer
             if zoom_commune is None or not zoom_commune.isValid():
                 for layer_id, layer in QgsProject.instance().mapLayers().items():
-                    if isinstance(layer, QgsVectorLayer) and layer.name().startswith(f"Commune {code_insee}"):
+                    if isinstance(layer, QgsVectorLayer) and layer.name() == f"Commune {code_insee}":
                         zoom_commune = layer
                         break
             if zoom_commune and zoom_commune.isValid():

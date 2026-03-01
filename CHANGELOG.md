@@ -1,3 +1,6 @@
+# [0.9.66] - 2026-03-01
+### Corrigé
+- Recherche de la couche `Commune {code_insee}` dans le projet : remplacement de `startswith` par `==` pour éviter les faux positifs si plusieurs couches ont un nom proche (ex. deux communes différentes dont l'une est préfixe de l'autre).
 # [0.9.65] - 2026-03-01
 ### Corrigé
 - Zoom post-chargement : quand aucune commune n'était cochée (ex. chargement de Waze seul), le zoom tombait en `zoomToFullExtent()` (monde entier). Désormais, avant ce fallback, on recherche une couche `Commune {code_insee}` déjà présente dans le projet pour zoomer dessus.

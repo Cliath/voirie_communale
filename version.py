@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.65"
-__version_info__ = (0, 9, 65)
+__version__ = "0.9.66"
+__version_info__ = (0, 9, 66)
 
 VERSION_HISTORY = {
+    "0.9.66": {
+        "date": "2026-03-01",
+        "changes": [
+            "Corrigé : recherche de la couche Commune dans le projet utilise désormais une égalité exacte (==) au lieu de startswith, évitant les faux positifs en cas de plusieurs couches similaires."
+        ]
+    },
     "0.9.65": {
         "date": "2026-03-01",
         "changes": [
