@@ -34,8 +34,7 @@ set /p DEPLOY="> "
 if /I "%DEPLOY%"=="O" (
     echo.
     echo [3/3] Déploiement vers %QGIS_PLUGINS%...
-    set "SRC=%~dp0."
-    robocopy "%SRC%" "%QGIS_PLUGINS%" /MIR /XD .git releases __pycache__ .github .vscode /XF *.zip *.qrc *.ui *.bat *.sh *.py.bak /NFL /NDL /NJH /NJS
+    powershell -Command "$zip = Get-ChildItem 'd:\chemins_ruraux\releases\chemins_ruraux-*.zip' | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if ($zip) { if (Test-Path '%QGIS_PLUGINS%') { Remove-Item -Recurse -Force '%QGIS_PLUGINS%' }; Expand-Archive -Path $zip.FullName -DestinationPath (Split-Path '%QGIS_PLUGINS%') -Force; Write-Host ('Deploye : ' + $zip.Name) } else { Write-Host 'ZIP non trouve'; exit 1 }"
     if %ERRORLEVEL% GTR 7 (
         echo Erreur lors du déploiement
     ) else (
