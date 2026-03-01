@@ -1,3 +1,6 @@
+# [0.9.67] - 2026-03-01
+### Ajouté
+- Réordonnancement automatique des couches dans le panneau après chargement, quel que soit l'ordre de cobhage des cases. Ordre canonique (haut → bas) : Parcelles MAJIC → OSM → BD TOPO → Voirie comm. → Voirie dép. → BAN → Commune → Cadastre → SCAN 1950 → Cassini → État-Major → Waze. Méthode `_reorder_layers(code_insee)`.
 # [0.9.66] - 2026-03-01
 ### Corrigé
 - Recherche de la couche `Commune {code_insee}` dans le projet : remplacement de `startswith` par `==` pour éviter les faux positifs si plusieurs couches ont un nom proche (ex. deux communes différentes dont l'une est préfixe de l'autre).

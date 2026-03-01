@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.66"
-__version_info__ = (0, 9, 66)
+__version__ = "0.9.67"
+__version_info__ = (0, 9, 67)
 
 VERSION_HISTORY = {
+    "0.9.67": {
+        "date": "2026-03-01",
+        "changes": [
+            "Ajouté : réordonnancement automatique des couches après chargement selon un ordre canonique (vecteurs détaillés → emprise → cadastre → rasters historiques → tuiles), quelle que soit l'ordre de sélection des cases."
+        ]
+    },
     "0.9.66": {
         "date": "2026-03-01",
         "changes": [

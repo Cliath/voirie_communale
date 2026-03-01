@@ -11,7 +11,8 @@ from qgis.PyQt.QtWidgets import QAction, QMessageBox, QProgressDialog
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
-                       Qgis, QgsApplication, QgsLayerTreeGroup, QgsCoordinateTransform,
+                       Qgis, QgsApplication, QgsLayerTreeGroup, QgsLayerTreeLayer,
+                       QgsCoordinateTransform,
                        QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsSingleSymbolRenderer,
                        QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol, QgsFeature, QgsField,
                        QgsGeometry, QgsPointXY,
@@ -604,6 +605,9 @@ class CheminsRuraux:
         progress.setValue(steps)
         progress.close()
 
+        # Réordonner les couches dans le panneau selon l'ordre canonique
+        self._reorder_layers(code_insee)
+
         # Zoomer sur l'emprise de la commune
         success_count = sum(1 for _, success in results if success)
         if success_count > 0:
@@ -920,6 +924,58 @@ class CheminsRuraux:
 
     # URL du service WFS IGN Géoplateforme (constante pour tous les services WFS)
     WFS_IGN_URL = "https://data.geopf.fr/wfs"
+
+    def _reorder_layers(self, code_insee):
+        """Réordonne les couches chargées dans le panneau selon un ordre canonique.
+
+        Ordre canonique (du haut vers le bas) :
+        vecteurs détaillés → emprise → cadastre → rasters historiques → tuiles de fond.
+        Les couches absentes sont ignorées.
+        """
+        root = QgsProject.instance().layerTreeRoot()
+
+        # Ordre désiré : index 0 = tout en haut du panneau
+        canonical_order = [
+            f"Parcelles MAJIC {code_insee}",
+            f"OSM Routes {code_insee} (C/R)",
+            f"BD TOPO Routes numérotées ou nommées {code_insee}",
+            f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
+            f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
+            f"Adresses BAN {code_insee}",
+            f"Commune {code_insee}",
+            f"Cadastre - {code_insee}",
+            "SCAN 50\u00ae 1950",
+            "Carte de Cassini",
+            "Carte d'\u00c9tat-Major",
+            "Waze",
+        ]
+
+        # Traitement en ordre inversé : on insère successivement en position 0
+        # → le dernier traité se retrouve en tête, soit l'ordre canonique final
+        for name in reversed(canonical_order):
+            target = None
+            for child in root.children():
+                if isinstance(child, QgsLayerTreeGroup) and child.name() == name:
+                    target = child
+                    break
+                elif isinstance(child, QgsLayerTreeLayer):
+                    layer = child.layer()
+                    if layer and layer.name() == name:
+                        target = child
+                        break
+            if target is None:
+                continue
+            # clone() copie le nœud (et ses enfants pour les groupes)
+            # sans dupliquer les objets QgsMapLayer sous-jacents
+            clone = target.clone()
+            root.insertChildNode(0, clone)
+            root.removeChildNode(target)
+
+        QgsMessageLog.logMessage(
+            f"Couches réordonnées selon l'ordre canonique pour {code_insee}",
+            "CheminsRuraux",
+            Qgis.Info
+        )
 
     def _remove_layers_by_name(self, layer_name):
         """Supprime toutes les couches du projet portant ce nom exact."""

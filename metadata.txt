@@ -2,7 +2,7 @@
 name=chemins_ruraux
 qgisMinimumVersion=3.0
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.9.66
+version=0.9.67
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -16,7 +16,9 @@ repository=https://github.com/Cliath/chemins_ruraux
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.9.66 (2026-03-01)
+changelog=    Version 0.9.67 (2026-03-01)
+    - Ajouté : réordonnancement automatique des couches après chargement (ordre canonique : vecteurs → emprise → cadastre → historiques → tuiles).
+    Version 0.9.66 (2026-03-01)
     - Corrigé : recherche couche Commune utilise == au lieu de startswith (robustesse multi-couches).
     Version 0.9.65 (2026-03-01)
     - Corrigé : zoom sur la commune ne fonctionnait pas après chargement d'une couche tuile seule (Waze) — le zoom cherche maintenant une couche Commune existante dans le projet.
