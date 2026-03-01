@@ -212,6 +212,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="chkBDOrtho">
+        <property name="text">
+         <string>BD ORTHO® 20 cm</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge la BD ORTHO® 20 cm (HR.ORTHOIMAGERY.ORTHOPHOTOS) via le WMS IGN Géoplateforme</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnLoadCadastre">
         <property name="text">
          <string>Charger les données</string>

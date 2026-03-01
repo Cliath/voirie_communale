@@ -1,3 +1,6 @@
+# [0.9.75] - 2026-03-01
+### Ajouté
+- Case à cocher **BD ORTHO® 20 cm** (`HR.ORTHOIMAGERY.ORTHOPHOTOS`) dans "Plans à charger" : charge l'orthophotographie haute résolution 20 cm via le WMS IGN Géoplateforme.
 # [0.9.74] - 2026-03-01
 ### Modifié
 - Mentions `(Licence Ouverte 2.0)` et `(ODbL)` retirées de tous les libellés des cases à cocher du dialogue.

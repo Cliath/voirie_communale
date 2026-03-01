@@ -435,8 +435,9 @@ class CheminsRuraux:
         scan50_1950_checked = hasattr(self.dlg, 'chkScan50_1950') and self.dlg.chkScan50_1950.isChecked()
         waze_tiles_checked = hasattr(self.dlg, 'chkWazeTiles') and self.dlg.chkWazeTiles.isChecked()
         photo_aeriennes_checked = hasattr(self.dlg, 'chkPhotoAeriennes') and self.dlg.chkPhotoAeriennes.isChecked()
+        bd_ortho_checked = hasattr(self.dlg, 'chkBDOrtho') and self.dlg.chkBDOrtho.isChecked()
         
-        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not photo_aeriennes_checked:
+        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not photo_aeriennes_checked and not bd_ortho_checked:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Sélection requise",
@@ -466,7 +467,7 @@ class CheminsRuraux:
             voirie_checked, voirie_dep_checked, osm_routes_checked,
             bdtopo_routesnom_checked, majic_checked,
             scan_etat_major_checked, scan_cassini_checked, scan50_1950_checked,
-            waze_tiles_checked
+            waze_tiles_checked, bd_ortho_checked
         ]) + len(photo_aeriennes_sources)
         # +1 pour le chargement éventuel de la commune (bbox)
         if (voirie_checked or voirie_dep_checked or osm_routes_checked or bdtopo_routesnom_checked) and not commune_checked:
@@ -612,6 +613,12 @@ class CheminsRuraux:
             )
             results.append(('Waze', waze_success))
             loaded_layers.extend(waze_layers)
+
+        if bd_ortho_checked:
+            advance("Chargement BD ORTHO\u00ae 20 cm...")
+            bdortho_success, bdortho_layers = self.load_scan_historique_wms('HR.ORTHOIMAGERY.ORTHOPHOTOS', 'BD ORTHO\u00ae 20 cm')
+            results.append(('BD ORTHO\u00ae 20 cm', bdortho_success))
+            loaded_layers.extend(bdortho_layers)
 
         for typename, display_name in photo_aeriennes_sources:
             advance(f"Chargement {display_name}...")
@@ -970,6 +977,7 @@ class CheminsRuraux:
             "Photos aériennes 2011-2015",
             "Photos aériennes 2016-2020",
             "Photos aériennes 2021-2023",
+            "BD ORTHO\u00ae 20 cm",
             f"Cadastre - {code_insee}",
             "SCAN 50\u00ae 1950",
             "Carte de Cassini",
