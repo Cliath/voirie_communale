@@ -1,3 +1,6 @@
+# [0.9.65] - 2026-03-01
+### Corrigé
+- Zoom post-chargement : quand aucune commune n'était cochée (ex. chargement de Waze seul), le zoom tombait en `zoomToFullExtent()` (monde entier). Désormais, avant ce fallback, on recherche une couche `Commune {code_insee}` déjà présente dans le projet pour zoomer dessus.
 # [0.9.64] - 2026-03-01
 ### Modifié
 - Case **Tuiles Waze Editor** renommée en **Waze**.

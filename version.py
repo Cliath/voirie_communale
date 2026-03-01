@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.64"
-__version_info__ = (0, 9, 64)
+__version__ = "0.9.65"
+__version_info__ = (0, 9, 65)
 
 VERSION_HISTORY = {
+    "0.9.65": {
+        "date": "2026-03-01",
+        "changes": [
+            "Corrigé : zoom post-chargement ne fonctionnait pas quand seule une couche tuile (Waze/WMS global) était cochée sans commune — on cherche désormais une couche Commune existante dans le projet avant de recourir à zoomToFullExtent."
+        ]
+    },
     "0.9.64": {
         "date": "2026-03-01",
         "changes": [

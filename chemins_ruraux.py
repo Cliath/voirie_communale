@@ -609,12 +609,19 @@ class CheminsRuraux:
         if success_count > 0:
             canvas = self.iface.mapCanvas()
             zoom_extent = None
-            if commune_layer and commune_layer.isValid():
-                commune_layer.updateExtents()
-                zoom_extent = commune_layer.extent()
+            # Utiliser la couche commune chargée, ou en chercher une dans le projet
+            zoom_commune = commune_layer
+            if zoom_commune is None or not zoom_commune.isValid():
+                for layer_id, layer in QgsProject.instance().mapLayers().items():
+                    if isinstance(layer, QgsVectorLayer) and layer.name().startswith(f"Commune {code_insee}"):
+                        zoom_commune = layer
+                        break
+            if zoom_commune and zoom_commune.isValid():
+                zoom_commune.updateExtents()
+                zoom_extent = zoom_commune.extent()
                 if not zoom_extent.isEmpty():
                     project_crs = canvas.mapSettings().destinationCrs()
-                    commune_crs = commune_layer.crs()
+                    commune_crs = zoom_commune.crs()
                     if commune_crs and commune_crs != project_crs:
                         transform = QgsCoordinateTransform(commune_crs, project_crs, QgsProject.instance())
                         zoom_extent = transform.transformBoundingBox(zoom_extent)
