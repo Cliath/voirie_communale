@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.42"
-__version_info__ = (0, 9, 42)
+__version__ = "0.9.43"
+__version_info__ = (0, 9, 43)
 
 VERSION_HISTORY = {
+    "0.9.43": {
+        "date": "2026-03-01",
+        "changes": [
+            "Correction : case 'Routes numérotées ou nommées (BD TOPO)' manquante dans le groupe Tout sélectionner/Désélectionner."
+        ]
+    },
     "0.9.42": {
         "date": "2026-02-28",
         "changes": [

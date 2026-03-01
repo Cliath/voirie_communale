@@ -1,3 +1,6 @@
+# [0.9.43] - 2026-03-01
+### Correction
+- Case "Routes numérotées ou nommées (BD TOPO)" absente du groupe Tout sélectionner/Désélectionner.
 # [0.9.42] - 2026-02-28
 ### Technique
 - Mise à jour technique : incrémentation automatique de version, workflow automatisé (test).
