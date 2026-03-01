@@ -1,3 +1,6 @@
+# [0.9.71] - 2026-03-01
+### Ajouté
+- Bouton **Photographies aériennes historiques...** dans la section Plans à charger : ouvre un dialogue de sélection avec les 3 périodes IGN Géoplateforme (1950-1965, 1965-1980, 1980-1995). Chargement WMS immédiat à la validation, indépendant du bouton principal.
 # [0.9.70] - 2026-03-01
 ### Modifié
 - Couche OSM renommée `OSM Routes {code_insee}` (suppression du suffixe `(C/R)`).

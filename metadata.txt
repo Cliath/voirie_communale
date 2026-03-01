@@ -2,7 +2,7 @@
 name=chemins_ruraux
 qgisMinimumVersion=3.0
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.9.70
+version=0.9.71
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -16,7 +16,9 @@ repository=https://github.com/Cliath/chemins_ruraux
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.9.70 (2026-03-01)
+changelog=    Version 0.9.71 (2026-03-01)
+    - Ajouté : bouton 'Photographies aériennes historiques...' ouvrant un dialogue de sélection WMS (1950-1965, 1965-1980, 1980-1995).
+    Version 0.9.70 (2026-03-01)
     - Modifié : couche OSM renommée 'OSM Routes {code_insee}' (sans le suffixe '(C/R)').
     Version 0.9.69 (2026-03-01)
     - Modifié : Waze placée au-dessus de Cadastre dans l'ordre canonique.

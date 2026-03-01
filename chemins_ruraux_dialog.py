@@ -9,7 +9,7 @@ import os
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QTextEdit,
-    QPushButton, QLabel, QSizePolicy, QMessageBox
+    QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QFont
@@ -47,6 +47,65 @@ class CheminsRurauxDialog(QtWidgets.QDialog, Ui_CheminsRurauxDialogBase):
         all_checked = all(getattr(self, name).isChecked() for name in self._layer_checkboxes)
         self.chkToutSelectionner.setChecked(all_checked)
         self.chkToutSelectionner.blockSignals(False)
+
+
+class PhotoAeriennesDialog(QDialog):
+    """Dialogue de sélection des photographies aériennes historiques IGN."""
+
+    # (typename WMS, libellé affiché)
+    SOURCES = [
+        ('ORTHOIMAGERY.ORTHOPHOTOS.1950-1965', 'Photos aériennes 1950-1965 (IGN Géoplateforme)'),
+        ('ORTHOIMAGERY.ORTHOPHOTOS.1965-1980', 'Photos aériennes 1965-1980 (IGN Géoplateforme)'),
+        ('ORTHOIMAGERY.ORTHOPHOTOS.1980-1995', 'Photos aériennes 1980-1995 (IGN Géoplateforme)'),
+    ]
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Photographies aériennes historiques")
+        self.setMinimumWidth(440)
+
+        layout = QVBoxLayout(self)
+
+        desc = QLabel(
+            "Sélectionnez les périodes à charger depuis la Géoplateforme IGN :"
+        )
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        sep = QFrame()
+        sep.setFrameShape(QFrame.HLine)
+        sep.setFrameShadow(QFrame.Sunken)
+        layout.addWidget(sep)
+
+        self._checkboxes = []
+        for typename, label in self.SOURCES:
+            chk = QCheckBox(label)
+            chk.setChecked(True)
+            chk.setProperty('typename', typename)
+            layout.addWidget(chk)
+            self._checkboxes.append(chk)
+
+        layout.addSpacing(8)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        self.btn_ok = QPushButton("Charger")
+        self.btn_ok.setDefault(True)
+        self.btn_cancel = QPushButton("Annuler")
+        btn_layout.addWidget(self.btn_ok)
+        btn_layout.addWidget(self.btn_cancel)
+        layout.addLayout(btn_layout)
+
+        self.btn_ok.clicked.connect(self.accept)
+        self.btn_cancel.clicked.connect(self.reject)
+
+    def selected_sources(self):
+        """Retourne la liste des (typename, libellé) cochés."""
+        return [
+            (chk.property('typename'), chk.text().split(' (')[0])
+            for chk in self._checkboxes
+            if chk.isChecked()
+        ]
 
 
 class TodoDialog(QDialog):

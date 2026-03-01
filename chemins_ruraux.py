@@ -7,7 +7,7 @@ Licence : GNU GPL v2+
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import QIcon, QColor
-from qgis.PyQt.QtWidgets import QAction, QMessageBox, QProgressDialog
+from qgis.PyQt.QtWidgets import QAction, QMessageBox, QProgressDialog, QDialog
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
@@ -28,7 +28,7 @@ import json
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .chemins_ruraux_dialog import CheminsRurauxDialog, TodoDialog
+from .chemins_ruraux_dialog import CheminsRurauxDialog, TodoDialog, PhotoAeriennesDialog
 # Import version information
 from .version import __version__, get_changelog
 
@@ -358,6 +358,59 @@ class CheminsRuraux:
         )
         msg.setTextFormat(1)  # Qt::RichText
         msg.exec_()
+
+    def show_photo_aeriennes_dialog(self):
+        """Ouvre le dialogue de sélection des photos aériennes historiques et charge les WMS choisis."""
+        code_insee = self.dlg.txtCodeInsee.text().strip().upper()
+        if not code_insee:
+            QMessageBox.warning(
+                self.iface.mainWindow(),
+                "Code INSEE manquant",
+                "Veuillez saisir le code INSEE avant de charger des photographies aériennes."
+            )
+            return
+
+        dlg = PhotoAeriennesDialog(parent=self.iface.mainWindow())
+        if dlg.exec_() != QDialog.Accepted:
+            return
+
+        sources = dlg.selected_sources()
+        if not sources:
+            QMessageBox.information(
+                self.iface.mainWindow(),
+                "Aucune sélection",
+                "Aucune période sélectionnée."
+            )
+            return
+
+        results = []
+        for typename, display_name in sources:
+            success, layers = self.load_scan_historique_wms(typename, display_name)
+            results.append((display_name, success))
+
+        self._reorder_layers(code_insee)
+
+        success_count = sum(1 for _, ok in results if ok)
+        if len(results) > 1:
+            if success_count == len(results):
+                QMessageBox.information(
+                    self.iface.mainWindow(),
+                    "Photographies chargées",
+                    f"{success_count} couche(s) chargée(s) avec succès."
+                )
+            elif success_count > 0:
+                failed = [n for n, ok in results if not ok]
+                QMessageBox.warning(
+                    self.iface.mainWindow(),
+                    "Chargement partiel",
+                    f"Échec : {', '.join(failed)}\n\nConsultez le journal des messages."
+                )
+            else:
+                QMessageBox.warning(
+                    self.iface.mainWindow(),
+                    "Chargement échoué",
+                    "Aucune photographie aérienne n'a pu être chargée.\nConsultez le journal des messages."
+                )
 
     def show_todo(self):
         """Ouvre la fenêtre ToDo (lit/écrite dans le profil utilisateur QGIS)."""
@@ -944,6 +997,9 @@ class CheminsRuraux:
             f"Parcelles MAJIC {code_insee}",
             f"Commune {code_insee}",
             "Waze",
+            "Photos aériennes 1950-1965",
+            "Photos aériennes 1965-1980",
+            "Photos aériennes 1980-1995",
             f"Cadastre - {code_insee}",
             "SCAN 50\u00ae 1950",
             "Carte de Cassini",
@@ -1798,6 +1854,7 @@ class CheminsRuraux:
             # Afficher la version dans le titre
             self.dlg.setWindowTitle(f"Voirie Communale v{__version__}")
             # Connecter le bouton de chargement (gère cadastre ET commune selon le bouton radio)
+            self.dlg.btnPhotoAeriennes.clicked.connect(self.show_photo_aeriennes_dialog)
             self.dlg.btnLoadCadastre.clicked.connect(self.validate_and_load)
 
         # show the dialog (non-modal, reste ouvert après actions)

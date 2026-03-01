@@ -202,6 +202,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btnPhotoAeriennes">
+        <property name="text">
+         <string>Photographies aériennes historiques...</string>
+        </property>
+        <property name="toolTip">
+         <string>Ouvre une fenêtre de sélection des photographies aériennes historiques IGN (1950-1965, 1965-1980, 1980-1995)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnLoadCadastre">
         <property name="text">
          <string>Charger les données</string>

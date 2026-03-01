@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.70"
-__version_info__ = (0, 9, 70)
+__version__ = "0.9.71"
+__version_info__ = (0, 9, 71)
 
 VERSION_HISTORY = {
+    "0.9.71": {
+        "date": "2026-03-01",
+        "changes": [
+            "Ajouté : bouton 'Photographies aériennes historiques...' dans Plans à charger, ouvre un dialogue de sélection (1950-1965, 1965-1980, 1980-1995) depuis la Géoplateforme IGN."
+        ]
+    },
     "0.9.70": {
         "date": "2026-03-01",
         "changes": [
