@@ -6,7 +6,7 @@ echo  Compilation et packaging du plugin
 echo ========================================
 echo.
 
-REM Étape 1 : Compilation
+REM Etape 1 : Compilation
 echo [1/2] Compilation des ressources et UI...
 python compile_plugin.py
 if %ERRORLEVEL% NEQ 0 (
@@ -16,8 +16,8 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo.
 
-REM Étape 2 : Packaging
-echo [2/2] Création du package ZIP...
+REM Etape 2 : Packaging
+echo [2/2] Creation du package ZIP...
 python package.py
 if %ERRORLEVEL% NEQ 0 (
     echo Erreur lors du packaging
@@ -27,25 +27,25 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 
-REM Étape 3 (optionnelle) : Déploiement dans QGIS (push-only, sens unique)
+REM Etape 3 (optionnelle) : Deploiement dans QGIS (push-only, sens unique)
 set QGIS_PLUGINS=%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\chemins_ruraux
-echo [Optionnel] Déployer dans QGIS ? (O/N)
+echo [Optionnel] Deployer dans QGIS ? (O/N)
 set /p DEPLOY="> "
 if /I "%DEPLOY%"=="O" (
     echo.
-    echo [3/3] Déploiement vers %QGIS_PLUGINS%...
+    echo [3/3] Deploiement vers %QGIS_PLUGINS%...
     powershell -Command "$zip = Get-ChildItem 'd:\chemins_ruraux\releases\chemins_ruraux-*.zip' | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if ($zip) { Expand-Archive -Path $zip.FullName -DestinationPath (Split-Path '%QGIS_PLUGINS%') -Force; Write-Host ('Deploye : ' + $zip.Name) } else { Write-Host 'ZIP non trouve'; exit 1 }"
     if %ERRORLEVEL% GTR 7 (
-        echo Erreur lors du déploiement
+        echo Erreur lors du deploiement
     ) else (
-        echo Deploiement termine avec succes ^!
+        echo Deploiement termine avec succes !
     )
 ) else (
-    echo Déploiement ignoré.
+    echo Deploiement ignore.
 )
 
 echo.
 echo ========================================
-echo  Terminé !
+echo  Termine !
 echo ========================================
 pause
