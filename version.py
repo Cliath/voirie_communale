@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.56"
-__version_info__ = (0, 9, 56)
+__version__ = "0.9.57"
+__version_info__ = (0, 9, 57)
 
 VERSION_HISTORY = {
+    "0.9.57": {
+        "date": "2026-03-01",
+        "changes": [
+            "Ajouté : section 'Plans à charger' dans la boîte de dialogue."
+        ]
+    },
     "0.9.56": {
         "date": "2026-03-01",
         "changes": [
