@@ -222,6 +222,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="chkPlanIGN">
+        <property name="text">
+         <string>PLAN IGN J+1</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge le PLAN IGN J+1 (GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1) via le WMS IGN Géoplateforme</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnLoadCadastre">
         <property name="text">
          <string>Charger les données</string>

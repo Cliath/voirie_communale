@@ -1,3 +1,6 @@
+# [0.9.76] - 2026-03-01
+### Ajouté
+- Case à cocher **PLAN IGN J+1** (`GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1`) dans "Plans à charger" : charge le plan topographique IGN en contenu J+1 via le WMS IGN Géoplateforme.
 # [0.9.75] - 2026-03-01
 ### Ajouté
 - Case à cocher **BD ORTHO® 20 cm** (`HR.ORTHOIMAGERY.ORTHOPHOTOS`) dans "Plans à charger" : charge l'orthophotographie haute résolution 20 cm via le WMS IGN Géoplateforme.
