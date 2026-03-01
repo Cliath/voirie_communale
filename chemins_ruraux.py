@@ -1590,12 +1590,7 @@ class CheminsRuraux:
         })
         cat_r = QgsRendererCategory('R', sym_r, 'Chemin rural (R)')
 
-        # Autre - Gris (masqué par défaut)
-        sym_autre = QgsLineSymbol.createSimple({'color': '#999999', 'width': '0.4'})
-        cat_autre = QgsRendererCategory('Autre', sym_autre, 'Autre')
-        cat_autre.setRenderState(False)
-
-        renderer = QgsCategorizedSymbolRenderer(expression, [cat_ce, cat_c, cat_r, cat_autre])
+        renderer = QgsCategorizedSymbolRenderer(expression, [cat_ce, cat_c, cat_r])
         layer.setRenderer(renderer)
 
         # Étiquettes : afficher le champ 'ref'

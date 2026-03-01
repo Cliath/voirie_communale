@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.49"
-__version_info__ = (0, 9, 49)
+__version__ = "0.9.50"
+__version_info__ = (0, 9, 50)
 
 VERSION_HISTORY = {
+    "0.9.50": {
+        "date": "2026-03-01",
+        "changes": [
+            "Supprimé : catégorie 'Autre' inutile dans le renderer OSM (les tronçons sont déjà filtrés à la source sur C/R)."
+        ]
+    },
     "0.9.49": {
         "date": "2026-03-01",
         "changes": [

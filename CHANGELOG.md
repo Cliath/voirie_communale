@@ -1,3 +1,6 @@
+# [0.9.50] - 2026-03-01
+### Supprimé
+- Catégorie "Autre" inutile dans le renderer OSM (les tronçons sont filtrés à la source — seuls C/R passent dans la couche).
 # [0.9.49] - 2026-03-01
 ### Correction
 - `AttributeError: 'QgsRectangle' object has no attribute '__ior__'` dans `validate_and_load` — le calcul de l'emprise combinatoire utilisait l'opérateur `|=` non supporté par `QgsRectangle`. Remplacé par `combineExtentWith()`.
