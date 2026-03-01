@@ -618,13 +618,19 @@ class CheminsRuraux:
 
         if bd_ortho_checked:
             advance("Chargement BD ORTHO\u00ae 20 cm...")
-            bdortho_success, bdortho_layers = self.load_scan_historique_wms('HR.ORTHOIMAGERY.ORTHOPHOTOS', 'BD ORTHO\u00ae 20 cm')
+            bdortho_success, bdortho_layers = self._load_wms_layer('HR.ORTHOIMAGERY.ORTHOPHOTOS', 'BD ORTHO\u00ae 20 cm', 'EPSG:2154')
             results.append(('BD ORTHO\u00ae 20 cm', bdortho_success))
             loaded_layers.extend(bdortho_layers)
 
+        if mnt_lidar_checked:
+            advance("Chargement MNT LiDAR HD...")
+            mntlidar_success, mntlidar_layers = self._load_wms_layer('IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW', 'MNT LiDAR HD', 'EPSG:4326')
+            results.append(('MNT LiDAR HD', mntlidar_success))
+            loaded_layers.extend(mntlidar_layers)
+
         if plan_ign_checked:
             advance("Chargement PLAN IGN J+1...")
-            planign_success, planign_layers = self.load_wms_epsg3857('GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1', 'PLAN IGN J+1')
+            planign_success, planign_layers = self._load_wms_layer('GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1', 'PLAN IGN J+1', 'EPSG:3857')
             results.append(('PLAN IGN J+1', planign_success))
             loaded_layers.extend(planign_layers)
 

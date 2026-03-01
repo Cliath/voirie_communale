@@ -1,3 +1,7 @@
+# [0.9.80] - 2026-03-01
+### Corrigé
+- **MNT LiDAR HD** : bloc de chargement manquant dans `validate_and_load()` (même régression que PLAN IGN J+1 en v0.9.77). Remplacement de `IGNF:WGS84G` par `EPSG:4326` (CRS reconnu par QGIS).
+- BD ORTHO® 20 cm et PLAN IGN J+1 migrés vers `_load_wms_layer()` dans les blocs de chargement.
 # [0.9.79] - 2026-03-01
 ### Ajouté
 - Case à cocher **MNT LiDAR HD** (`IGNF_LIDAR-HD_MNT_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW`) dans "Plans à charger" : charge le modèle numérique de terrain issu du LiDAR HD via le WMS IGN Géoplateforme (CRS `IGNF:WGS84G`).
