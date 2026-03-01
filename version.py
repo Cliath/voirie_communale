@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.9.69"
-__version_info__ = (0, 9, 69)
+__version__ = "0.9.70"
+__version_info__ = (0, 9, 70)
 
 VERSION_HISTORY = {
+    "0.9.70": {
+        "date": "2026-03-01",
+        "changes": [
+            "Modifié : couche OSM renommée 'OSM Routes {code_insee}' (suppression du suffixe '(C/R)')."
+        ]
+    },
     "0.9.69": {
         "date": "2026-03-01",
         "changes": [

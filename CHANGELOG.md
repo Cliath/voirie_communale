@@ -1,3 +1,6 @@
+# [0.9.70] - 2026-03-01
+### Modifié
+- Couche OSM renommée `OSM Routes {code_insee}` (suppression du suffixe `(C/R)`).
 # [0.9.69] - 2026-03-01
 ### Modifié
 - Ordre canonique : **Waze** déplacée au-dessus de Cadastre.

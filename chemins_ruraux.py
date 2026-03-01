@@ -936,7 +936,7 @@ class CheminsRuraux:
 
         # Ordre désiré : index 0 = tout en haut du panneau
         canonical_order = [
-            f"OSM Routes {code_insee} (C/R)",
+            f"OSM Routes {code_insee}",
             f"BD TOPO Routes numérotées ou nommées {code_insee}",
             f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
             f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
@@ -1647,7 +1647,7 @@ class CheminsRuraux:
                     if member.get("type") == "way":
                         relation_refs.setdefault(member.get("ref"), set()).add(ref_val)
 
-        layer_name = f"OSM Routes {code_insee} (C/R)"
+        layer_name = f"OSM Routes {code_insee}"
         uri = "LineString?crs=EPSG:4326&field=ref:string&field=name:string&field=highway:string&field=rel_ref:string"
         filtered_layer = QgsVectorLayer(uri, layer_name, "memory")
         filtered_provider = filtered_layer.dataProvider()
