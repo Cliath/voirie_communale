@@ -1164,11 +1164,15 @@ class CheminsRuraux:
         
         return success, layer
     
-    def apply_ban_style(self, layer):
+    def apply_ban_style(self, layer,
+                         regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
+                         regex_voie=r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'):
         """Applique un style différencié à la couche BAN selon le type de voie
-        
+
         Args:
             layer: La couche QgsVectorLayer BAN à styliser
+            regex_chemin: Expression régulière QGIS pour détecter les chemins ruraux
+            regex_voie: Expression régulière QGIS pour détecter les voies communales
         """
         
         # Créer une expression qui catégorise les voies
@@ -1188,8 +1192,8 @@ class CheminsRuraux:
         # regexp_match retourne la position (>0) si trouvé, 0 sinon
         expression = f"""
         CASE 
-            WHEN regexp_match("{field_name}", '(?i)(che(?:min)?|sen(?:tier)?) rural|\\\\bC\\\\.?R\\\\.?\\\\b') > 0 THEN 'Chemin rural'
-            WHEN regexp_match("{field_name}", '(?i)(voi(?:e)?) (com(?:munale)?)|\\\\bV\\\\.?C\\\\.?\\\\b') > 0 THEN 'Voie communale'
+            WHEN regexp_match("{field_name}", '{regex_chemin}') > 0 THEN 'Chemin rural'
+            WHEN regexp_match("{field_name}", '{regex_voie}') > 0 THEN 'Voie communale'
             ELSE 'Autre'
         END
         """
@@ -1240,8 +1244,8 @@ class CheminsRuraux:
         label_settings.isExpression = True
         label_settings.fieldName = (
             f"CASE "
-            f"WHEN regexp_match(\"{field_name}\", '(?i)(che(?:min)?|sen(?:tier)?) rural|\\\\bC\\\\.?R\\\\.?\\\\b') > 0 THEN \"{field_name}\" "
-            f"WHEN regexp_match(\"{field_name}\", '(?i)(voi(?:e)?) (com(?:munale)?)|\\\\bV\\\\.?C\\\\.?\\\\b') > 0 THEN \"{field_name}\" "
+            f"WHEN regexp_match(\"{field_name}\", '{regex_chemin}') > 0 THEN \"{field_name}\" "
+            f"WHEN regexp_match(\"{field_name}\", '{regex_voie}') > 0 THEN \"{field_name}\" "
             f"ELSE '' END"
         )
         label_settings.enabled = True
@@ -1287,7 +1291,11 @@ class CheminsRuraux:
             layer_name=f"Adresses BAN {code_insee}",
             code_insee=code_insee,
             crs="EPSG:4326",
-            style_callback=self.apply_ban_style
+            style_callback=lambda lyr: self.apply_ban_style(
+                lyr,
+                regex_chemin=SettingsDialog.get('ban_regex_chemin', r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b') or r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
+                regex_voie=SettingsDialog.get('ban_regex_voie', r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b') or r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b',
+            )
         )
         
         # Afficher le message seulement si c'est le seul chargement

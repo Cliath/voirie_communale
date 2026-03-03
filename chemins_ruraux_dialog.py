@@ -9,7 +9,7 @@ import os
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QTextEdit,
-    QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame, QToolButton
+    QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame, QToolButton, QLineEdit
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QFont
@@ -238,6 +238,41 @@ class SettingsDialog(QDialog):
         note.setWordWrap(True)
         layout.addWidget(note)
 
+        layout.addSpacing(4)
+        sep2 = QFrame(); sep2.setFrameShape(QFrame.HLine); sep2.setFrameShadow(QFrame.Sunken)
+        layout.addWidget(sep2)
+        layout.addSpacing(4)
+
+        # --- Catégorisation des adresses BAN ---
+        lbl_ban = QLabel("<b>Catégorisation des adresses BAN</b>")
+        layout.addWidget(lbl_ban)
+
+        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
+        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
+
+        row_cr = QHBoxLayout()
+        row_cr.addWidget(QLabel("Regex Chemin rural :"))
+        self.txt_regex_chemin = QLineEdit(self.get('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT) or _BAN_REGEX_CHEMIN_DEFAULT)
+        self.txt_regex_chemin.setPlaceholderText(_BAN_REGEX_CHEMIN_DEFAULT)
+        self.txt_regex_chemin.setMinimumWidth(260)
+        row_cr.addWidget(self.txt_regex_chemin)
+        layout.addLayout(row_cr)
+
+        row_vc = QHBoxLayout()
+        row_vc.addWidget(QLabel("Regex Voie communale :"))
+        self.txt_regex_voie = QLineEdit(self.get('ban_regex_voie', _BAN_REGEX_VOIE_DEFAULT) or _BAN_REGEX_VOIE_DEFAULT)
+        self.txt_regex_voie.setPlaceholderText(_BAN_REGEX_VOIE_DEFAULT)
+        self.txt_regex_voie.setMinimumWidth(260)
+        row_vc.addWidget(self.txt_regex_voie)
+        layout.addLayout(row_vc)
+
+        note_ban = QLabel(
+            "<small><i>Expressions régulières utilisées pour identifier les chemins ruraux "
+            "et voies communales dans le champ <tt>nom_voie</tt> de la couche BAN.</i></small>"
+        )
+        note_ban.setWordWrap(True)
+        layout.addWidget(note_ban)
+
         layout.addSpacing(12)
 
         # --- Boutons ---
@@ -256,6 +291,8 @@ class SettingsDialog(QDialog):
     def _save_and_accept(self):
         self.set('auto_zoom', self.chk_auto_zoom.isChecked())
         self.set('auto_reorder', self.chk_auto_reorder.isChecked())
+        self.set('ban_regex_chemin', self.txt_regex_chemin.text().strip())
+        self.set('ban_regex_voie', self.txt_regex_voie.text().strip())
         self.accept()
 
 
