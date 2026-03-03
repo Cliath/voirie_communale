@@ -12,7 +12,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
                        Qgis, QgsApplication, QgsLayerTreeGroup, QgsLayerTreeLayer,
-                       QgsCoordinateTransform,
+                       QgsCoordinateTransform, QgsSettings,
                        QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsSingleSymbolRenderer,
                        QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol, QgsFeature, QgsField,
                        QgsGeometry, QgsPointXY,
@@ -28,7 +28,7 @@ import json
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .chemins_ruraux_dialog import CheminsRurauxDialog, TodoDialog, PhotoAeriennesDialog, LauncherDialog
+from .chemins_ruraux_dialog import CheminsRurauxDialog, TodoDialog, PhotoAeriennesDialog, LauncherDialog, SettingsDialog
 # Import version information
 from .version import __version__, get_changelog
 
@@ -420,7 +420,12 @@ class CheminsRuraux:
                 "  Exemples : 97105 (Basse-Terre), 98411 (Nouméa)"
             )
             return
-        
+
+        # Mémoriser le code INSEE et la sélection des couches
+        SettingsDialog.set('last_insee', code_insee)
+        checked_layers = [n for n in self.dlg._layer_checkboxes if getattr(self.dlg, n).isChecked()]
+        SettingsDialog.set('checked_layers', checked_layers)
+
         # Vérifier quelles données charger
         cadastre_checked = self.dlg.chkCadastre.isChecked()
         commune_checked = self.dlg.chkCommune.isChecked()
@@ -645,11 +650,12 @@ class CheminsRuraux:
         progress.close()
 
         # Réordonner les couches dans le panneau selon l'ordre canonique
-        self._reorder_layers(code_insee)
+        if SettingsDialog.get('auto_reorder', True, bool):
+            self._reorder_layers(code_insee)
 
         # Zoomer sur l'emprise de la commune
         success_count = sum(1 for _, success in results if success)
-        if success_count > 0:
+        if success_count > 0 and SettingsDialog.get('auto_zoom', True, bool):
             canvas = self.iface.mapCanvas()
             zoom_extent = None
             # Utiliser la couche commune chargée, ou en chercher une dans le projet
@@ -1851,9 +1857,10 @@ class CheminsRuraux:
             self.launcher = LauncherDialog(
                 parent=self.iface.mainWindow(),
                 callbacks={
-                    'charger': self.open_charger_dialog,
-                    'todo':    self.show_todo,
-                    'about':   self.show_about,
+                    'charger':   self.open_charger_dialog,
+                    'todo':      self.show_todo,
+                    'settings':  self.show_settings,
+                    'about':     self.show_about,
                 }
             )
             self.launcher.setWindowTitle(f"Voirie Communale v{__version__}")
@@ -1862,9 +1869,10 @@ class CheminsRuraux:
         self.launcher.raise_()
         self.launcher.activateWindow()
 
-        self.launcher.show()
-        self.launcher.raise_()
-        self.launcher.activateWindow()
+    def show_settings(self):
+        """Ouvre le dialogue de paramètres."""
+        dlg = SettingsDialog(parent=self.iface.mainWindow())
+        dlg.exec_()
 
     def open_charger_dialog(self):
         """Ouvre le dialogue de chargement des données."""
@@ -1872,6 +1880,19 @@ class CheminsRuraux:
             self.dlg = CheminsRurauxDialog()
             self.dlg.setWindowTitle(f"Voirie Communale v{__version__} – Chargement des données")
             self.dlg.btnLoadCadastre.clicked.connect(self.validate_and_load)
+        # Restaurer le dernier code INSEE
+        last_insee = SettingsDialog.get('last_insee', '')
+        if last_insee:
+            self.dlg.txtCodeInsee.setText(last_insee)
+        # Restaurer l'état des cases à cocher
+        saved_checked = SettingsDialog.get('checked_layers', None)
+        if saved_checked is not None:
+            if isinstance(saved_checked, str):
+                saved_checked = [saved_checked] if saved_checked else []
+            for name in self.dlg._layer_checkboxes:
+                widget = getattr(self.dlg, name, None)
+                if widget:
+                    widget.setChecked(name in saved_checked)
         self.dlg.show()
         self.dlg.raise_()
         self.dlg.activateWindow()

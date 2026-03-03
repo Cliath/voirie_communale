@@ -13,6 +13,7 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QFont
+from qgis.core import QgsSettings
 
 # Importer la classe du fichier UI compilé
 from .chemins_ruraux_dialog_base import Ui_CheminsRurauxDialogBase
@@ -174,6 +175,90 @@ class TodoDialog(QDialog):
         self.editor.textChanged.disconnect(self._on_modified)
 
 
+class SettingsDialog(QDialog):
+    """Dialogue de paramètres du plugin."""
+
+    _NS = "chemins_ruraux"
+
+    @staticmethod
+    def get(key, default, value_type=None):
+        """Lit un paramètre depuis QgsSettings."""
+        s = QgsSettings()
+        full_key = f"chemins_ruraux/{key}"
+        if value_type is not None:
+            return s.value(full_key, default, type=value_type)
+        return s.value(full_key, default)
+
+    @staticmethod
+    def set(key, value):
+        """Enregistre un paramètre dans QgsSettings."""
+        QgsSettings().setValue(f"chemins_ruraux/{key}", value)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Paramètres - Voirie Communale")
+        self.setMinimumWidth(400)
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(8)
+
+        # --- Comportement ---
+        lbl_comportement = QLabel("<b>Comportement après chargement</b>")
+        layout.addWidget(lbl_comportement)
+
+        self.chk_auto_zoom = QCheckBox("Zoom automatique sur la commune")
+        self.chk_auto_zoom.setChecked(self.get('auto_zoom', True, bool))
+        layout.addWidget(self.chk_auto_zoom)
+
+        self.chk_auto_reorder = QCheckBox("Réordonnancement automatique des couches")
+        self.chk_auto_reorder.setChecked(self.get('auto_reorder', True, bool))
+        layout.addWidget(self.chk_auto_reorder)
+
+        layout.addSpacing(4)
+        sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setFrameShadow(QFrame.Sunken)
+        layout.addWidget(sep)
+        layout.addSpacing(4)
+
+        # --- Mémorisation automatique ---
+        lbl_memo = QLabel("<b>Mémorisation automatique</b>")
+        layout.addWidget(lbl_memo)
+
+        last_insee = self.get('last_insee', '') or ''
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Dernier code INSEE chargé :"))
+        self.lbl_insee = QLabel(f"<b>{last_insee}</b>" if last_insee else "<i>(aucun)</i>")
+        row.addWidget(self.lbl_insee)
+        row.addStretch()
+        layout.addLayout(row)
+
+        note = QLabel(
+            "<small><i>Le code INSEE et la sélection des couches sont mémorisés "
+            "automatiquement à chaque chargement.</i></small>"
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+
+        layout.addSpacing(12)
+
+        # --- Boutons ---
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        self.btn_ok = QPushButton("OK")
+        self.btn_ok.setDefault(True)
+        self.btn_cancel = QPushButton("Annuler")
+        btn_layout.addWidget(self.btn_ok)
+        btn_layout.addWidget(self.btn_cancel)
+        layout.addLayout(btn_layout)
+
+        self.btn_ok.clicked.connect(self._save_and_accept)
+        self.btn_cancel.clicked.connect(self.reject)
+
+    def _save_and_accept(self):
+        self.set('auto_zoom', self.chk_auto_zoom.isChecked())
+        self.set('auto_reorder', self.chk_auto_reorder.isChecked())
+        self.accept()
+
+
 class LauncherDialog(QDialog):
     """Barre de lancement du plugin : accès rapide aux fonctionnalités principales."""
 
@@ -234,8 +319,8 @@ class LauncherDialog(QDialog):
             (
                 "⚙️",
                 "Paramètres",
-                "Paramètres du plugin (fonctionnalité à venir)",
-                None,
+                "Paramètres du plugin",
+                callbacks.get('settings'),
             ),
             (
                 "ℹ️",
@@ -258,8 +343,3 @@ class LauncherDialog(QDialog):
 
         self.adjustSize()
         self.setFixedHeight(self.sizeHint().height())
-
-    def _on_modified(self):
-        self.btn_save.setText("Enregistrer")
-        self.btn_save.setEnabled(True)
-        self.editor.textChanged.disconnect(self._on_modified)

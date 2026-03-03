@@ -1,3 +1,10 @@
+# [0.10.3] - 2026-03-03
+### Ajouté
+- **Paramètres** : bouton activé dans la barre de lancement. `SettingsDialog` avec deux options : *Zoom automatique* et *Réordonnancement automatique des couches* après chargement.
+- Mémorisation automatique du dernier code INSEE et de la sélection des couches (à chaque chargement réussi).
+- Restauration automatique du code INSEE et des cases cochées à l'ouverture du dialogue de chargement.
+### Corrigé
+- Doublon `launcher.show()` dans `run()` supprimé.
 # [0.10.2] - 2026-03-03
 ### Corrigé
 - **ToDo** : erreur `'TodoDialog' object has no attribute '_on_modified'` lors de l'enregistrement — méthode `_on_modified()` manquante ajoutée.
