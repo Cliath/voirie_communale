@@ -1,5 +1,6 @@
 ﻿@echo off
 chcp 65001 > nul
+setlocal enabledelayedexpansion
 REM Script pour compiler et packager le plugin QGIS Chemins Ruraux
 
 echo ========================================
@@ -8,7 +9,7 @@ echo ========================================
 echo.
 
 REM Etape 1 : Compilation
-echo [1/3] Compilation des ressources et UI...
+echo [1/4] Compilation des ressources et UI...
 python compile_plugin.py
 if %ERRORLEVEL% NEQ 0 (
     echo Erreur lors de la compilation
@@ -17,7 +18,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 
 REM Etape 2 : Packaging
-echo [2/3] Création du package ZIP...
+echo [2/4] Création du package ZIP...
 python package.py
 if %ERRORLEVEL% NEQ 0 (
     echo Erreur lors du packaging
@@ -26,20 +27,20 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 
 REM Etape 3 : Publication sur GitHub
-echo [3/3] Publication sur GitHub...
+echo [3/4] Publication sur GitHub...
 for /f "delims=" %%v in ('python -c "from version import __version__; print(__version__)"') do set VERSION=%%v
 git add --all
 git diff --cached --quiet
-if %ERRORLEVEL% EQU 0 (
+if !ERRORLEVEL! EQU 0 (
     echo Rien a committer - working tree propre
 ) else (
-    git commit -m "Release v%VERSION%"
-    if %ERRORLEVEL% NEQ 0 (
+    git commit -m "Release v!VERSION!"
+    if !ERRORLEVEL! NEQ 0 (
         echo Erreur lors du commit
         exit /b 1
     )
     git push
-    if %ERRORLEVEL% NEQ 0 (
+    if !ERRORLEVEL! NEQ 0 (
         echo Erreur lors du push
         exit /b 1
     )
