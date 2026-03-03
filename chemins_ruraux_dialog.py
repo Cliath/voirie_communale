@@ -167,6 +167,12 @@ class TodoDialog(QDialog):
         except Exception as e:
             QMessageBox.warning(self, "Erreur", f"Impossible d'enregistrer :\n{e}")
 
+    def _on_modified(self):
+        """Réactive le bouton Enregistrer après une modification."""
+        self.btn_save.setText("Enregistrer")
+        self.btn_save.setEnabled(True)
+        self.editor.textChanged.disconnect(self._on_modified)
+
 
 class LauncherDialog(QDialog):
     """Barre de lancement du plugin : accès rapide aux fonctionnalités principales."""

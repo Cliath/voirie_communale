@@ -1,3 +1,6 @@
+# [0.10.2] - 2026-03-03
+### Corrigé
+- **ToDo** : erreur `'TodoDialog' object has no attribute '_on_modified'` lors de l'enregistrement — méthode `_on_modified()` manquante ajoutée.
 # [0.10.1] - 2026-03-03
 ### Ajouté
 - **Barre de lancement** : le bouton du plugin ouvre désormais une barre d'accès rapide avec 5 boutons : *Charger des données*, *Numériser des données* (à venir), *Liste des tâches*, *Paramètres* (à venir), *À propos*. Classe `LauncherDialog` ajoutée dans `chemins_ruraux_dialog.py`.
