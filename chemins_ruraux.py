@@ -28,7 +28,7 @@ import json
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .chemins_ruraux_dialog import CheminsRurauxDialog, TodoDialog, PhotoAeriennesDialog
+from .chemins_ruraux_dialog import CheminsRurauxDialog, TodoDialog, PhotoAeriennesDialog, LauncherDialog
 # Import version information
 from .version import __version__, get_changelog
 
@@ -1845,20 +1845,33 @@ class CheminsRuraux:
         layer.triggerRepaint()
 
     def run(self):
-        """Run method that performs all the real work"""
-
-        # Create the dialog with elements (after translation) and keep reference
-        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
+        """Ouvre la barre de lancement du plugin."""
         if self.first_start:
             self.first_start = False
-            self.dlg = CheminsRurauxDialog()
-            # Afficher la version dans le titre
-            self.dlg.setWindowTitle(f"Voirie Communale v{__version__}")
-            # Connecter le bouton de chargement (gère cadastre ET commune selon le bouton radio)
-            self.dlg.btnLoadCadastre.clicked.connect(self.validate_and_load)
+            self.launcher = LauncherDialog(
+                parent=self.iface.mainWindow(),
+                callbacks={
+                    'charger': self.open_charger_dialog,
+                    'todo':    self.show_todo,
+                    'about':   self.show_about,
+                }
+            )
+            self.launcher.setWindowTitle(f"Voirie Communale v{__version__}")
 
-        # show the dialog (non-modal, reste ouvert après actions)
+        self.launcher.show()
+        self.launcher.raise_()
+        self.launcher.activateWindow()
+
+        self.launcher.show()
+        self.launcher.raise_()
+        self.launcher.activateWindow()
+
+    def open_charger_dialog(self):
+        """Ouvre le dialogue de chargement des données."""
+        if not hasattr(self, 'dlg') or self.dlg is None:
+            self.dlg = CheminsRurauxDialog()
+            self.dlg.setWindowTitle(f"Voirie Communale v{__version__} – Chargement des données")
+            self.dlg.btnLoadCadastre.clicked.connect(self.validate_and_load)
         self.dlg.show()
-        # Ramener le dialogue au premier plan s'il était déjà ouvert
         self.dlg.raise_()
         self.dlg.activateWindow()

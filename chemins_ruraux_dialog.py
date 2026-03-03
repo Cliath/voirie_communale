@@ -9,7 +9,7 @@ import os
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QTextEdit,
-    QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame
+    QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame, QToolButton
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QFont
@@ -166,6 +166,92 @@ class TodoDialog(QDialog):
             self.editor.textChanged.connect(self._on_modified)
         except Exception as e:
             QMessageBox.warning(self, "Erreur", f"Impossible d'enregistrer :\n{e}")
+
+
+class LauncherDialog(QDialog):
+    """Barre de lancement du plugin : accès rapide aux fonctionnalités principales."""
+
+    _BTN_STYLE = """
+        QToolButton {
+            font-size: 12px;
+            padding: 10px 6px 8px 6px;
+            border: 1px solid #c8c8c8;
+            border-radius: 6px;
+            background: #f7f7f7;
+            min-width: 105px;
+            min-height: 72px;
+        }
+        QToolButton:hover:enabled {
+            background: #ddeeff;
+            border-color: #4a90d9;
+        }
+        QToolButton:pressed:enabled {
+            background: #b8d4f0;
+        }
+        QToolButton:disabled {
+            color: #aaaaaa;
+            background: #f0f0f0;
+            border-color: #ddd;
+        }
+    """
+
+    def __init__(self, parent=None, callbacks=None):
+        super().__init__(parent)
+        callbacks = callbacks or {}
+        self.setWindowTitle("Voirie Communale")
+        self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
+        self.setSizeGripEnabled(False)
+
+        layout = QHBoxLayout(self)
+        layout.setSpacing(8)
+        layout.setContentsMargins(12, 12, 12, 12)
+
+        buttons_def = [
+            (
+                "📂",
+                "Charger\ndes données",
+                "Ouvre le panneau de chargement des données",
+                callbacks.get('charger'),
+            ),
+            (
+                "✏️",
+                "Numériser\ndes données",
+                "Numérisation des voies (fonctionnalité à venir)",
+                None,
+            ),
+            (
+                "📋",
+                "Liste des\ntâches",
+                "Ouvre le gestionnaire de tâches",
+                callbacks.get('todo'),
+            ),
+            (
+                "⚙️",
+                "Paramètres",
+                "Paramètres du plugin (fonctionnalité à venir)",
+                None,
+            ),
+            (
+                "ℹ️",
+                "À propos",
+                "Informations sur le plugin Voirie Communale",
+                callbacks.get('about'),
+            ),
+        ]
+
+        for icon, label, tooltip, callback in buttons_def:
+            btn = QToolButton()
+            btn.setText(f"{icon}\n{label}")
+            btn.setToolButtonStyle(Qt.ToolButtonTextOnly)
+            btn.setToolTip(tooltip)
+            btn.setStyleSheet(self._BTN_STYLE)
+            btn.setEnabled(callback is not None)
+            if callback:
+                btn.clicked.connect(callback)
+            layout.addWidget(btn)
+
+        self.adjustSize()
+        self.setFixedHeight(self.sizeHint().height())
 
     def _on_modified(self):
         self.btn_save.setText("Enregistrer")

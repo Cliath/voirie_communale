@@ -1,3 +1,6 @@
+# [0.9.81] - 2026-03-03
+### Ajouté
+- **Barre de lancement** : le bouton du plugin ouvre désormais une barre d'accès rapide avec 5 boutons : *Charger des données*, *Numériser des données* (à venir), *Liste des tâches*, *Paramètres* (à venir), *À propos*. Classe `LauncherDialog` ajoutée dans `chemins_ruraux_dialog.py`.
 # [0.9.80] - 2026-03-01
 ### Corrigé
 - **MNT LiDAR HD** : bloc de chargement manquant dans `validate_and_load()` (même régression que PLAN IGN J+1 en v0.9.77). Remplacement de `IGNF:WGS84G` par `EPSG:4326` (CRS reconnu par QGIS).
