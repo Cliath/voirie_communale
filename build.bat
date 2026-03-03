@@ -51,6 +51,7 @@ git diff --cached --quiet
 if !ERRORLEVEL! EQU 0 (
     echo Rien a committer - working tree propre
 ) else (
+    set PYTHONUTF8=1
     python get_commit_message.py > .commit_msg.txt
     git commit -F .commit_msg.txt
     del .commit_msg.txt
@@ -79,9 +80,6 @@ if %ERRORLEVEL% GTR 7 (
 
 echo.
 echo ========================================
-echo  Termine !  (v!VERSION!)
+echo  Termine - v!VERSION!
 echo ========================================
-echo.
-echo ========================================
-echo  Terminé !
-echo ========================================
+
