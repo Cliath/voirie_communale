@@ -1,3 +1,6 @@
+# [0.10.6] - 2026-03-04
+### Modifié
+- Ordre canonique des couches : BD TOPO → Voirie comm. → Voirie dép. → OSM Routes → BAN → MAJIC → Commune → PLAN IGN → Waze → OSM France → Cadastre → BD ORTHO® → 8×Photos → SCAN 50® → Cassini → État-Major.
 # [0.10.5] - 2026-03-04
 ### Ajouté
 - Couche **OSM France** (tuiles XYZ `openstreetmap.fr`) comme fond de plan raster, avec case à cocher dédiée.

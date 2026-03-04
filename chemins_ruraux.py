@@ -993,23 +993,25 @@ class CheminsRuraux:
         """Réordonne les couches chargées dans le panneau selon un ordre canonique.
 
         Ordre canonique (du haut vers le bas) :
-        vecteurs détaillés → emprise → cadastre → rasters historiques → tuiles de fond.
+        vecteurs détaillés → emprise → fonds raster → rasters historiques.
         Les couches absentes sont ignorées.
         """
         root = QgsProject.instance().layerTreeRoot()
 
         # Ordre désiré : index 0 = tout en haut du panneau
         canonical_order = [
-            f"OSM Routes {code_insee}",
             f"BD TOPO Routes numérotées ou nommées {code_insee}",
             f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
             f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
+            f"OSM Routes {code_insee}",
             f"Adresses BAN {code_insee}",
             f"Parcelles MAJIC {code_insee}",
             f"Commune {code_insee}",
             "PLAN IGN J+1",
             "Waze",
             "OSM France",
+            f"Cadastre - {code_insee}",
+            "BD ORTHO\u00ae 20 cm",
             "Photos aériennes 1950-1965",
             "Photos aériennes 1965-1980",
             "Photos aériennes 1980-1995",
@@ -1018,8 +1020,6 @@ class CheminsRuraux:
             "Photos aériennes 2011-2015",
             "Photos aériennes 2016-2020",
             "Photos aériennes 2021-2023",
-            "BD ORTHO\u00ae 20 cm",
-            f"Cadastre - {code_insee}",
             "SCAN 50\u00ae 1950",
             "Carte de Cassini",
             "Carte d'\u00c9tat-Major",
