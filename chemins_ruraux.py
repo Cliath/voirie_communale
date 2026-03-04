@@ -1839,32 +1839,38 @@ class CheminsRuraux:
         return True, filtered_layer
 
     def _style_osm_layer(self, layer):
-        """Applique un style catégorisé par type highway et des étiquettes à la couche OSM."""
-        from qgis.core import QgsCategorizedSymbolRenderer, QgsRendererCategory, QgsLineSymbol
+        """Applique un style catégorisé CE / C / R basé sur le champ ref, avec étiquettes."""
+        from qgis.core import QgsRuleBasedRenderer, QgsLineSymbol
 
-        highway_styles = [
-            ('track',         '#8B6310', '0.5', 'Chemin (track)'),
-            ('path',          '#2ca02c', '0.4', 'Sentier (path)'),
-            ('unclassified',  '#555555', '0.6', 'Voie non classée (unclassified)'),
-            ('residential',   '#888888', '0.5', 'Voie résidentielle (residential)'),
-            ('service',       '#7cafd4', '0.4', 'Voie de service (service)'),
+        def make_sym(color, width='0.5'):
+            return QgsLineSymbol.createSimple({
+                'color': color, 'width': width,
+                'capstyle': 'round', 'joinstyle': 'round',
+            })
+
+        root = QgsRuleBasedRenderer.Rule(None)
+
+        rules = [
+            ('"ref" LIKE \'CE%\'',                          make_sym('#27ae60', '0.6'), 'CE – Chemin d\'exploitation'),
+            ('"ref" LIKE \'C%\' AND "ref" NOT LIKE \'CE%\'', make_sym('#e67e22', '0.6'), 'C – Voie communale'),
+            ('"ref" LIKE \'R%\'',                            make_sym('#c0392b', '0.6'), 'R – Chemin rural'),
+            ('ELSE',                                         make_sym('#888888', '0.4'), 'Autre'),
         ]
 
-        categories = []
-        for value, color, width, label in highway_styles:
-            sym = QgsLineSymbol.createSimple({
-                'color': color,
-                'width': width,
-                'capstyle': 'round',
-                'joinstyle': 'round',
-            })
-            categories.append(QgsRendererCategory(value, sym, label))
+        for expr, sym, label in rules:
+            rule = QgsRuleBasedRenderer.Rule(sym)
+            rule.setLabel(label)
+            if expr == 'ELSE':
+                rule.setIsElse(True)
+            else:
+                rule.setFilterExpression(expr)
+            root.appendChild(rule)
 
-        layer.setRenderer(QgsCategorizedSymbolRenderer('highway', categories))
+        layer.setRenderer(QgsRuleBasedRenderer(root))
 
-        # Étiquettes : nom si disponible, sinon ref
+        # Étiquettes : ref en priorité, sinon name
         label_settings = QgsPalLayerSettings()
-        label_settings.fieldName = "coalesce(nullif(\"name\",''), nullif(\"ref\",''))"
+        label_settings.fieldName = "coalesce(nullif(\"ref\",''), nullif(\"name\",''))"
         label_settings.isExpression = True
         label_settings.enabled = True
         label_settings.placement = QgsPalLayerSettings.Line
