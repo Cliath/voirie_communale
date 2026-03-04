@@ -1207,13 +1207,13 @@ class CheminsRuraux:
         Le provider WFS QGIS est contourné car il surcharge le BBOX avec -90,-180,90,180.
         """
         xmin, ymin, xmax, ymax = bbox
-        cql_filter = f"BBOX({geom_field},{xmin},{ymin},{xmax},{ymax},'{crs}')"
+        # Paramètre BBOX natif WFS : pas de CQL_FILTER, pas de caractères spéciaux à encoder
         http_url = (
             f"{self.WFS_IGN_URL}?"
             f"service=WFS&version=2.0.0&request=GetFeature"
             f"&typename={typename}&srsname={crs}"
             f"&outputFormat=application/json"
-            f"&CQL_FILTER={urllib.parse.quote(cql_filter)}"
+            f"&BBOX={xmin},{ymin},{xmax},{ymax},{crs}"
         )
         vsicurl_url = f"/vsicurl/{http_url}"
         QgsMessageLog.logMessage(f"WFS BBOX vsicurl: {http_url}", "CheminsRuraux", Qgis.Info)
