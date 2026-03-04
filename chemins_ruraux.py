@@ -1163,24 +1163,30 @@ class CheminsRuraux:
                        bbox=None, style_callback=None, geom_field="geom"):
         """Charge une couche WFS depuis l'IGN Géoplateforme.
 
-        Filtre code_insee via CQL_FILTER, filtre spatial via le paramètre BBOX natif WFS
-        (pas via CQL_FILTER=BBOX(...) qui entre en conflit avec le BBOX ajouté par QGIS).
+        - Filtre code_insee : provider WFS natif QGIS avec CQL_FILTER.
+        - Filtre BBOX : provider OGR avec URL complète + &BBOX= + &outputFormat=application/json.
+          OGR exécute le GET HTTP tel quel, sans modifier ni surcharger le BBOX.
         """
-        uri_string = (
+        base = (
             f"{self.WFS_IGN_URL}?"
             f"service=WFS&version=2.0.0&request=GetFeature&"
             f"typename={typename}&srsname={crs}"
         )
+
         if bbox:
             xmin, ymin, xmax, ymax = bbox
-            uri_string += f"&BBOX={xmin},{ymin},{xmax},{ymax},{crs}"
-        elif code_insee:
-            uri_string += f"&CQL_FILTER=code_insee='{code_insee}'"
+            uri_string = base + f"&BBOX={xmin},{ymin},{xmax},{ymax},{crs}&outputFormat=application/json"
+            provider = "ogr"
+        else:
+            if code_insee:
+                base += f"&CQL_FILTER=code_insee='{code_insee}'"
+            uri_string = base
+            provider = "WFS"
 
-        QgsMessageLog.logMessage(f"WFS: {uri_string}", "CheminsRuraux", Qgis.Info)
-        wfs_layer = QgsVectorLayer(uri_string, layer_name, "WFS")
+        QgsMessageLog.logMessage(f"WFS [{provider}]: {uri_string}", "CheminsRuraux", Qgis.Info)
+        wfs_layer = QgsVectorLayer(uri_string, layer_name, provider)
 
-        if wfs_layer.isValid() and wfs_layer.featureCount() > 0:
+        if wfs_layer.isValid():
             self._remove_layers_by_name(layer_name)
             QgsProject.instance().addMapLayer(wfs_layer)
             if style_callback:
