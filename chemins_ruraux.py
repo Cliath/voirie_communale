@@ -444,6 +444,11 @@ class CheminsRuraux:
         bd_ortho_checked = hasattr(self.dlg, 'chkBDOrtho') and self.dlg.chkBDOrtho.isChecked()
         mnt_lidar_checked = hasattr(self.dlg, 'chkMNTLidar') and self.dlg.chkMNTLidar.isChecked()
         plan_ign_checked = hasattr(self.dlg, 'chkPlanIGN') and self.dlg.chkPlanIGN.isChecked()
+
+        # La commune est obligatoire dès qu'une donnée nécessite un filtre géométrique BBOX
+        needs_bbox = voirie_checked or voirie_dep_checked or osm_routes_checked or bdtopo_routesnom_checked
+        if needs_bbox:
+            commune_checked = True
         
         if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not osmfr_checked and not photo_aeriennes_checked and not bd_ortho_checked and not mnt_lidar_checked and not plan_ign_checked:
             QMessageBox.warning(
@@ -477,9 +482,6 @@ class CheminsRuraux:
             scan_etat_major_checked, scan_cassini_checked, scan50_1950_checked,
             waze_tiles_checked, osmfr_checked, bd_ortho_checked, mnt_lidar_checked, plan_ign_checked
         ]) + len(photo_aeriennes_sources)
-        # +1 pour le chargement éventuel de la commune (bbox)
-        if (voirie_checked or voirie_dep_checked or osm_routes_checked or bdtopo_routesnom_checked) and not commune_checked:
-            steps += 1
 
         progress = QProgressDialog(
             "Chargement des données en cours...",
@@ -512,37 +514,28 @@ class CheminsRuraux:
             results.append(('Emprise communale', commune_success))
             if commune_layer:
                 loaded_layers.append(commune_layer)
-        
-        # Récupérer l'emprise de la commune pour filtrer les voiries
+
+        # Extraire le BBOX de la commune pour les couches nécessitant un filtre géométrique
         commune_bbox = None
-        if voirie_checked or voirie_dep_checked or osm_routes_checked or bdtopo_routesnom_checked:
-            # Chercher d'abord si une commune existe déjà dans le projet
-            if commune_layer is None:
-                for layer_id, layer in QgsProject.instance().mapLayers().items():
-                    if isinstance(layer, QgsVectorLayer) and layer.name() == f"Commune {code_insee}":
-                        commune_layer = layer
-                        QgsMessageLog.logMessage(
-                            f"Couche commune existante trouvée : {layer.name()}",
-                            "CheminsRuraux",
-                            Qgis.Info
-                        )
-                        break
-            
-            # Charger la commune si toujours pas trouvée
-            if commune_layer is None:
-                QgsMessageLog.logMessage(
-                    f"Chargement de la commune {code_insee} pour obtenir le BBOX des voiries",
-                    "CheminsRuraux",
-                    Qgis.Info
-                )
-                advance(f"Chargement de l'emprise communale pour le filtrage ({code_insee})...")
-                _, commune_layer = self.load_commune_wfs(code_insee)
-            
-            # Extraire le BBOX de la commune
-            if commune_layer and commune_layer.isValid():
-                extent = commune_layer.extent()
-                commune_bbox = (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum())
-        
+        if needs_bbox and commune_layer and commune_layer.isValid():
+            extent = commune_layer.extent()
+            commune_bbox = (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum())
+
+        if needs_bbox and commune_bbox is None:
+            # La commune n'a pas pu être chargée : impossible de filtrer les couches BBOX-dépendantes
+            progress.close()
+            QMessageBox.critical(
+                self.iface.mainWindow(),
+                "Emprise communale indisponible",
+                f"Impossible de charger l'emprise de la commune {code_insee}.\n\n"
+                "Les couches nécessitant un filtre géographique (Voirie, OSM Routes, BD TOPO) "
+                "ne peuvent pas être chargées sans ce prérequis.\n\n"
+                "Vérifiez le code INSEE et votre connexion internet."
+            )
+            self.dlg.raise_()
+            self.dlg.activateWindow()
+            return
+
         if ban_checked:
             advance(f"Chargement des adresses BAN ({code_insee})...")
             ban_success, ban_layer = self.load_ban_wfs(code_insee)
@@ -727,20 +720,11 @@ class CheminsRuraux:
 
         Args:
             code_insee: Code INSEE de la commune
-            bbox: Emprise de la commune (xmin, ymin, xmax, ymax) en EPSG:4326
+            bbox: Emprise de la commune (xmin, ymin, xmax, ymax) en EPSG:4326 (toujours fourni)
 
         Returns:
             tuple: (bool, QgsVectorLayer ou None)
         """
-        if not bbox:
-            QMessageBox.warning(
-                self.iface.mainWindow(),
-                "Emprise communale manquante",
-                "Impossible de calculer le BBOX pour les routes numérotées ou nommées BD TOPO.\n"
-                "Chargez l'emprise communale ou vérifiez le code INSEE."
-            )
-            return False, None
-
         success, layer = self.load_wfs_layer(
             typename="BDTOPO_V3:route_numerotee_ou_nommee",
             layer_name=f"BD TOPO Routes numérotées ou nommées {code_insee}",
@@ -1437,20 +1421,11 @@ class CheminsRuraux:
         
         Args:
             code_insee: Code INSEE de la commune
-            bbox: Emprise de la commune pour filtrage spatial (optionnel)
+            bbox: Emprise de la commune pour filtrage spatial (toujours fourni)
         
         Returns:
             tuple: (bool, QgsVectorLayer ou None) - (succès, couche chargée)
         """
-        if not bbox:
-            QMessageBox.warning(
-                self.iface.mainWindow(),
-                "Emprise communale manquante",
-                "Impossible de calculer le BBOX pour la voirie communale DGCL.\n"
-                "Chargez l'emprise communale ou vérifiez le code INSEE."
-            )
-            return False, None
-
         success, layer = self.load_wfs_layer(
             typename="DGCL.2025:voirie_communale",
             layer_name=f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
@@ -1481,20 +1456,11 @@ class CheminsRuraux:
         
         Args:
             code_insee: Code INSEE de la commune
-            bbox: Emprise de la commune pour filtrage spatial (optionnel)
+            bbox: Emprise de la commune pour filtrage spatial (toujours fourni)
         
         Returns:
             tuple: (bool, QgsVectorLayer ou None) - (succès, couche chargée)
         """
-        if not bbox:
-            QMessageBox.warning(
-                self.iface.mainWindow(),
-                "Emprise communale manquante",
-                "Impossible de calculer le BBOX pour la voirie départementale DGCL.\n"
-                "Chargez l'emprise communale ou vérifiez le code INSEE."
-            )
-            return False, None
-
         success, layer = self.load_wfs_layer(
             typename="DGCL.2025:voirie_departementale",
             layer_name=f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
@@ -1776,20 +1742,11 @@ class CheminsRuraux:
 
         Args:
             code_insee: Code INSEE de la commune
-            bbox: Emprise de la commune (xmin, ymin, xmax, ymax) en EPSG:4326
+            bbox: Emprise de la commune (xmin, ymin, xmax, ymax) en EPSG:4326 (toujours fourni)
 
         Returns:
             tuple: (bool, QgsVectorLayer ou None)
         """
-        if not bbox:
-            QMessageBox.warning(
-                self.iface.mainWindow(),
-                "Emprise communale manquante",
-                "Impossible de calculer le BBOX pour OSM.\n"
-                "Chargez l'emprise communale ou vérifiez le code INSEE."
-            )
-            return False, None
-
         xmin, ymin, xmax, ymax = bbox
         south, west, north, east = ymin, xmin, ymax, xmax
 
