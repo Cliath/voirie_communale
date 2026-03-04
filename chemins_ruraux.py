@@ -660,9 +660,15 @@ class CheminsRuraux:
         progress.setValue(steps)
         progress.close()
 
+        # Récupérer le nom de la commune pour nommer le groupe
+        commune_name = self._get_commune_name(code_insee, commune_layer)
+
         # Réordonner les couches dans le panneau selon l'ordre canonique
         if SettingsDialog.get('auto_reorder', True, bool):
             self._reorder_layers(code_insee)
+
+        # Regrouper toutes les couches dans un groupe dédié
+        self._group_commune_layers(code_insee, commune_name)
 
         # Zoomer sur l'emprise de la commune
         success_count = sum(1 for _, success in results if success)
@@ -1012,6 +1018,7 @@ class CheminsRuraux:
             "OSM France",
             f"Cadastre - {code_insee}",
             "BD ORTHO\u00ae 20 cm",
+            "MNT LiDAR HD",
             "Photos aériennes 1950-1965",
             "Photos aériennes 1965-1980",
             "Photos aériennes 1980-1995",
@@ -1070,7 +1077,117 @@ class CheminsRuraux:
             for child in group.findLayers():
                 QgsProject.instance().removeMapLayer(child.layerId())
             root.removeChildNode(group)
-    
+
+    def _get_commune_name(self, code_insee, commune_layer=None):
+        """Récupère le nom de la commune depuis sa couche chargée ou les couches du projet.
+
+        Returns:
+            str or None: Nom de la commune, ou None si non trouvé
+        """
+        def _extract_nom(lyr):
+            for feature in lyr.getFeatures():
+                for field in ('nom', 'NOM', 'nom_commune', 'NOM_COM'):
+                    try:
+                        val = feature.attribute(field)
+                        if val:
+                            return str(val)
+                    except KeyError:
+                        continue
+            return None
+
+        if commune_layer and commune_layer.isValid():
+            nom = _extract_nom(commune_layer)
+            if nom:
+                return nom
+
+        commune_layer_name = f"Commune {code_insee}"
+        for lyr in QgsProject.instance().mapLayers().values():
+            if lyr.name() == commune_layer_name:
+                nom = _extract_nom(lyr)
+                if nom:
+                    return nom
+        return None
+
+    def _group_commune_layers(self, code_insee, commune_name=None):
+        """Regroupe toutes les couches liées au code INSEE dans un groupe dédié.
+
+        Le groupe est nommé "{code_insee} - {nom_commune}" ou "{code_insee}" si le nom est inconnu.
+        S'il existait déjà un groupe avec ce nom, il est remplacé.
+        """
+        root = QgsProject.instance().layerTreeRoot()
+
+        group_name = f"{code_insee} - {commune_name}" if commune_name else code_insee
+
+        canonical_names = {
+            f"BD TOPO Routes num\u00e9rot\u00e9es ou nomm\u00e9es {code_insee}",
+            f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
+            f"DGCL Voirie d\u00e9partementale retenue DGF 2025 {code_insee}",
+            f"OSM Routes {code_insee}",
+            f"Adresses BAN {code_insee}",
+            f"Parcelles MAJIC {code_insee}",
+            f"Commune {code_insee}",
+            "PLAN IGN J+1",
+            "Waze",
+            "OSM France",
+            f"Cadastre - {code_insee}",
+            "BD ORTHO\u00ae 20 cm",
+            "MNT LiDAR HD",
+            "Photos a\u00e9riennes 1950-1965",
+            "Photos a\u00e9riennes 1965-1980",
+            "Photos a\u00e9riennes 1980-1995",
+            "Photos a\u00e9riennes 2000-2005",
+            "Photos a\u00e9riennes 2006-2010",
+            "Photos a\u00e9riennes 2011-2015",
+            "Photos a\u00e9riennes 2016-2020",
+            "Photos a\u00e9riennes 2021-2023",
+            "SCAN 50\u00ae 1950",
+            "Carte de Cassini",
+            "Carte d'\u00c9tat-Major",
+        }
+
+        # Supprimer un éventuel groupe existant avec le même nom
+        # (ses couches ont déjà été supprimées par les méthodes de chargement)
+        for child in list(root.children()):
+            if isinstance(child, QgsLayerTreeGroup) and child.name() == group_name:
+                root.removeChildNode(child)
+                break
+
+        # Identifier les nœuds à déplacer et la position du premier
+        to_move = []
+        first_idx = None
+        for i, child in enumerate(root.children()):
+            node_name = None
+            if isinstance(child, QgsLayerTreeGroup):
+                node_name = child.name()
+            elif isinstance(child, QgsLayerTreeLayer):
+                layer = child.layer()
+                if layer:
+                    node_name = layer.name()
+            if node_name in canonical_names:
+                if first_idx is None:
+                    first_idx = i
+                to_move.append(child)
+
+        if not to_move:
+            return
+
+        # Créer le groupe à la position du premier nœud correspondant
+        commune_group = root.insertGroup(first_idx, group_name)
+
+        # Déplacer les nœuds dans le groupe (clone + suppression originale)
+        for node in to_move:
+            clone = node.clone()
+            commune_group.addChildNode(clone)
+            root.removeChildNode(node)
+
+        commune_group.setExpanded(True)
+
+        QgsMessageLog.logMessage(
+            f"Couches regroup\u00e9es dans '{group_name}'",
+            "CheminsRuraux",
+            Qgis.Info
+        )
+
     def load_wfs_layer(self, typename, layer_name, code_insee=None, crs="EPSG:4326",
                        bbox=None, style_callback=None, geom_field="geom"):
         """Méthode générique pour charger une couche WFS depuis l'IGN Géoplateforme.
