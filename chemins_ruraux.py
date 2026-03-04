@@ -5,7 +5,7 @@ Recensement de la voirie communale (voies communales et chemins ruraux).
 Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
 Licence : GNU GPL v2+
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.PyQt.QtWidgets import QAction, QMessageBox, QProgressDialog, QDialog
 from qgis.PyQt.QtCore import Qt
@@ -1637,16 +1637,16 @@ class CheminsRuraux:
         )
         provider = layer.dataProvider()
         provider.addAttributes([
-            QgsField("code_parcelle",   QVariant.String),
-            QgsField("denomination",    QVariant.String),
-            QgsField("groupe_personne", QVariant.Int),
-            QgsField("forme_juridique", QVariant.String),
-            QgsField("numero_siren",    QVariant.String),
-            QgsField("contenance_m2",   QVariant.Int),
-            QgsField("nature_culture",  QVariant.String),
-            QgsField("adresse",         QVariant.String),
-            QgsField("section",         QVariant.String),
-            QgsField("numero",          QVariant.String),
+            QgsField("code_parcelle",   str),
+            QgsField("denomination",    str),
+            QgsField("groupe_personne", int),
+            QgsField("forme_juridique", str),
+            QgsField("numero_siren",    str),
+            QgsField("contenance_m2",   int),
+            QgsField("nature_culture",  str),
+            QgsField("adresse",         str),
+            QgsField("section",         str),
+            QgsField("numero",          str),
         ])
         layer.updateFields()
 
