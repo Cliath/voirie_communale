@@ -82,12 +82,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="chkBAN">
+       <widget class="QCheckBox" name="chkBDTopoRoutesNom">
         <property name="text">
-         <string>Adresses (Base Adresse Nationale - BAN)</string>
+        <string>Routes numérotées ou nommées (BD TOPO® IGN)</string>
         </property>
         <property name="toolTip">
-         <string>Charge toutes les adresses de la commune (peut être lent pour les grandes villes)</string>
+         <string>Charge les routes numérotées ou nommées (BDTOPO_V3:route_numerotee_ou_nommee) filtrées sur l'emprise de la commune</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkOsmRoutes">
+        <property name="text">
+        <string>Routes OSM (Overpass)</string>
+        </property>
+        <property name="toolTip">
+         <string>Télécharge les routes OSM filtrées sur la commune</string>
         </property>
        </widget>
       </item>
@@ -111,36 +121,26 @@
         </property>
        </widget>
       </item>
-    <item>
-     <widget class="QCheckBox" name="chkOsmRoutes">
-      <property name="text">
-      <string>Routes OSM (Overpass)</string>
-      </property>
-      <property name="toolTip">
-       <string>Télécharge les routes OSM filtrées sur la commune</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="chkBDTopoRoutesNom">
-      <property name="text">
-      <string>Routes numérotées ou nommées (BD TOPO® IGN)</string>
-      </property>
-      <property name="toolTip">
-       <string>Charge les routes numérotées ou nommées (BDTOPO_V3:route_numerotee_ou_nommee) filtrées sur l'emprise de la commune</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="chkMajic">
-      <property name="text">
-      <string>Parcelles personnes morales (MAJIC)</string>
-      </property>
-      <property name="toolTip">
-       <string>Charge les parcelles cadastrales détenues par des personnes morales (données DGFiP via Koumoul)</string>
-      </property>
-     </widget>
-    </item>
+      <item>
+       <widget class="QCheckBox" name="chkBAN">
+        <property name="text">
+         <string>Adresses (Base Adresse Nationale - BAN)</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge toutes les adresses de la commune (peut être lent pour les grandes villes)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkMajic">
+        <property name="text">
+        <string>Parcelles personnes morales (MAJIC)</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge les parcelles cadastrales détenues par des personnes morales (données DGFiP via Koumoul)</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="labelChoixPlans">
         <property name="text">
@@ -152,42 +152,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="chkCadastre">
+       <widget class="QCheckBox" name="chkPlanIGN">
         <property name="text">
-         <string>Cadastre (10 couches : parcelles, bâtiments, lieux-dits, etc.)</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="chkScanEtatMajor">
-        <property name="text">
-         <string>Carte d'État-Major IGN (1820-1866)</string>
+         <string>PLAN IGN J+1</string>
         </property>
         <property name="toolTip">
-         <string>Charge le scan de la carte d'État-Major (relevés entre 1820 et 1866) depuis la Géoplateforme IGN</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="chkScanCassini">
-        <property name="text">
-         <string>Carte de Cassini IGN (XVIIIe siècle)</string>
-        </property>
-        <property name="toolTip">
-         <string>Charge le scan de la carte de Cassini (première carte de France au 1/86400e, XVIIIe siècle) depuis la Géoplateforme IGN</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="chkScan50_1950">
-        <property name="text">
-         <string>SCAN 50® 1950 IGN</string>
-        </property>
-        <property name="toolTip">
-         <string>Charge le SCAN 50 de 1950 depuis la Géoplateforme IGN</string>
+         <string>Charge le PLAN IGN J+1 (GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1) via le WMS IGN Géoplateforme</string>
         </property>
        </widget>
       </item>
@@ -212,12 +182,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="chkPhotoAeriennes">
+       <widget class="QCheckBox" name="chkCadastre">
         <property name="text">
-         <string>Photographies aériennes historiques...</string>
+         <string>Cadastre (10 couches : parcelles, bâtiments, lieux-dits, etc.)</string>
         </property>
-        <property name="toolTip">
-         <string>Ouvre une fenêtre de sélection des photographies aériennes historiques IGN (1950-2023)</string>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -242,12 +212,42 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="chkPlanIGN">
+       <widget class="QCheckBox" name="chkPhotoAeriennes">
         <property name="text">
-         <string>PLAN IGN J+1</string>
+         <string>Photographies aériennes historiques...</string>
         </property>
         <property name="toolTip">
-         <string>Charge le PLAN IGN J+1 (GEOGRAPHICALGRIDSYSTEMS.MAPS.BDUNI.J1) via le WMS IGN Géoplateforme</string>
+         <string>Ouvre une fenêtre de sélection des photographies aériennes historiques IGN (1950-2023)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkScan50_1950">
+        <property name="text">
+         <string>SCAN 50® 1950 IGN</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge le SCAN 50 de 1950 depuis la Géoplateforme IGN</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkScanCassini">
+        <property name="text">
+         <string>Carte de Cassini IGN (XVIIIe siècle)</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge le scan de la carte de Cassini (première carte de France au 1/86400e, XVIIIe siècle) depuis la Géoplateforme IGN</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="chkScanEtatMajor">
+        <property name="text">
+         <string>Carte d'État-Major IGN (1820-1866)</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge le scan de la carte d'État-Major (relevés entre 1820 et 1866) depuis la Géoplateforme IGN</string>
         </property>
        </widget>
       </item>
