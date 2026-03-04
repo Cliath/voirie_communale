@@ -202,6 +202,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="chkOsmFR">
+        <property name="text">
+         <string>OSM France</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge les tuiles XYZ OpenStreetMap France comme fond de plan raster</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="chkPhotoAeriennes">
         <property name="text">
          <string>Photographies aériennes historiques...</string>

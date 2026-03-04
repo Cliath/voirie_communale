@@ -1,3 +1,6 @@
+# [0.10.5] - 2026-03-04
+### Ajouté
+- Couche **OSM France** (tuiles XYZ `openstreetmap.fr`) comme fond de plan raster, avec case à cocher dédiée.
 # [0.10.4] - 2026-03-03
 ### Ajouté
 - Incrément de version automatique via `bump_version.py` (`build.bat patch|minor|major`).
