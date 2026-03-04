@@ -516,10 +516,14 @@ class CheminsRuraux:
                 loaded_layers.append(commune_layer)
 
         # Extraire le BBOX de la commune pour les couches nécessitant un filtre géométrique
+        # On itère sur les features (pas layer.extent() qui renvoie l'extent serveur complet)
         commune_bbox = None
         if needs_bbox and commune_layer and commune_layer.isValid():
-            extent = commune_layer.extent()
-            commune_bbox = (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum())
+            for feat in commune_layer.getFeatures():
+                if feat.hasGeometry():
+                    b = feat.geometry().boundingBox()
+                    commune_bbox = (b.xMinimum(), b.yMinimum(), b.xMaximum(), b.yMaximum())
+                    break
 
         if needs_bbox and commune_bbox is None:
             # La commune n'a pas pu être chargée : impossible de filtrer les couches BBOX-dépendantes
@@ -1203,12 +1207,13 @@ class CheminsRuraux:
         Le provider WFS QGIS est contourné car il surcharge le BBOX avec -90,-180,90,180.
         """
         xmin, ymin, xmax, ymax = bbox
+        cql_filter = f"BBOX({geom_field},{xmin},{ymin},{xmax},{ymax},'{crs}')"
         http_url = (
             f"{self.WFS_IGN_URL}?"
             f"service=WFS&version=2.0.0&request=GetFeature"
             f"&typename={typename}&srsname={crs}"
             f"&outputFormat=application/json"
-            f"&CQL_FILTER=BBOX({geom_field},{xmin},{ymin},{xmax},{ymax},'{crs}')"
+            f"&CQL_FILTER={urllib.parse.quote(cql_filter)}"
         )
         vsicurl_url = f"/vsicurl/{http_url}"
         QgsMessageLog.logMessage(f"WFS BBOX vsicurl: {http_url}", "CheminsRuraux", Qgis.Info)
