@@ -1429,8 +1429,8 @@ class CheminsRuraux:
         success, layer = self.load_wfs_layer(
             typename="DGCL.2025:voirie_communale",
             layer_name=f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
-            crs="EPSG:4326",
-            bbox=bbox
+            code_insee=code_insee,
+            crs="EPSG:4326"
         )
         
         # Afficher le message seulement si c'est le seul chargement
@@ -1464,8 +1464,8 @@ class CheminsRuraux:
         success, layer = self.load_wfs_layer(
             typename="DGCL.2025:voirie_departementale",
             layer_name=f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
-            crs="EPSG:4326",
-            bbox=bbox
+            code_insee=code_insee,
+            crs="EPSG:4326"
         )
         
         # Afficher le message seulement si c'est le seul chargement
