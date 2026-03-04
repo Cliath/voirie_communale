@@ -79,6 +79,9 @@
         <property name="text">
          <string>Emprise communale (Admin Express IGN)</string>
         </property>
+        <property name="toolTip">
+         <string>Charge le contour de la commune (Admin Express COG IGN) filtré sur le code INSEE saisi</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -155,6 +158,9 @@
        <widget class="QCheckBox" name="chkCadastre">
         <property name="text">
          <string>Cadastre (10 couches : parcelles, bâtiments, lieux-dits, etc.)</string>
+        </property>
+        <property name="toolTip">
+         <string>Charge les 10 couches du cadastre (parcelles, bâtiments, lieux-dits, sections, communes, subdivisions fiscales, etc.) via le WMS DGFiP</string>
         </property>
         <property name="checked">
          <bool>true</bool>
