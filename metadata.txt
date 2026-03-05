@@ -2,7 +2,7 @@
 name=chemins_ruraux
 qgisMinimumVersion=3.0
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.10.44
+version=0.10.45
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 

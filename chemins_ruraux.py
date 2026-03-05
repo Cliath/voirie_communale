@@ -1104,13 +1104,14 @@ class CheminsRuraux:
         Le groupe est nommé "{code_insee} - {nom_commune}" ou "{code_insee}" si le nom est inconnu.
         Si le groupe existe déjà (rechargement partiel), les nouvelles couches y sont ajoutées
         sans supprimer les couches du chargement précédent.
+        Les couches dans le groupe sont ensuite réordonnées selon l'ordre canonique.
         """
         root = QgsProject.instance().layerTreeRoot()
 
         group_name = f"{code_insee} - {commune_name}" if commune_name else code_insee
 
-        # Uniquement les couches spécifiques à la commune (filtrées sur le code INSEE)
-        canonical_names = {
+        # Ordre canonique des couches à l'intérieur du groupe (haut → bas)
+        canonical_order_in_group = [
             f"BD TOPO Routes num\u00e9rot\u00e9es ou nomm\u00e9es {code_insee}",
             f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
             f"DGCL Voirie d\u00e9partementale retenue DGF 2025 {code_insee}",
@@ -1119,7 +1120,8 @@ class CheminsRuraux:
             f"Parcelles MAJIC {code_insee}",
             f"Commune {code_insee}",
             f"Cadastre - {code_insee}",
-        }
+        ]
+        canonical_names = set(canonical_order_in_group)
 
         # Identifier les nœuds à la RACINE à déplacer et la position du premier.
         # On ne touche pas aux nœuds déjà à l'intérieur du groupe existant.
@@ -1138,11 +1140,9 @@ class CheminsRuraux:
                     first_idx = i
                 to_move.append(child)
 
-        if not to_move:
-            return
-
         # Chercher un groupe existant pour cette commune
         existing_group = root.findGroup(group_name)
+
         if existing_group:
             # Le groupe existe déjà (rechargement partiel) : ajouter les nouvelles couches
             # sans supprimer celles qui n'ont pas été rechargées.
@@ -1150,20 +1150,39 @@ class CheminsRuraux:
                 clone = node.clone()
                 existing_group.addChildNode(clone)
                 root.removeChildNode(node)
-        else:
+            target_group = existing_group
+        elif to_move:
             # Créer le groupe à la position du premier nœud correspondant
-            commune_group = root.insertGroup(first_idx, group_name)
+            target_group = root.insertGroup(first_idx, group_name)
 
             # Déplacer les nœuds dans le groupe (clone + suppression originale)
             for node in to_move:
                 clone = node.clone()
-                commune_group.addChildNode(clone)
+                target_group.addChildNode(clone)
                 root.removeChildNode(node)
 
-            commune_group.setExpanded(True)
+            target_group.setExpanded(True)
+        else:
+            return
+
+        # Réordonner les couches à l'intérieur du groupe selon l'ordre canonique.
+        # Technique identique à _reorder_layers : insertion en position 0 en ordre inversé.
+        for name in reversed(canonical_order_in_group):
+            target = None
+            for child in target_group.children():
+                if isinstance(child, QgsLayerTreeLayer):
+                    layer = child.layer()
+                    if layer and layer.name() == name:
+                        target = child
+                        break
+            if target is None:
+                continue
+            clone = target.clone()
+            target_group.insertChildNode(0, clone)
+            target_group.removeChildNode(target)
 
         QgsMessageLog.logMessage(
-            f"Couches regroup\u00e9es dans '{group_name}'",
+            f"Couches regroup\u00e9es et r\u00e9ordonn\u00e9es dans '{group_name}'",
             "CheminsRuraux",
             Qgis.Info
         )
