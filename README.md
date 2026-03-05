@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.10.39**
+Version actuelle : **0.10.40**
 
 ## Installation
 
@@ -15,15 +15,18 @@ Version actuelle : **0.10.39**
 ### En mode développement
 
 ```powershell
-# Créer un lien symbolique vers le répertoire des plugins QGIS
+# Déployer manuellement dans le répertoire des plugins QGIS
 $pluginDir = "$env:APPDATA\QGIS\QGIS3\profiles\default\python\plugins\chemins_ruraux"
-New-Item -ItemType SymbolicLink -Path $pluginDir -Target "D:\chemins_ruraux"
+if (Test-Path $pluginDir) { Remove-Item -Recurse -Force $pluginDir }
+Copy-Item -Recurse -Force D:\chemins_ruraux $pluginDir
 ```
 
-Puis compilez les ressources et l'UI :
+Ou via `build.bat` qui compile, package, push git et déploie en une commande :
 
 ```powershell
-.\build.bat patch   # compile + package + push git + déploie dans QGIS
+.\build.bat patch   # patch version (0.0.X)
+.\build.bat minor   # minor version (0.X.0)
+.\build.bat major   # major version (X.0.0)
 ```
 
 ## Fonctionnalités
@@ -39,7 +42,6 @@ Puis compilez les ressources et l'UI :
 
 | Couche | Source | Filtre |
 |--------|--------|--------|
-| **Cadastre** (10 couches WMS) | DGFiP — INSPIRE | code INSEE |
 | **Emprise communale** | IGN Géoplateforme WFS — Admin Express | code INSEE |
 | **Adresses BAN** | IGN Géoplateforme WFS | code INSEE |
 | **Voirie communale DGCL 2025** | IGN Géoplateforme WFS | BBOX commune |
@@ -58,6 +60,7 @@ Puis compilez les ressources et l'UI :
 
 | Plan | Source |
 |------|--------|
+| **Cadastre** (10 couches) | DGFiP — WMS INSPIRE |
 | **Plan IGN J+1** | IGN Géoplateforme WMS |
 | **Waze** | Tuiles XYZ Waze |
 | **OSM France** | Tuiles XYZ openstreetmap.fr |
@@ -86,7 +89,9 @@ chemins_ruraux/
 ├── chemins_ruraux.py                # Classe principale (logique métier)
 ├── chemins_ruraux_dialog.py         # Dialogues (LauncherDialog, CheminsRurauxDialog, etc.)
 ├── chemins_ruraux_dialog_base.ui    # Interface Qt Designer
-├── resources.qrc / resources.py    # Ressources Qt (icônes)
+├── chemins_ruraux_dialog_base.py    # [généré] Compilé depuis le .ui
+├── resources.qrc                    # Ressources Qt (icônes)
+├── resources.py                     # [généré] Compilé depuis resources.qrc
 ├── version.py                       # Version courante
 ├── metadata.txt                     # Métadonnées QGIS
 ├── CHANGELOG.md                     # Historique détaillé
