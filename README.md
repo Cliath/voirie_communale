@@ -1,13 +1,13 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.10.41**
+Version actuelle : **0.10.42**
 
 ## Installation
 
-### Depuis un ZIP (recommandé)
+### Depuis un ZIP
 
-1. Téléchargez la dernière version depuis [GitHub Releases](https://github.com/Cliath/chemins_ruraux/releases)
+1. Récupérez le ZIP depuis le dépôt ou via `build.bat` (dossier `releases/`)
 2. QGIS → **Extensions** → **Installer/Gérer les extensions** → onglet **Installer depuis un ZIP**
 3. Sélectionnez le fichier `chemins_ruraux-X.X.X.zip` et cliquez sur **Installer l'extension**
 4. Activez le plugin dans l'onglet **Installées**

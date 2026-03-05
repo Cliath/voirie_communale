@@ -61,6 +61,16 @@ def bump(part):
     meta = re.sub(r'^version=\d+\.\d+\.\d+', f'version={new}', meta, flags=re.MULTILINE)
     mpath.write_text(meta, encoding='utf-8')
 
+    # --- README.md ---
+    rpath = BASE / 'README.md'
+    readme = rpath.read_text(encoding='utf-8')
+    readme = re.sub(
+        r'Version actuelle : \*\*\d+\.\d+\.\d+\*\*',
+        f'Version actuelle : **{new}**',
+        readme
+    )
+    rpath.write_text(readme, encoding='utf-8')
+
     print(f"Version : {old} → {new}", file=sys.stderr)
     print(new)  # stdout : capturé par build.bat
     return 0
