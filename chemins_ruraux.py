@@ -660,12 +660,12 @@ class CheminsRuraux:
         # Récupérer le nom de la commune pour nommer le groupe
         commune_name = self._get_commune_name(code_insee, commune_layer)
 
-        # Réordonner les couches dans le panneau selon l'ordre canonique
+        # Regrouper d'abord les couches spécifiques dans leur groupe commune
+        self._group_commune_layers(code_insee, commune_name)
+
+        # Puis réordonner les items à la racine (groupe commune + fonds de plan)
         if SettingsDialog.get('auto_reorder', True, bool):
             self._reorder_layers(code_insee)
-
-        # Regrouper toutes les couches dans un groupe dédié
-        self._group_commune_layers(code_insee, commune_name)
 
         # Zoomer sur l'emprise de la commune
         success_count = sum(1 for _, success in results if success)
@@ -1168,6 +1168,10 @@ class CheminsRuraux:
                         child.setName(group_name)
                     break
 
+        if existing_group and not to_move:
+            # Groupe existant, rien de nouveau à déplacer : rien à faire
+            return
+
         if existing_group:
             # Le groupe existe déjà (rechargement partiel) : ajouter les nouvelles couches
             # sans supprimer celles qui n'ont pas été rechargées.
@@ -1191,11 +1195,15 @@ class CheminsRuraux:
             return
 
         # Réordonner les couches à l'intérieur du groupe selon l'ordre canonique.
-        # Technique identique à _reorder_layers : insertion en position 0 en ordre inversé.
+        # Technique : insertion en position 0 en ordre inversé.
+        # Gère à la fois les QgsLayerTreeLayer (couches) et QgsLayerTreeGroup (ex: Cadastre).
         for name in reversed(canonical_order_in_group):
             target = None
             for child in target_group.children():
-                if isinstance(child, QgsLayerTreeLayer):
+                if isinstance(child, QgsLayerTreeGroup) and child.name() == name:
+                    target = child
+                    break
+                elif isinstance(child, QgsLayerTreeLayer):
                     layer = child.layer()
                     if layer and layer.name() == name:
                         target = child
