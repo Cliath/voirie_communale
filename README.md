@@ -1,148 +1,140 @@
 # Voirie Communale - Plugin QGIS
 
-Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).
+Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
+Version actuelle : **0.10.39**
 
 ## Installation
 
-### Installation depuis un ZIP (recommandé)
+### Depuis un ZIP (recommandé)
 
 1. Téléchargez la dernière version depuis [GitHub Releases](https://github.com/Cliath/chemins_ruraux/releases)
-2. Ouvrez QGIS
-3. Menu **Extensions** → **Installer/Gérer les extensions**
-4. Onglet **Installer depuis un ZIP**
-5. Sélectionnez le fichier `chemins_ruraux-X.X.X.zip` téléchargé
-6. Cliquez sur **Installer l'extension**
-7. Activez le plugin dans l'onglet **Installées**
+2. QGIS → **Extensions** → **Installer/Gérer les extensions** → onglet **Installer depuis un ZIP**
+3. Sélectionnez le fichier `chemins_ruraux-X.X.X.zip` et cliquez sur **Installer l'extension**
+4. Activez le plugin dans l'onglet **Installées**
 
-### Installation en mode développement
+### En mode développement
 
-1. Clonez ce dépôt dans le répertoire des plugins QGIS :
-   - Windows : `%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\`
-   - Linux : `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
-   - macOS : `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/`
+```powershell
+# Créer un lien symbolique vers le répertoire des plugins QGIS
+$pluginDir = "$env:APPDATA\QGIS\QGIS3\profiles\default\python\plugins\chemins_ruraux"
+New-Item -ItemType SymbolicLink -Path $pluginDir -Target "D:\chemins_ruraux"
+```
 
-2. Compilez les ressources et fichiers UI :
-   ```bash
-   # Windows
-   compile.bat
-   
-   # Linux/macOS
-   chmod +x compile.sh
-   ./compile.sh
-   ```
+Puis compilez les ressources et l'UI :
 
-3. Redémarrez QGIS et activez le plugin dans le gestionnaire d'extensions
+```powershell
+.\build.bat patch   # compile + package + push git + déploie dans QGIS
+```
+
+## Fonctionnalités
+
+### Interface
+
+- **Barre de lancement** : le bouton du plugin ouvre 4 actions : *Charger des données*, *Liste des tâches*, *Paramètres*, *À propos*
+- **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
+- **Paramètres** : zoom automatique et réordonnancement automatique des couches configurables
+- **Ordre canonique** des couches dans le panneau (haut → bas) : BD TOPO → Voirie comm. → Voirie dép. → OSM Routes → BAN → MAJIC → Commune → PLAN IGN → Waze → OSM France → Cadastre → BD ORTHO® → Photos aériennes → SCAN 50® → Cassini → État-Major
+
+### Données vectorielles (filtrées par code INSEE ou BBOX communale)
+
+| Couche | Source | Filtre |
+|--------|--------|--------|
+| **Cadastre** (10 couches WMS) | DGFiP — INSPIRE | code INSEE |
+| **Emprise communale** | IGN Géoplateforme WFS — Admin Express | code INSEE |
+| **Adresses BAN** | IGN Géoplateforme WFS | code INSEE |
+| **Voirie communale DGCL 2025** | IGN Géoplateforme WFS | BBOX commune |
+| **Voirie départementale DGCL 2025** | IGN Géoplateforme WFS | BBOX commune |
+| **Routes OSM** (CE / C / R) | Overpass API | BBOX commune |
+| **BD TOPO routes nommées** | IGN Géoplateforme WFS | BBOX commune |
+| **Parcelles MAJIC** (personnes morales) | API Koumoul (DGFiP) + IGN WFS | code INSEE |
+
+#### Routes OSM — catégorisation par `ref`
+
+- 🟢 **CE** – Chemin d'exploitation (`ref` commence par `CE`)
+- 🟠 **C** – Voie communale (`ref` commence par `C`, hors `CE`)
+- 🔴 **R** – Chemin rural (`ref` commence par `R`)
+
+### Plans de fond
+
+| Plan | Source |
+|------|--------|
+| **Plan IGN J+1** | IGN Géoplateforme WMS |
+| **Waze** | Tuiles XYZ Waze |
+| **OSM France** | Tuiles XYZ openstreetmap.fr |
+| **BD ORTHO® 20 cm** | IGN Géoplateforme WMS |
+| **Photos aériennes historiques** (8 périodes 1950–2023) | IGN Géoplateforme WMS |
+| **SCAN 50® 1950** | IGN Géoplateforme WMS |
+| **Carte de Cassini** | IGN Géoplateforme WMS |
+| **Carte de l'État-Major** | IGN Géoplateforme WMS |
+| **MNT LiDAR HD** | IGN Géoplateforme WMS |
+
+## Utilisation
+
+1. Cliquez sur l'icône **Voirie Communale** dans la barre d'outils
+2. Cliquez sur **Charger des données**
+3. Saisissez le **code INSEE** de la commune (5 chiffres, ex : `57150`)
+4. Cochez les couches souhaitées
+5. Cliquez sur **Charger les données**
+
+Les couches nécessitant un filtre géographique (Voirie DGCL, OSM Routes, BD TOPO) chargent automatiquement l'emprise communale en premier pour délimiter la zone de requête.
 
 ## Structure du projet
 
 ```
 chemins_ruraux/
-├── .github/
-│   └── copilot-instructions.md    # Instructions pour les agents IA
-├── metadata.txt                    # Métadonnées du plugin
-├── version.py                      # Gestion des versions
-├── CHANGELOG.md                    # Historique des modifications
-├── __init__.py                     # Point d'entrée du plugin
-├── chemins_ruraux.py              # Classe principale du plugin
-├── chemins_ruraux_dialog.py       # Classe de dialogue
-├── chemins_ruraux_dialog_base.ui  # Interface utilisateur (Qt Designer)
-├── resources.qrc                   # Ressources Qt (icônes, etc.)
-├── resources.py                    # Ressources compilées
-├── icon.png                        # Icône du plugin
-├── compile.sh                      # Script de compilation (Linux/macOS)
-├── compile.bat                     # Script de compilation (Windows)
-├── compile_plugin.py               # Script de compilation Python
-├── package.py                      # Script de packaging (création du ZIP)
-├── build.sh                        # Script complet (compile + package)
-├── build.bat                       # Script complet Windows
-└── releases/                       # Packages ZIP des versions
-    ├── README.md
-    ├── chemins_ruraux-0.1.0.zip
-    ├── chemins_ruraux-0.1.1.zip
-    ├── chemins_ruraux-0.1.2.zip
-    ├── chemins_ruraux-0.2.0.zip
-    └── chemins_ruraux-0.2.1.zip
+├── __init__.py                      # Point d'entrée du plugin
+├── chemins_ruraux.py                # Classe principale (logique métier)
+├── chemins_ruraux_dialog.py         # Dialogues (LauncherDialog, CheminsRurauxDialog, etc.)
+├── chemins_ruraux_dialog_base.ui    # Interface Qt Designer
+├── resources.qrc / resources.py    # Ressources Qt (icônes)
+├── version.py                       # Version courante
+├── metadata.txt                     # Métadonnées QGIS
+├── CHANGELOG.md                     # Historique détaillé
+├── build.bat                        # Build complet (compile + ZIP + git + déploiement)
+├── bump_version.py                  # Incrémentation automatique de version
+├── compile_plugin.py                # Compilation UI et ressources
+├── get_commit_message.py            # Extraction du message de commit depuis CHANGELOG
+├── package.py                       # Création du ZIP
+└── releases/                        # Packages ZIP (ignorés par git)
 ```
 
 ## Développement
 
 ### Prérequis
 
-- QGIS 3.0 ou supérieur
-- Python 3.6+
-- PyQt5
-- pyrcc5 et pyuic5 pour compiler les ressources
+- QGIS 3.0+
+- Python 3.6+, PyQt5, `pyuic5`, `pyrcc5`
+- Git (GitHub Desktop ou autre)
 
-### Workflow de développement
+### Workflow
 
-1. **Modifier l'interface** : Éditez `chemins_ruraux_dialog_base.ui` avec Qt Designer
-2. **Compiler** : Exécutez `compile.bat` ou `compile.sh`
-3. **Tester** : Rechargez le plugin dans QGIS (Plugin Reloader recommandé)
-4. **Déboguer** : Utilisez la console Python de QGIS ou un débogueur externe
+```powershell
+.\build.bat patch    # patch version (0.0.X)
+.\build.bat minor    # minor version (0.X.0)
+.\build.bat major    # major version (X.0.0)
+```
 
-### API QGIS utilisée
+`build.bat` enchaîne automatiquement :
+1. Incrémentation de la version dans `version.py` et `metadata.txt`
+2. Compilation `resources.qrc` → `resources.py` et `*.ui` → `*_base.py`
+3. Création du ZIP dans `releases/`
+4. Commit + push sur GitHub
+5. Déploiement dans le répertoire des plugins QGIS
 
-- `QgsInterface` : Interface principale de QGIS
-- `QgsMapLayerComboBox` : Sélection de couches vectorielles
-- `QgsVectorLayer` : Manipulation de couches vectorielles
-- `QgsProject` : Accès au projet QGIS actuel
+### Sources de données
 
-## Fonctionnalités
-
-### Actuellement implémentées
-
-- ✅ **Chargement automatique du flux WMS du Cadastre** : Intégration complète des données cadastrales françaises
-  - 10 couches chargées automatiquement :
-    - Parcelles cadastrales
-    - Bâtiments
-    - Subdivisions fiscales
-    - Lieux-dits
-    - Amorces cadastrales
-    - Clôtures
-    - Détails topographiques
-    - Hydrographie
-    - Voies de communication
-    - Bornes et repères
-  - Organisation automatique dans un groupe "Cadastre - {code INSEE}"
-- ✅ **Sélection de couches** : Interface pour choisir la couche de chemins à analyser
-
-### À développer
-
-- [ ] Import de données de chemins ruraux depuis fichiers (Shapefile, GeoPackage, etc.)
-- [ ] Analyse de connectivité des chemins
-- [ ] Calcul automatique de longueurs et surfaces
-- [ ] Export de rapports PDF/Excel
-- [ ] Croisement avec les données cadastrales
-- [ ] Détection de chemins non entretenus
-
-## Utilisation
-
-### Charger les données cadastrales
-
-1. Ouvrez le plugin via le menu **Extensions → Voirie Communale** ou l'icône dans la barre d'outils
-2. Dans la section **Cadastre**, saisissez le **code INSEE** de votre commune (5 chiffres)
-   - Exemples : 75056 pour Paris, 13055 pour Marseille, 69123 pour Lyon
-   - Vous pouvez trouver le code INSEE sur [le site de l'INSEE](https://www.insee.fr/fr/recherche/recherche-geographique)
-3. Cliquez sur **Charger toutes les couches du Cadastre**
-4. Les 10 couches cadastrales se chargent automatiquement dans un groupe "Cadastre - {code INSEE}"
-5. Les couches sont organisées et prêtes à l'emploi dans votre projet QGIS
-
-Le flux WMS utilise le service INSPIRE de la DGFiP (https://inspire.cadastre.gouv.fr) et couvre l'ensemble du territoire français.
-
-## Développement
-
-Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
-
-1. Forkez le projet
-2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
-3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. Pushez vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Pull Request
+| Service | URL |
+|---------|-----|
+| IGN Géoplateforme WFS | `https://data.geopf.fr/wfs` |
+| IGN Géoplateforme WMS | `https://data.geopf.fr/wms/r` |
+| Cadastre INSPIRE DGFiP | `https://inspire.cadastre.gouv.fr/scpc/{codeINSEE}.wms` |
+| Overpass API (OSM) | `https://overpass-api.de/api/interpreter` |
+| API Koumoul (MAJIC) | `https://koumoul.com/data-fair/api/v1/datasets/parcelles-des-personnes-morales` |
 
 ## Licence
 
-Ce projet est sous licence GNU General Public License v2.0 ou ultérieure.
+GNU General Public License v2.0 ou ultérieure.
 
 ## Contact
 
-Yann Schwarz - yann.schwarz@ign.fr
+Yann Schwarz — yann.schwarz@gmail.com
