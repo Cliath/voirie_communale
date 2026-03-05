@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.10.42**
+Version actuelle : **0.10.43**
 
 ## Installation
 
@@ -18,7 +18,7 @@ Version actuelle : **0.10.42**
 # Déployer manuellement dans le répertoire des plugins QGIS
 $pluginDir = "$env:APPDATA\QGIS\QGIS3\profiles\default\python\plugins\chemins_ruraux"
 if (Test-Path $pluginDir) { Remove-Item -Recurse -Force $pluginDir }
-Copy-Item -Recurse -Force D:\chemins_ruraux $pluginDir
+Copy-Item -Recurse -Force <dossier_du_dépôt> $pluginDir
 ```
 
 Ou via `build.bat` qui compile, package, push git et déploie en une commande :
@@ -33,7 +33,7 @@ Ou via `build.bat` qui compile, package, push git et déploie en une commande :
 
 ### Interface
 
-- **Barre de lancement** : le bouton du plugin ouvre 4 actions : *Charger des données*, *Liste des tâches*, *Paramètres*, *À propos*
+- **Barre de lancement** : le bouton du plugin ouvre 5 actions : *Charger des données*, *Numériser des données* (à venir), *Liste des tâches*, *Paramètres*, *À propos*
 - **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
 - **Paramètres** : zoom automatique et réordonnancement automatique des couches configurables
 - **Ordre canonique** des couches dans le panneau (haut → bas) : BD TOPO → Voirie comm. → Voirie dép. → OSM Routes → BAN → MAJIC → Commune → PLAN IGN → Waze → OSM France → Cadastre → BD ORTHO® → Photos aériennes → SCAN 50® → Cassini → État-Major
@@ -110,21 +110,6 @@ chemins_ruraux/
 - QGIS 3.0+
 - Python 3.6+, PyQt5, `pyuic5`, `pyrcc5`
 - Git (GitHub Desktop ou autre)
-
-### Workflow
-
-```powershell
-.\build.bat patch    # patch version (0.0.X)
-.\build.bat minor    # minor version (0.X.0)
-.\build.bat major    # major version (X.0.0)
-```
-
-`build.bat` enchaîne automatiquement :
-1. Incrémentation de la version dans `version.py` et `metadata.txt`
-2. Compilation `resources.qrc` → `resources.py` et `*.ui` → `*_base.py`
-3. Création du ZIP dans `releases/`
-4. Commit + push sur GitHub
-5. Déploiement dans le répertoire des plugins QGIS
 
 ### Sources de données
 
