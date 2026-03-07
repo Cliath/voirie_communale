@@ -476,9 +476,21 @@ class CheminsRuraux:
                 if not photo_aeriennes_sources:
                     photo_aeriennes_checked = False
 
+        # Détecter si la commune peut être réutilisée depuis le projet
+        # (needs_bbox a pu forcer commune_checked=True même si la case n'est pas cochée)
+        commune_reuse = False
+        if commune_checked and not self.dlg.chkCommune.isChecked():
+            commune_layer_name = f"Commune {code_insee}"
+            for lyr in QgsProject.instance().mapLayers().values():
+                if isinstance(lyr, QgsVectorLayer) and lyr.name() == commune_layer_name and lyr.isValid():
+                    commune_layer = lyr
+                    commune_reuse = True
+                    break
+
         # Compter le nombre d'étapes pour la barre de progression
+        # La commune n'est pas comptée si elle est réutilisée (pas de téléchargement)
         steps = sum([
-            cadastre_checked, commune_checked, ban_checked,
+            cadastre_checked, commune_checked and not commune_reuse, ban_checked,
             voirie_checked, voirie_dep_checked, osm_routes_checked,
             bdtopo_routesnom_checked, bdtopo_troncons_checked, majic_checked,
             scan_etat_major_checked, scan_cassini_checked, scan50_1950_checked,
@@ -511,11 +523,15 @@ class CheminsRuraux:
             loaded_layers.extend(cadastre_layers)
         
         if commune_checked:
-            advance(f"Chargement de l'emprise communale ({code_insee})...")
-            commune_success, commune_layer = self.load_commune_wfs(code_insee)
-            results.append(('Emprise communale', commune_success))
-            if commune_layer:
-                loaded_layers.append(commune_layer)
+            if commune_reuse:
+                # Couche existante réutilisée, pas de téléchargement ni de comptage
+                pass
+            else:
+                advance(f"Chargement de l'emprise communale ({code_insee})...")
+                commune_success, commune_layer = self.load_commune_wfs(code_insee)
+                results.append(('Emprise communale', commune_success))
+                if commune_layer:
+                    loaded_layers.append(commune_layer)
 
         # Extraire le BBOX de la commune pour les couches nécessitant un filtre géométrique
         # On itère sur les features (pas layer.extent() qui renvoie l'extent serveur complet)
