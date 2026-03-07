@@ -12,7 +12,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
                        Qgis, QgsApplication, QgsLayerTreeGroup, QgsLayerTreeLayer,
-                       QgsCoordinateTransform, QgsSettings,
+                       QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsSettings,
                        QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsSingleSymbolRenderer,
                        QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol, QgsFeature, QgsField,
                        QgsGeometry, QgsPointXY,
@@ -564,19 +564,27 @@ class CheminsRuraux:
             results.append(('Adresses BAN', ban_success))
             if ban_layer:
                 loaded_layers.append(ban_layer)
-        
+
+        # Lecture des options de clip géométrique (paramètres une seule fois)
+        clip_to_commune = SettingsDialog.get('clip_to_commune', False, bool)
+        clip_buffer_m = SettingsDialog.get('clip_buffer_m', 25, int)
+
         if voirie_checked:
             advance(f"Chargement de la voirie communale ({code_insee})...")
             voirie_success, voirie_layer = self.load_voirie_wfs(code_insee, commune_bbox)
             results.append(('Voirie communale', voirie_success))
             if voirie_layer:
+                if clip_to_commune and commune_layer:
+                    voirie_layer = self._clip_layer_to_commune(voirie_layer, commune_layer, clip_buffer_m)
                 loaded_layers.append(voirie_layer)
-        
+
         if voirie_dep_checked:
             advance(f"Chargement de la voirie départementale ({code_insee})...")
             voirie_dep_success, voirie_dep_layer = self.load_voirie_dep_wfs(code_insee, commune_bbox)
             results.append(('Voirie départementale', voirie_dep_success))
             if voirie_dep_layer:
+                if clip_to_commune and commune_layer:
+                    voirie_dep_layer = self._clip_layer_to_commune(voirie_dep_layer, commune_layer, clip_buffer_m)
                 loaded_layers.append(voirie_dep_layer)
 
         if osm_routes_checked:
@@ -584,15 +592,17 @@ class CheminsRuraux:
             osm_success, osm_layer = self.load_osm_roads(code_insee, commune_bbox)
             results.append(('Routes OSM', osm_success))
             if osm_layer:
+                if clip_to_commune and commune_layer:
+                    osm_layer = self._clip_layer_to_commune(osm_layer, commune_layer, clip_buffer_m)
                 loaded_layers.append(osm_layer)
-
-
 
         if bdtopo_routesnom_checked:
             advance(f"Chargement BD TOPO Routes nommées ({code_insee})...")
             bdtopo_routesnom_success, bdtopo_routesnom_layer = self.load_bdtopo_routesnom_wfs(code_insee, commune_bbox)
             results.append(('BD TOPO Routes numérotées ou nommées', bdtopo_routesnom_success))
             if bdtopo_routesnom_layer:
+                if clip_to_commune and commune_layer:
+                    bdtopo_routesnom_layer = self._clip_layer_to_commune(bdtopo_routesnom_layer, commune_layer, clip_buffer_m)
                 loaded_layers.append(bdtopo_routesnom_layer)
 
         if bdtopo_troncons_checked:
@@ -600,6 +610,8 @@ class CheminsRuraux:
             bdtopo_troncons_success, bdtopo_troncons_layer = self.load_bdtopo_troncons_wfs(code_insee, commune_bbox)
             results.append(('BD TOPO Tronçons de route', bdtopo_troncons_success))
             if bdtopo_troncons_layer:
+                if clip_to_commune and commune_layer:
+                    bdtopo_troncons_layer = self._clip_layer_to_commune(bdtopo_troncons_layer, commune_layer, clip_buffer_m)
                 loaded_layers.append(bdtopo_troncons_layer)
 
         if majic_checked:
@@ -749,6 +761,126 @@ class CheminsRuraux:
         # TOUJOURS ramener le dialogue au premier plan à la fin
         self.dlg.raise_()
         self.dlg.activateWindow()
+
+    # ------------------------------------------------------------------
+    # Clip géométrique par emprise communale
+    # ------------------------------------------------------------------
+
+    def _clip_layer_to_commune(self, layer, commune_layer, buffer_m=25):
+        """Filtre les entités d'une couche vectorielle selon l'emprise de la commune.
+
+        Calcule un buffer (en mètres, en EPSG:2154) autour de la géométrie
+        communale, reprojette ce buffer dans le CRS de la couche cible, puis
+        ne conserve que les entités dont la géométrie intersecte ce buffer.
+        Le résultat est une couche mémoire qui remplace la couche originale
+        dans le projet QGIS.
+
+        Args:
+            layer: QgsVectorLayer à filtrer (déjà chargée dans le projet)
+            commune_layer: QgsVectorLayer contenant la géométrie de la commune
+            buffer_m: rayon du buffer en mètres (défaut 25)
+
+        Returns:
+            QgsVectorLayer filtrée (couche mémoire), ou la couche originale
+            si le clip échoue.
+        """
+        try:
+            # 1. Fusionner les géométries de la couche commune
+            geom_commune = None
+            for feat in commune_layer.getFeatures():
+                g = feat.geometry()
+                if g and not g.isEmpty():
+                    geom_commune = g if geom_commune is None else geom_commune.combine(g)
+
+            if geom_commune is None or geom_commune.isEmpty():
+                QgsMessageLog.logMessage(
+                    "Clip commune : géométrie communale vide, clip ignoré.",
+                    "VoirieCommunale", Qgis.Warning
+                )
+                return layer
+
+            # 2. Reprojeter la géométrie en EPSG:2154 pour le buffer métrique
+            crs_2154 = QgsCoordinateReferenceSystem("EPSG:2154")
+            crs_commune = commune_layer.crs()
+            if crs_commune != crs_2154:
+                xform_to_2154 = QgsCoordinateTransform(
+                    crs_commune, crs_2154, QgsProject.instance()
+                )
+                geom_2154 = QgsGeometry(geom_commune)
+                geom_2154.transform(xform_to_2154)
+            else:
+                geom_2154 = geom_commune
+
+            # 3. Appliquer le buffer en mètres
+            mask_2154 = geom_2154.buffer(buffer_m, 25) if buffer_m > 0 else geom_2154
+
+            # 4. Reprojeter le masque dans le CRS de la couche cible
+            crs_layer = layer.crs()
+            if crs_layer != crs_2154:
+                xform_to_layer = QgsCoordinateTransform(
+                    crs_2154, crs_layer, QgsProject.instance()
+                )
+                mask = QgsGeometry(mask_2154)
+                mask.transform(xform_to_layer)
+            else:
+                mask = mask_2154
+
+            # 5. Filtrer les entités qui intersectent le masque
+            kept_features = [
+                f for f in layer.getFeatures()
+                if f.geometry() and not f.geometry().isEmpty()
+                and f.geometry().intersects(mask)
+            ]
+
+            if not kept_features:
+                QgsMessageLog.logMessage(
+                    f"Clip commune : aucune entité conservée pour la couche '{layer.name()}'.",
+                    "VoirieCommunale", Qgis.Warning
+                )
+                return layer
+
+            # 6. Créer une couche mémoire avec les entités filtrées
+            geom_type_str = QgsVectorLayer.geometryDisplayString(layer.geometryType())
+            crs_authid = crs_layer.authid()
+            mem_layer = QgsVectorLayer(
+                f"{geom_type_str}?crs={crs_authid}",
+                layer.name(),
+                "memory"
+            )
+            mem_provider = mem_layer.dataProvider()
+            mem_provider.addAttributes(layer.fields().toList())
+            mem_layer.updateFields()
+            mem_provider.addFeatures(kept_features)
+            mem_layer.updateExtents()
+
+            # Conserver le style de la couche originale
+            mem_layer.setRenderer(layer.renderer().clone())
+            if layer.labeling():
+                mem_layer.setLabeling(layer.labeling().clone())
+                mem_layer.setLabelsEnabled(layer.labelsEnabled())
+
+            # 7. Remplacer dans le projet
+            layer_id = layer.id()
+            layer_tree = QgsProject.instance().layerTreeRoot()
+            layer_node = layer_tree.findLayer(layer_id)
+            parent_node = layer_node.parent() if layer_node else layer_tree
+
+            QgsProject.instance().removeMapLayer(layer_id)
+            QgsProject.instance().addMapLayer(mem_layer, False)
+            parent_node.insertLayer(0, mem_layer)
+
+            QgsMessageLog.logMessage(
+                f"Clip commune : {len(kept_features)} entités conservées pour '{mem_layer.name()}'.",
+                "VoirieCommunale", Qgis.Info
+            )
+            return mem_layer
+
+        except Exception as exc:
+            QgsMessageLog.logMessage(
+                f"Clip commune : erreur sur '{layer.name()}' : {exc}",
+                "VoirieCommunale", Qgis.Warning
+            )
+            return layer
 
     def load_bdtopo_troncons_wfs(self, code_insee, bbox=None):
         """Charge les tronçons de route BD TOPO V3 depuis la Géoplateforme IGN avec pagination.

@@ -11,7 +11,8 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QTextEdit,
     QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame,
-    QToolButton, QLineEdit, QTabWidget, QListWidget, QListWidgetItem, QAbstractItemView
+    QToolButton, QLineEdit, QTabWidget, QListWidget, QListWidgetItem, QAbstractItemView,
+    QSpinBox
 )
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QFont
@@ -255,6 +256,24 @@ class SettingsDialog(QDialog):
         self.chk_auto_reorder.setChecked(self.get('auto_reorder', True, bool))
         lay_general.addWidget(self.chk_auto_reorder)
 
+        self.chk_clip_commune = QCheckBox("Découper les couches sur l'emprise communale")
+        self.chk_clip_commune.setChecked(self.get('clip_to_commune', False, bool))
+        lay_general.addWidget(self.chk_clip_commune)
+
+        row_buf = QHBoxLayout()
+        row_buf.addSpacing(20)
+        row_buf.addWidget(QLabel("Buffer :"))
+        self.spn_clip_buffer = QSpinBox()
+        self.spn_clip_buffer.setRange(0, 10000)
+        self.spn_clip_buffer.setValue(self.get('clip_buffer_m', 25, int))
+        self.spn_clip_buffer.setSuffix(" m")
+        self.spn_clip_buffer.setMaximumWidth(100)
+        row_buf.addWidget(self.spn_clip_buffer)
+        row_buf.addStretch()
+        lay_general.addLayout(row_buf)
+        self.chk_clip_commune.toggled.connect(self.spn_clip_buffer.setEnabled)
+        self.spn_clip_buffer.setEnabled(self.chk_clip_commune.isChecked())
+
         lay_general.addSpacing(4)
         sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setFrameShadow(QFrame.Sunken)
         lay_general.addWidget(sep)
@@ -390,6 +409,8 @@ class SettingsDialog(QDialog):
     def _save_and_accept(self):
         self.set('auto_zoom', self.chk_auto_zoom.isChecked())
         self.set('auto_reorder', self.chk_auto_reorder.isChecked())
+        self.set('clip_to_commune', self.chk_clip_commune.isChecked())
+        self.set('clip_buffer_m', self.spn_clip_buffer.value())
         self.set('ban_regex_chemin', self.txt_regex_chemin.text().strip())
         self.set('ban_regex_voie', self.txt_regex_voie.text().strip())
 
