@@ -1,3 +1,8 @@
+# [0.13.5] - 2026-03-07
+### Modifié
+- **`build.bat`** : tags git (`vX.Y.Z`) créés et poussés après chaque commit. GitHub CLI (`gh`) crée automatiquement une GitHub Release avec le ZIP et des notes générées depuis les commits (`--generate-notes`). Requiert `gh` installé et authentifié.
+- **`metadata.txt`** : `name` corrigé en `Voirie Communale`, champ `tags` ajouté.
+
 # [0.13.4] - 2026-03-07
 ### Ajouté
 - **Tags git + GitHub Releases** : `build.bat` crée désormais un tag `vX.Y.Z` après chaque commit et pousse le tag. Le GitHub CLI (`gh`) crée automatiquement une GitHub Release avec le ZIP attaché et les notes extraites du CHANGELOG. Nécessite `gh` installé et authentifié (`gh auth login`).
