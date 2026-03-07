@@ -1,3 +1,8 @@
+# [0.13.6] - 2026-03-07
+### Modifié
+- **`build.bat`** : le workflow crée désormais un tag git `vX.Y.Z` après chaque commit et une GitHub Release avec le ZIP attaché (`gh release create --generate-notes`). Requiert GitHub CLI (`gh`) installé et authentifié (`gh auth login`).
+- **`metadata.txt`** : `name` corrigé en `Voirie Communale`, champ `tags` ajouté (voirie, commune, chemin rural…).
+
 # [0.13.5] - 2026-03-07
 ### Modifié
 - **`build.bat`** : tags git (`vX.Y.Z`) créés et poussés après chaque commit. GitHub CLI (`gh`) crée automatiquement une GitHub Release avec le ZIP et des notes générées depuis les commits (`--generate-notes`). Requiert `gh` installé et authentifié.
