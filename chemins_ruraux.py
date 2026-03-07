@@ -1005,6 +1005,53 @@ class CheminsRuraux:
     # URL du service WFS IGN Géoplateforme (constante pour tous les services WFS)
     WFS_IGN_URL = "https://data.geopf.fr/wfs"
 
+    def _load_canonical_order(self):
+        """Lit layer_order.json (répertoire du plugin) et retourne le dict d'ordre canonique.
+
+        Structure attendue :
+          {"commune_group": [...], "root": [...]}
+
+        En cas d'erreur (fichier absent, JSON invalide), retourne les valeurs par défaut
+        hardcodées et logue un avertissement.
+        """
+        json_path = os.path.join(os.path.dirname(__file__), 'layer_order.json')
+        try:
+            with open(json_path, encoding='utf-8') as f:
+                data = json.load(f)
+            commune_group = data.get('commune_group', [])
+            root = data.get('root', [])
+            if not commune_group or not root:
+                raise ValueError("Clés 'commune_group' ou 'root' manquantes ou vides")
+            return commune_group, root
+        except Exception as exc:
+            QgsMessageLog.logMessage(
+                f"layer_order.json illisible ({exc}) — ordre canonique par défaut utilisé",
+                "CheminsRuraux", Qgis.Warning
+            )
+            # Valeurs de repli (identiques au contenu initial du JSON)
+            commune_group = [
+                "BD TOPO Routes num\u00e9rot\u00e9es ou nomm\u00e9es {code_insee}",
+                "DGCL Voirie communale retenue DSR 2025 {code_insee}",
+                "DGCL Voirie d\u00e9partementale retenue DGF 2025 {code_insee}",
+                "OSM Routes {code_insee}",
+                "Adresses BAN {code_insee}",
+                "Parcelles MAJIC {code_insee}",
+                "Commune {code_insee}",
+                "Cadastre - {code_insee}",
+            ]
+            root = [
+                "__COMMUNE_GROUP__",
+                "PLAN IGN J+1", "Waze", "OSM France",
+                "CoSIA (Couverture du Sol par IA)",
+                "BD ORTHO\u00ae 20 cm", "MNT LiDAR HD",
+                "Photos a\u00e9riennes 1950-1965", "Photos a\u00e9riennes 1965-1980",
+                "Photos a\u00e9riennes 1980-1995", "Photos a\u00e9riennes 2000-2005",
+                "Photos a\u00e9riennes 2006-2010", "Photos a\u00e9riennes 2011-2015",
+                "Photos a\u00e9riennes 2016-2020", "Photos a\u00e9riennes 2021-2023",
+                "SCAN 50\u00ae 1950", "Carte de Cassini", "Carte d'\u00c9tat-Major",
+            ]
+            return commune_group, root
+
     def _reorder_layers(self, code_insee):
         """Réordonne les couches chargées dans le panneau selon un ordre canonique.
 
@@ -1021,34 +1068,12 @@ class CheminsRuraux:
         # Sentinel pour le groupe commune (nom dynamique ex: "75056 - Paris")
         _COMMUNE_GROUP_SENTINEL = f"__COMMUNE_GROUP_{code_insee}__"
 
-        # Ordre désiré, index 0 = tout en haut du panneau
+        # Ordre chargé depuis layer_order.json (root = items à la racine)
+        _, root_order_templates = self._load_canonical_order()
+        # Remplacer le sentinel générique par le sentinel spécifique au code_insee
         canonical_order = [
-            f"BD TOPO Routes num\u00e9rot\u00e9es ou nomm\u00e9es {code_insee}",
-            f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
-            f"DGCL Voirie d\u00e9partementale retenue DGF 2025 {code_insee}",
-            f"OSM Routes {code_insee}",
-            f"Adresses BAN {code_insee}",
-            f"Parcelles MAJIC {code_insee}",
-            f"Commune {code_insee}",
-            _COMMUNE_GROUP_SENTINEL,
-            "PLAN IGN J+1",
-            "Waze",
-            "OSM France",
-            "CoSIA (Couverture du Sol par IA)",
-            f"Cadastre - {code_insee}",
-            "BD ORTHO\u00ae 20 cm",
-            "MNT LiDAR HD",
-            "Photos a\u00e9riennes 1950-1965",
-            "Photos a\u00e9riennes 1965-1980",
-            "Photos a\u00e9riennes 1980-1995",
-            "Photos a\u00e9riennes 2000-2005",
-            "Photos a\u00e9riennes 2006-2010",
-            "Photos a\u00e9riennes 2011-2015",
-            "Photos a\u00e9riennes 2016-2020",
-            "Photos a\u00e9riennes 2021-2023",
-            "SCAN 50\u00ae 1950",
-            "Carte de Cassini",
-            "Carte d'\u00c9tat-Major",
+            _COMMUNE_GROUP_SENTINEL if name == "__COMMUNE_GROUP__" else name
+            for name in root_order_templates
         ]
 
         # Traitement en ordre inversé : chaque item connu est cloné et inséré en position 0.
@@ -1148,15 +1173,11 @@ class CheminsRuraux:
         group_name = f"{code_insee} - {commune_name}" if commune_name else code_insee
 
         # Ordre canonique des couches à l'intérieur du groupe (haut → bas)
+        # Ordre chargé depuis layer_order.json, {}  remplacé par le code_insee réel
+        commune_group_templates, _ = self._load_canonical_order()
         canonical_order_in_group = [
-            f"BD TOPO Routes num\u00e9rot\u00e9es ou nomm\u00e9es {code_insee}",
-            f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
-            f"DGCL Voirie d\u00e9partementale retenue DGF 2025 {code_insee}",
-            f"OSM Routes {code_insee}",
-            f"Adresses BAN {code_insee}",
-            f"Parcelles MAJIC {code_insee}",
-            f"Commune {code_insee}",
-            f"Cadastre - {code_insee}",
+            name.replace('{code_insee}', code_insee)
+            for name in commune_group_templates
         ]
         canonical_names = set(canonical_order_in_group)
 

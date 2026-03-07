@@ -10,26 +10,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-# Fichiers et dossiers à inclure dans le ZIP (strict)
-FILES_TO_INCLUDE = [
-    '__init__.py',
-    'chemins_ruraux.py',
-    'chemins_ruraux_dialog.py',
-    'chemins_ruraux_dialog_base.py',
-    'resources.py',
-    'version.py',
-    'metadata.txt',
-    'icon.png',
-    'README.md',
-    'CHANGELOG.md',
-]
-FOLDERS_TO_INCLUDE = [
-    'i18n',  # Traductions (si présent)
-]
-EXCLUDE_PATTERNS = [
-    '__pycache__', '*.pyc', '*.pyo', '.git', '.venv', 'venv', '.idea', '.vscode', '*.zip', 'compile*.py', 'compile.bat', 'compile.sh', '*.ui', '*.qrc', 'temp_*.ui', '.github', '.gitignore',
-]
-
 # Import de la version
 try:
     from version import __version__
@@ -48,6 +28,7 @@ FILES_TO_INCLUDE = [
     'icon.png',
     'README.md',
     'CHANGELOG.md',
+    'layer_order.json',
 ]
 
 # Dossiers à inclure (récursif)
