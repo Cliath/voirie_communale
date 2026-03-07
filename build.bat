@@ -94,7 +94,6 @@ if not defined GH_EXE (
     echo AVERTISSEMENT : GitHub CLI (gh) non trouve, GitHub Release ignoree
     goto :deploy
 )
-!GH_EXE! release delete v!VERSION! --yes 2>nul
 !GH_EXE! release create v!VERSION! "releases\chemins_ruraux-!VERSION!.zip" --title "Voirie Communale v!VERSION!" --generate-notes
 if !ERRORLEVEL! NEQ 0 (
     echo Erreur lors de la creation de la GitHub Release
