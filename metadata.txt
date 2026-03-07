@@ -250,8 +250,6 @@ changelog=    Version 0.9.74 (2026-03-01)
     Version 0.1.0 (2026-01-25)
     - Version initiale avec flux WMS cadastre INSPIRE
 
-# Tags are comma separated with spaces allowed
-tags=python, rural, chemins, cadastre
 
 homepage=https://github.com/votre-username/chemins_ruraux
 category=Plugins
