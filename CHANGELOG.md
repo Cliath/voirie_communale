@@ -1,6 +1,6 @@
 # [0.13.7] - 2026-03-07
 ### Corrigé
-- **Journal des messages QGIS** : toutes les entrées `logMessage` utilisaient deux tags distincts (`"CheminsRuraux"` et `"VoirieCommunale"`). Uniformisation sur `"VoirieCommunale"` (53 occurrences corrigées).
+- **Journal des messages QGIS** : toutes les entrées `logMessage` utilisaient deux tags distincts (`"VoirieCommunale"` et `"VoirieCommunale"`). Uniformisation sur `"VoirieCommunale"` (53 occurrences corrigées).
 
 # [0.13.6] - 2026-03-07
 ### Modifié
@@ -10,13 +10,13 @@
 ### Modifié
 - **Regex BAN chemin rural** : réécriture pour couvrir toutes les abréviations courantes (`ch`, `che`, `chem`, `chin`, `chemin`, `cheminement`, `sen`, `sente`, `sentier`) avec suffixe rural tronqué (`r`, `ru`, `rur`, `ral`, `rle`, `rural`, `rurale`), plus point optionnel entre préfixe et suffixe. Ancienne regex : `(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b`.
 - **Regex BAN voie communale** : réécriture symétrique couvrant les préfixes `voi`/`voie`, `ch`→`cheminement`, `rout`/`route` et les suffixes communal tronqués (`c`, `com`, `commun`, `communal`, `communale`, `cal`, `cale`, `cle`). Ancienne regex : `(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b`.
-- Mise à jour dans `chemins_ruraux.py` (3 occurrences) et `settings.json` (valeurs par défaut).
+- Mise à jour dans `voirie_communale.py` (3 occurrences) et `settings.json` (valeurs par défaut).
 
 # [0.13.4] - 2026-03-07
 ### Ajouté
 - **`build.bat`** : crée un tag `vX.Y.Z` après chaque commit et une GitHub Release avec le ZIP attaché (`gh release create --generate-notes`). Requiert le GitHub CLI (`gh`) installé et authentifié (`gh auth login`).
 ### Modifié
-- **`metadata.txt`** : `name` corrigé en `Voirie Communale` (au lieu de `chemins_ruraux`), champ `tags` ajouté (voirie, commune, chemin rural…).
+- **`metadata.txt`** : `name` corrigé en `Voirie Communale` (au lieu de `voirie_communale`), champ `tags` ajouté (voirie, commune, chemin rural…).
 
 # [0.13.3] - 2026-03-07
 ### Corrigé
@@ -40,7 +40,7 @@
 
 # [0.12.10] - 2026-03-07
 ### Modifié
-- **Stockage des paramètres** : `QgsSettings` (registre Windows) remplacé par un fichier `settings.json` dans le profil QGIS (`<profil>/chemins_ruraux/settings.json`). Le fichier est UTF-8, indenté, lisible et éditable manuellement. Même emplacement que `TODO.md`. L'API interne `SettingsDialog.get()`/`set()` est inchangée.
+- **Stockage des paramètres** : `QgsSettings` (registre Windows) remplacé par un fichier `settings.json` dans le profil QGIS (`<profil>/voirie_communale/settings.json`). Le fichier est UTF-8, indenté, lisible et éditable manuellement. Même emplacement que `TODO.md`. L'API interne `SettingsDialog.get()`/`set()` est inchangée.
 
 # [0.12.9] - 2026-03-07
 ### Modifié
@@ -76,7 +76,7 @@
 ### Ajouté
 - **Paramètres** : option "Découper les couches sur l'emprise communale" avec buffer configurable (0–10 000 m, défaut 25 m). Les couches filtrées par BBOX (Voirie comm., Voirie dép., OSM Routes, BD TOPO Routes nommées, BD TOPO Tronçons) sont découpées après chargement via `_clip_layer_to_commune()`.
 - `_clip_layer_to_commune()` : filtre les entités intersectant le buffer communal (calcul en EPSG:2154 pour être métrique, puis transformé dans le CRS de la couche).
-- `QSpinBox` ajouté aux imports de `chemins_ruraux_dialog.py` ; clés QgsSettings `clip_to_commune` et `clip_buffer_m`.
+- `QSpinBox` ajouté aux imports de `voirie_communale_dialog.py` ; clés QgsSettings `clip_to_commune` et `clip_buffer_m`.
 
 # [0.11.10] - 2026-03-06
 ### Corrigé
@@ -106,7 +106,7 @@
 - **ToDo** : erreur `'TodoDialog' object has no attribute '_on_modified'` lors de l'enregistrement — méthode `_on_modified()` manquante ajoutée.
 # [0.10.1] - 2026-03-03
 ### Ajouté
-- **Barre de lancement** : le bouton du plugin ouvre désormais une barre d'accès rapide avec 5 boutons : *Charger des données*, *Numériser des données* (à venir), *Liste des tâches*, *Paramètres* (à venir), *À propos*. Classe `LauncherDialog` ajoutée dans `chemins_ruraux_dialog.py`.
+- **Barre de lancement** : le bouton du plugin ouvre désormais une barre d'accès rapide avec 5 boutons : *Charger des données*, *Numériser des données* (à venir), *Liste des tâches*, *Paramètres* (à venir), *À propos*. Classe `LauncherDialog` ajoutée dans `voirie_communale_dialog.py`.
 # [0.9.81] - 2026-03-03
 ### Note
 - Version intermédiaire fusionnée dans 0.10.1.
@@ -189,7 +189,7 @@
 - Section **Plans à charger** dans la boîte de dialogue (en dessous de "Données à charger").
 # [0.9.56] - 2026-03-01
 ### Modifié
-- `TODO.md` n'est plus stocké dans le dossier du plugin (qui est écrasé à chaque mise à jour). Il est désormais sauvegardd dans le profil utilisateur QGIS : `<profil>/chemins_ruraux/TODO.md` (via `QgsApplication.qgisSettingsDirPath()`). Le fichier est créé automatiquement à la première ouverture.
+- `TODO.md` n'est plus stocké dans le dossier du plugin (qui est écrasé à chaque mise à jour). Il est désormais sauvegardd dans le profil utilisateur QGIS : `<profil>/voirie_communale/TODO.md` (via `QgsApplication.qgisSettingsDirPath()`). Le fichier est créé automatiquement à la première ouverture.
 # [0.9.55] - 2026-03-01
 ### Ajouté
 - Suppression automatique des doublons : si une couche du même nom (même commune) existe déjà dans le projet QGIS, elle est retirée avant le rechargement. Concerne toutes les sources (cadastre, commune, BAN, voirie, OSM, BD TOPO, MAJIC).
@@ -342,7 +342,7 @@ et ce projet adhère au [Versionnement Sémantique](https://semver.org/lang/fr/)
 ## [0.9.20] - 2026-02-22
 
 ### Corrigé
-- Renommage exhaustif du plugin en **Voirie Communale** dans tous les fichiers restants : message de log au chargement (`chemins_ruraux.py`), scripts de compilation (`compile_plugin.py`, `compile_simple.py`), script de packaging (`package.py`), guide de démarrage rapide (`QUICKSTART.md`) et `releases/README.md`
+- Renommage exhaustif du plugin en **Voirie Communale** dans tous les fichiers restants : message de log au chargement (`voirie_communale.py`), scripts de compilation (`compile_plugin.py`, `compile_simple.py`), script de packaging (`package.py`), guide de démarrage rapide (`QUICKSTART.md`) et `releases/README.md`
 
 ## [0.9.19] - 2026-02-22
 
@@ -823,7 +823,7 @@ et ce projet adhère au [Versionnement Sémantique](https://semver.org/lang/fr/)
 ## [0.2.5] - 2026-01-25
 
 ### Corrigé
-- **CORRECTION CRITIQUE** : Erreur `AttributeError: 'CheminsRurauxDialog' object has no attribute 'mMapLayerComboBox'`
+- **CORRECTION CRITIQUE** : Erreur `AttributeError: 'VoirieCommunaleDialog' object has no attribute 'mMapLayerComboBox'`
 - Suppression du code qui référençait le widget supprimé en 0.2.4
 - Le bouton OK ferme maintenant correctement le dialogue sans erreur
 
@@ -894,7 +894,7 @@ et ce projet adhère au [Versionnement Sémantique](https://semver.org/lang/fr/)
 
 ### Amélioré
 - Gestion d'erreur détaillée pour le chargement des flux WMS
-- Logs détaillés dans le journal des messages QGIS (onglet CheminsRuraux)
+- Logs détaillés dans le journal des messages QGIS (onglet VoirieCommunale)
 - Messages d'erreur explicites avec instructions de diagnostic
 - Affichage des URI WMS testés pour faciliter le débogage
 
@@ -936,6 +936,6 @@ et ce projet adhère au [Versionnement Sémantique](https://semver.org/lang/fr/)
 - Structure de base du plugin PyQGIS
 - Fichiers de métadonnées (metadata.txt)
 
-[Non publié]: https://github.com/votre-username/chemins_ruraux/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/votre-username/chemins_ruraux/compare/v0.0.1...v0.1.0
-[0.0.1]: https://github.com/votre-username/chemins_ruraux/releases/tag/v0.0.1
+[Non publié]: https://github.com/votre-username/voirie_communale/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/votre-username/voirie_communale/compare/v0.0.1...v0.1.0
+[0.0.1]: https://github.com/votre-username/voirie_communale/releases/tag/v0.0.1

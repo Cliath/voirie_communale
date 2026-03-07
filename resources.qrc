@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/chemins_ruraux" >
+    <qresource prefix="/plugins/voirie_communale" >
         <file>icon.png</file>
     </qresource>
 </RCC>

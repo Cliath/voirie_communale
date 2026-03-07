@@ -85,14 +85,14 @@ echo.
 
 REM Etape 5 : GitHub Release avec le ZIP
 echo [5/6] Creation de la GitHub Release v%VERSION%...
-powershell -NoProfile -Command "$v='%VERSION%'; $zip='releases\chemins_ruraux-' + $v + '.zip'; $title='Voirie Communale v' + $v; gh release create ('v'+$v) $zip --title $title --generate-notes; if ($LASTEXITCODE -eq 0) { Write-Host ('GitHub Release v'+$v+' creee avec le ZIP') } else { Write-Host 'Erreur lors de la creation de la GitHub Release' }"
+powershell -NoProfile -Command "$v='%VERSION%'; $zip='releases\voirie_communale-' + $v + '.zip'; $title='Voirie Communale v' + $v; gh release create ('v'+$v) $zip --title $title --generate-notes; if ($LASTEXITCODE -eq 0) { Write-Host ('GitHub Release v'+$v+' creee avec le ZIP') } else { Write-Host 'Erreur lors de la creation de la GitHub Release' }"
 echo.
 
 :deploy
 REM Etape 6 : Deploiement automatique dans QGIS
-set QGIS_PLUGINS=%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\chemins_ruraux
+set QGIS_PLUGINS=%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\voirie_communale
 echo [6/6] Deploiement vers %QGIS_PLUGINS%...
-powershell -Command "$zip = Get-ChildItem 'd:\chemins_ruraux\releases\chemins_ruraux-*.zip' | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if ($zip) { Expand-Archive -Path $zip.FullName -DestinationPath (Split-Path '%QGIS_PLUGINS%') -Force; Write-Host ('Deploye : ' + $zip.Name) } else { Write-Host 'ZIP non trouve'; exit 1 }"
+powershell -Command "$zip = Get-ChildItem 'd:\voirie_communale\releases\voirie_communale-*.zip' | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if ($zip) { Expand-Archive -Path $zip.FullName -DestinationPath (Split-Path '%QGIS_PLUGINS%') -Force; Write-Host ('Deploye : ' + $zip.Name) } else { Write-Host 'ZIP non trouve'; exit 1 }"
 if %ERRORLEVEL% GTR 7 (
     echo Erreur lors du deploiement
 ) else (

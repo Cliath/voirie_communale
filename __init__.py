@@ -8,11 +8,11 @@ Licence : GNU GPL v2+
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
-    """Load CheminsRuraux class from file CheminsRuraux.
+    """Load VoirieCommunale class from file VoirieCommunale.
 
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
     #
-    from .chemins_ruraux import CheminsRuraux
-    return CheminsRuraux(iface)
+    from .voirie_communale import VoirieCommunale
+    return VoirieCommunale(iface)

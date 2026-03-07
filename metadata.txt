@@ -11,23 +11,23 @@ about=Ce plugin aide au recensement de la voirie communale dans QGIS.
     Il permet de charger et croiser les données cadastrales, BAN, voirie DGCL
     et routes OSM pour tenter d'identifier et d'analyser les voies communales et chemins ruraux.
 
-tracker=https://github.com/Cliath/chemins_ruraux/issues
-repository=https://github.com/Cliath/chemins_ruraux
+tracker=https://github.com/Cliath/voirie_communale/issues
+repository=https://github.com/Cliath/voirie_communale
 # End of mandatory metadata
 
 # Recommended items:
 hasProcessingProvider=no
 changelog=    Version 0.13.7 (2026-03-07)
-    - Journal des messages QGIS : toutes les entrées logMessage utilisaient deux tags distincts ("CheminsRuraux" et "VoirieCommunale"). Uniformisation sur "VoirieCommunale" (53 occurrences corrigées).
+    - Journal des messages QGIS : toutes les entrées logMessage utilisaient deux tags distincts ("VoirieCommunale" et "VoirieCommunale"). Uniformisation sur "VoirieCommunale" (53 occurrences corrigées).
     Version 0.13.6 (2026-03-07)
     - Interface : la section "Données à charger" est maintenant organisée en 3 onglets — Nationales (toutes les couches existantes : Admin Express, BD TOPO, OSM, MagOSM, DGCL, BAN, MAJIC), Locales (vide, prévu pour des données locales), Autres (vide, réservé).
     Version 0.13.5 (2026-03-07)
     - Regex BAN chemin rural : réécriture pour couvrir toutes les abréviations courantes (ch, che, chem, chin, chemin, cheminement, sen, sente, sentier) avec suffixe rural tronqué (r, ru, rur, ral, rle, rural, rurale), plus point optionnel entre préfixe et suffixe. Ancienne regex : (?i)(che(?:min)?|sen(?:tier)?) rural|C\.?R\.?.
     - Regex BAN voie communale : réécriture symétrique couvrant les préfixes voi/voie, ch->cheminement, rout/route et les suffixes communal tronqués (c, com, commun, communal, communale, cal, cale, cle). Ancienne regex : (?i)(voi(?:e)?) (com(?:munale)?)|V\.?C\.?.
-    - Mise à jour dans chemins_ruraux.py (3 occurrences) et settings.json (valeurs par défaut).
+    - Mise à jour dans voirie_communale.py (3 occurrences) et settings.json (valeurs par défaut).
     Version 0.13.4 (2026-03-07)
     - build.bat : crée un tag vX.Y.Z après chaque commit et une GitHub Release avec le ZIP attaché (gh release create --generate-notes). Requiert le GitHub CLI (gh) installé et authentifié (gh auth login).
-    - metadata.txt : name corrigé en Voirie Communale (au lieu de chemins_ruraux), champ tags ajouté (voirie, commune, chemin rural...).
+    - metadata.txt : name corrigé en Voirie Communale (au lieu de voirie_communale), champ tags ajouté (voirie, commune, chemin rural...).
     Version 0.13.3 (2026-03-07)
     - README : MagOSM Routes ajouté dans l'ordre canonique, le tableau des couches vectorielles, la section style et la table des services.
     Version 0.13.2 (2026-03-07)
@@ -39,8 +39,8 @@ changelog=    Version 0.13.7 (2026-03-07)
     Version 0.12.11 (2026-03-07)
     - Stockage des paramètres : settings.json déplacé du profil QGIS vers le dossier du plugin, pour être partagé (versionné git). Le fichier est intégré au package ZIP et déployé avec le plugin. Au premier accès, toutes les clés manquantes sont complétées avec leurs valeurs par défaut (y compris ban_regex_chemin et ban_regex_voie même sans jamais ouvrir le dialogue Paramètres). Le dictionnaire _DEFAULTS centralise toutes les valeurs par défaut.
     Version 0.12.10 (2026-03-07)
-    - Stockage des paramètres : QgsSettings (registre Windows) remplacé par un fichier settings.json dans le profil QGIS (<profil>/chemins_ruraux/settings.json). Le fichier est UTF-8, indenté, lisible et éditable manuellement. Même emplacement que TODO.md. L'API interne SettingsDialog.get()/set() est inchangée.
-homepage=https://github.com/votre-username/chemins_ruraux
+    - Stockage des paramètres : QgsSettings (registre Windows) remplacé par un fichier settings.json dans le profil QGIS (<profil>/voirie_communale/settings.json). Le fichier est UTF-8, indenté, lisible et éditable manuellement. Même emplacement que TODO.md. L'API interne SettingsDialog.get()/set() est inchangée.
+homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png
 experimental=False

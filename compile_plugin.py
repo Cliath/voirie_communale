@@ -29,12 +29,12 @@ def compile_resources():
         return False
 
 def compile_ui_with_qgis_widgets():
-    """Compile chemins_ruraux_dialog_base.ui avec support des widgets QGIS"""
-    print("\nCompilation de chemins_ruraux_dialog_base.ui...")
+    """Compile voirie_communale_dialog_base.ui avec support des widgets QGIS"""
+    print("\nCompilation de voirie_communale_dialog_base.ui...")
     
     try:
         # Lire le fichier UI
-        with open('chemins_ruraux_dialog_base.ui', 'r', encoding='utf-8') as f:
+        with open('voirie_communale_dialog_base.ui', 'r', encoding='utf-8') as f:
             ui_content = f.read()
         
         # Créer un fichier UI temporaire sans les widgets QGIS personnalisés
@@ -50,11 +50,11 @@ def compile_ui_with_qgis_widgets():
         
         # Compiler le fichier temporaire
         with open('temp_dialog.ui', 'r', encoding='utf-8') as ui_file:
-            with open('chemins_ruraux_dialog_base.py', 'w', encoding='utf-8') as py_file:
+            with open('voirie_communale_dialog_base.py', 'w', encoding='utf-8') as py_file:
                 uic.compileUi(ui_file, py_file)
         
         # Lire le fichier compilé
-        with open('chemins_ruraux_dialog_base.py', 'r', encoding='utf-8') as f:
+        with open('voirie_communale_dialog_base.py', 'r', encoding='utf-8') as f:
             py_content = f.read()
         
         # Restaurer les imports QGIS
@@ -64,13 +64,13 @@ def compile_ui_with_qgis_widgets():
                                        'self.mMapLayerComboBox = QgsMapLayerComboBox')
         
         # Écrire le fichier final
-        with open('chemins_ruraux_dialog_base.py', 'w', encoding='utf-8') as f:
+        with open('voirie_communale_dialog_base.py', 'w', encoding='utf-8') as f:
             f.write(py_content)
         
         # Supprimer le fichier temporaire
         os.remove('temp_dialog.ui')
         
-        print("✓ chemins_ruraux_dialog_base.py créé")
+        print("✓ voirie_communale_dialog_base.py créé")
         return True
     except Exception as e:
         print(f"✗ Erreur: {e}")

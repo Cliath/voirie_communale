@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CheminsRurauxDialogBase</class>
- <widget class="QDialog" name="CheminsRurauxDialogBase">
+ <class>VoirieCommunaleDialogBase</class>
+ <widget class="QDialog" name="VoirieCommunaleDialogBase">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -459,7 +459,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>CheminsRurauxDialogBase</receiver>
+   <receiver>VoirieCommunaleDialogBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -475,7 +475,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>CheminsRurauxDialogBase</receiver>
+   <receiver>VoirieCommunaleDialogBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

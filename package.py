@@ -19,9 +19,9 @@ except ImportError:
 # Fichiers et dossiers à inclure dans le ZIP
 FILES_TO_INCLUDE = [
     '__init__.py',
-    'chemins_ruraux.py',
-    'chemins_ruraux_dialog.py',
-    'chemins_ruraux_dialog_base.py',
+    'voirie_communale.py',
+    'voirie_communale_dialog.py',
+    'voirie_communale_dialog_base.py',
     'resources.py',
     'version.py',
     'metadata.txt',
@@ -72,7 +72,7 @@ def create_plugin_zip(output_dir='releases'):
     print(f"=== Création du package Voirie Communale v{__version__} ===\n")
     
     # Nom du plugin et du fichier ZIP
-    plugin_name = 'chemins_ruraux'
+    plugin_name = 'voirie_communale'
     zip_filename = f"{plugin_name}-{__version__}.zip"
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)

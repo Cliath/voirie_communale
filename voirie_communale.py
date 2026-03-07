@@ -28,7 +28,7 @@ import json
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .chemins_ruraux_dialog import CheminsRurauxDialog, TodoDialog, PhotoAeriennesDialog, LauncherDialog, SettingsDialog
+from .voirie_communale_dialog import VoirieCommunaleDialog, TodoDialog, PhotoAeriennesDialog, LauncherDialog, SettingsDialog
 # Import version information
 from .version import __version__, get_changelog
 
@@ -176,7 +176,7 @@ MAJIC_GROUPES = {
 _MAJIC_GROUPE_DEFAULT_COLOR = "#A337F5"
 
 
-class CheminsRuraux:
+class VoirieCommunale:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -203,7 +203,7 @@ class CheminsRuraux:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'CheminsRuraux_{}.qm'.format(locale))
+            'VoirieCommunale_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -231,7 +231,7 @@ class CheminsRuraux:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('CheminsRuraux', message)
+        return QCoreApplication.translate('VoirieCommunale', message)
 
     def add_action(
         self,
@@ -310,7 +310,7 @@ class CheminsRuraux:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/chemins_ruraux/icon.png'
+        icon_path = ':/plugins/voirie_communale/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'Voirie Communale - Recensement'),
@@ -346,22 +346,22 @@ class CheminsRuraux:
         """Affiche la boîte de dialogue \u00c0 propos."""
         msg = QMessageBox(self.iface.mainWindow())
         msg.setWindowTitle(self.tr("\u00c0 propos - Voirie Communale"))
-        msg.setIconPixmap(QIcon(':/plugins/chemins_ruraux/icon.png').pixmap(64, 64))
+        msg.setIconPixmap(QIcon(':/plugins/voirie_communale/icon.png').pixmap(64, 64))
         msg.setText(
             f"<b>Voirie Communale</b> v{__version__}<br><br>"
             "Plugin QGIS pour le recensement de la voirie communale<br>"
             "(voies communales et chemins ruraux).<br><br>"
             "<b>Auteur :</b> Yann Schwarz &lt;yann.schwarz@ign.fr&gt;<br>"
             "<b>Licence :</b> GNU GPL v2+<br>"
-            "<b>Source :</b> <a href='https://github.com/Cliath/chemins_ruraux'>"
-            "github.com/Cliath/chemins_ruraux</a>"
+            "<b>Source :</b> <a href='https://github.com/Cliath/voirie_communale'>"
+            "github.com/Cliath/voirie_communale</a>"
         )
         msg.setTextFormat(1)  # Qt::RichText
         msg.exec_()
 
     def show_todo(self):
         """Ouvre la fenêtre ToDo (lit/écrite dans le profil utilisateur QGIS)."""
-        todo_dir = os.path.join(QgsApplication.qgisSettingsDirPath(), 'chemins_ruraux')
+        todo_dir = os.path.join(QgsApplication.qgisSettingsDirPath(), 'voirie_communale')
         os.makedirs(todo_dir, exist_ok=True)
         todo_path = os.path.join(todo_dir, 'TODO.md')
         # Créer le fichier avec un contenu initial s'il n'existe pas encore
@@ -2658,7 +2658,7 @@ class CheminsRuraux:
     def open_charger_dialog(self):
         """Ouvre le dialogue de chargement des données."""
         if not hasattr(self, 'dlg') or self.dlg is None:
-            self.dlg = CheminsRurauxDialog()
+            self.dlg = VoirieCommunaleDialog()
             self.dlg.setWindowTitle(f"Voirie Communale v{__version__} – Chargement des données")
             self.dlg.btnLoadCadastre.clicked.connect(self.validate_and_load)
         # Restaurer le dernier code INSEE

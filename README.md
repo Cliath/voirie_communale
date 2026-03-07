@@ -9,14 +9,14 @@ Version actuelle : **0.13.7**
 
 1. Récupérez le ZIP depuis le dépôt ou via `build.bat` (dossier `releases/`)
 2. QGIS → **Extensions** → **Installer/Gérer les extensions** → onglet **Installer depuis un ZIP**
-3. Sélectionnez le fichier `chemins_ruraux-X.X.X.zip` et cliquez sur **Installer l'extension**
+3. Sélectionnez le fichier `voirie_communale-X.X.X.zip` et cliquez sur **Installer l'extension**
 4. Activez le plugin dans l'onglet **Installées**
 
 ### En mode développement
 
 ```powershell
 # Déployer manuellement dans le répertoire des plugins QGIS
-$pluginDir = "$env:APPDATA\QGIS\QGIS3\profiles\default\python\plugins\chemins_ruraux"
+$pluginDir = "$env:APPDATA\QGIS\QGIS3\profiles\default\python\plugins\voirie_communale"
 if (Test-Path $pluginDir) { Remove-Item -Recurse -Force $pluginDir }
 Copy-Item -Recurse -Force <dossier_du_dépôt> $pluginDir
 ```
@@ -102,12 +102,12 @@ Les couches nécessitant un filtre géographique (Voirie DGCL, OSM Routes, BD TO
 ## Structure du projet
 
 ```
-chemins_ruraux/
+voirie_communale/
 ├── __init__.py                      # Point d'entrée du plugin
-├── chemins_ruraux.py                # Classe principale (logique métier)
-├── chemins_ruraux_dialog.py         # Dialogues (LauncherDialog, CheminsRurauxDialog, SettingsDialog…)
-├── chemins_ruraux_dialog_base.ui    # Interface Qt Designer
-├── chemins_ruraux_dialog_base.py    # [généré] Compilé depuis le .ui
+├── voirie_communale.py                # Classe principale (logique métier)
+├── voirie_communale_dialog.py         # Dialogues (LauncherDialog, VoirieCommunaleDialog, SettingsDialog…)
+├── voirie_communale_dialog_base.ui    # Interface Qt Designer
+├── voirie_communale_dialog_base.py    # [généré] Compilé depuis le .ui
 ├── resources.qrc                    # Ressources Qt (icônes)
 ├── resources.py                     # [généré] Compilé depuis resources.qrc
 ├── layer_order.json                 # Ordre canonique des couches (modifiable sans recompiler)

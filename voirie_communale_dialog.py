@@ -19,13 +19,13 @@ from qgis.PyQt.QtGui import QFont
 from qgis.PyQt import QtWidgets
 
 # Importer la classe du fichier UI compilé
-from .chemins_ruraux_dialog_base import Ui_CheminsRurauxDialogBase
+from .voirie_communale_dialog_base import Ui_VoirieCommunaleDialogBase
 
 
-class CheminsRurauxDialog(QtWidgets.QDialog, Ui_CheminsRurauxDialogBase):
+class VoirieCommunaleDialog(QtWidgets.QDialog, Ui_VoirieCommunaleDialogBase):
     def __init__(self, parent=None):
         """Constructor."""
-        super(CheminsRurauxDialog, self).__init__(parent)
+        super(VoirieCommunaleDialog, self).__init__(parent)
         self.setupUi(self)
         # Liste de toutes les cases à cocher de sélection de couches
         self._layer_checkboxes = [
@@ -182,7 +182,7 @@ class TodoDialog(QDialog):
 class SettingsDialog(QDialog):
     """Dialogue de paramètres du plugin."""
 
-    _NS = "chemins_ruraux"
+    _NS = "voirie_communale"
     _LAYER_ORDER_JSON = os.path.join(os.path.dirname(__file__), 'layer_order.json')
 
     # Valeurs par défaut de tous les paramètres.
