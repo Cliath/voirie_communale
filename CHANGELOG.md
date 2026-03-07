@@ -1,3 +1,8 @@
+# [0.12.6] - 2026-03-07
+### Corrigé
+- **Catégorisation BAN/BD TOPO** : expression QGIS `regexp_match(field, '...')` interprète `\b` comme retour arrière et supprime `\`, rendant la regex invalide (ex. `\bC\.?R\.?\b` → `?C??R???`). Correction : les backslashes sont doublés avant intégration dans l'expression (`_qgis_expr_regex`).
+- **Regex corrompue en QgsSettings** : si la valeur stockée est invalide (corruption antérieure à v0.12.5), elle est automatiquement restaurée au défaut — dans `SettingsDialog.__init__` (corrige le champ avant affichage) et dans `_get_regex_setting` (corrige à l'utilisation en log + reset).
+
 # [0.12.5] - 2026-03-07
 ### Corrigé
 - **Regex corrompues depuis QgsSettings** : `SettingsDialog.get()` sans `value_type` laissait Qt inférer le type, ce qui corrompait les backslashes (`\b`, `\.`) lors de la lecture sur Windows. Corrigé : le type est désormais automatiquement déduit depuis la valeur par défaut (ex. `str` si le défaut est une chaîne).

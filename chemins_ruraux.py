@@ -905,14 +905,8 @@ class CheminsRuraux:
         """
         _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
         _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
-        regex_chemin = (
-            SettingsDialog.get('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
-            or _BAN_REGEX_CHEMIN_DEFAULT
-        )
-        regex_voie = (
-            SettingsDialog.get('ban_regex_voie', _BAN_REGEX_VOIE_DEFAULT)
-            or _BAN_REGEX_VOIE_DEFAULT
-        )
+        regex_chemin = self._get_regex_setting('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
+        regex_voie   = self._get_regex_setting('ban_regex_voie',   _BAN_REGEX_VOIE_DEFAULT)
 
         layer_name = f"BD TOPO Tronçons de route {code_insee}"
         success, layer = self._load_wfs_paginated(
@@ -957,14 +951,14 @@ class CheminsRuraux:
         rule_cr = QgsRuleBasedRenderer.Rule(make_line('#A0522D', 0.7))
         rule_cr.setLabel('Chemin rural')
         rule_cr.setFilterExpression(
-            f"regexp_match(\"{nom_field}\", '{regex_chemin}') > 0"
+            f"regexp_match(\"{nom_field}\", '{self._qgis_expr_regex(regex_chemin)}') > 0"
         )
         root_rule.appendChild(rule_cr)
 
         rule_vc = QgsRuleBasedRenderer.Rule(make_line('#4169E1', 0.7))
         rule_vc.setLabel('Voie communale')
         rule_vc.setFilterExpression(
-            f"regexp_match(\"{nom_field}\", '{regex_voie}') > 0"
+            f"regexp_match(\"{nom_field}\", '{self._qgis_expr_regex(regex_voie)}') > 0"
         )
         root_rule.appendChild(rule_vc)
 
@@ -1634,6 +1628,48 @@ class CheminsRuraux:
         QgsMessageLog.logMessage(f"✓ {layer_name} ({layer.featureCount()} entité(s))", "CheminsRuraux", Qgis.Success)
         return True, layer
 
+    @staticmethod
+    def _get_regex_setting(key, default):
+        """Lit une regex depuis QgsSettings, valide, et restaure le défaut si corrompue.
+
+        Args:
+            key:     Clé QgsSettings (sans préfixe).
+            default: Valeur par défaut (raw string recommandé).
+
+        Returns:
+            str: Expression régulière valide.
+        """
+        import re as _re
+        val = SettingsDialog.get(key, default)
+        try:
+            _re.compile(val)
+            return val
+        except _re.error:
+            QgsMessageLog.logMessage(
+                f"Regex corrompue pour '{key}' ({val!r}), restauration du défaut.",
+                "CheminsRuraux", Qgis.Warning
+            )
+            SettingsDialog.set(key, default)   # Réparer QgsSettings
+            return default
+
+    @staticmethod
+    def _qgis_expr_regex(regex):
+        """Prépare une regex pour intégration dans un littéral de chaîne d'expression QGIS.
+
+        Le parseur d'expressions QGIS interprète les séquences d'échappement standard
+        (``\\n``, ``\\t``, ``\\b`` = retour arrière, etc.) dans les chaînes entre guillemets
+        simples.  Pour que ``\\b`` ou ``\\.`` soient transmis tels quels au moteur regex Qt,
+        il faut les doubler : ``\\\\b`` dans la chaîne Python → ``\\b`` dans l'expression
+        QGIS → ``\\b`` reçu par le moteur regex.
+
+        Args:
+            regex: Expression régulière Python (ex. ``r'\\bC\\.?R\\.?\\b'``).
+
+        Returns:
+            str: Regex avec backslashes doublés, prête à être insérée dans ``'...'``.
+        """
+        return regex.replace('\\', '\\\\')
+
     def _load_wfs_paginated(self, typename, layer_name, cql_filter=None,
                              crs="EPSG:4326", page_size=1000, style_callback=None,
                              bbox=None):
@@ -1791,8 +1827,8 @@ class CheminsRuraux:
         # regexp_match retourne la position (>0) si trouvé, 0 sinon
         expression = f"""
         CASE 
-            WHEN regexp_match("{field_name}", '{regex_chemin}') > 0 THEN 'Chemin rural'
-            WHEN regexp_match("{field_name}", '{regex_voie}') > 0 THEN 'Voie communale'
+            WHEN regexp_match("{field_name}", '{self._qgis_expr_regex(regex_chemin)}') > 0 THEN 'Chemin rural'
+            WHEN regexp_match("{field_name}", '{self._qgis_expr_regex(regex_voie)}') > 0 THEN 'Voie communale'
             ELSE 'Autre'
         END
         """
@@ -1858,11 +1894,11 @@ class CheminsRuraux:
         root_lbl = QgsRuleBasedLabeling.Rule(None)
 
         rule_lbl_cr = QgsRuleBasedLabeling.Rule(_make_label_settings(QgsPalLayerSettings.AroundPoint))
-        rule_lbl_cr.setFilterExpression(f"regexp_match(\"{field_name}\", '{regex_chemin}') > 0")
+        rule_lbl_cr.setFilterExpression(f"regexp_match(\"{field_name}\", '{self._qgis_expr_regex(regex_chemin)}') > 0")
         root_lbl.appendChild(rule_lbl_cr)
 
         rule_lbl_vc = QgsRuleBasedLabeling.Rule(_make_label_settings(QgsPalLayerSettings.AroundPoint))
-        rule_lbl_vc.setFilterExpression(f"regexp_match(\"{field_name}\", '{regex_voie}') > 0")
+        rule_lbl_vc.setFilterExpression(f"regexp_match(\"{field_name}\", '{self._qgis_expr_regex(regex_voie)}') > 0")
         root_lbl.appendChild(rule_lbl_vc)
 
         layer.setLabeling(QgsRuleBasedLabeling(root_lbl))
@@ -1891,13 +1927,11 @@ class CheminsRuraux:
             crs="EPSG:4326",
             style_callback=lambda lyr: self.apply_ban_style(
                 lyr,
-                regex_chemin=(
-                    SettingsDialog.get('ban_regex_chemin', r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b')
-                    or r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
+                regex_chemin=self._get_regex_setting(
+                    'ban_regex_chemin', r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
                 ),
-                regex_voie=(
-                    SettingsDialog.get('ban_regex_voie', r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b')
-                    or r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
+                regex_voie=self._get_regex_setting(
+                    'ban_regex_voie', r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
                 ),
             )
         )

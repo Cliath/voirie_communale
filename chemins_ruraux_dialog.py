@@ -317,9 +317,25 @@ class SettingsDialog(QDialog):
         _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
         _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
 
+        # Charger les valeurs stockées ; si corrompues (regex invalide), restaurer le défaut
+        # et corriger QgsSettings pour éviter l'erreur lors du prochain chargement BAN.
+        _stored_cr = self.get('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT) or _BAN_REGEX_CHEMIN_DEFAULT
+        try:
+            re.compile(_stored_cr)
+        except re.error:
+            _stored_cr = _BAN_REGEX_CHEMIN_DEFAULT
+            self.set('ban_regex_chemin', _stored_cr)
+
+        _stored_vc = self.get('ban_regex_voie', _BAN_REGEX_VOIE_DEFAULT) or _BAN_REGEX_VOIE_DEFAULT
+        try:
+            re.compile(_stored_vc)
+        except re.error:
+            _stored_vc = _BAN_REGEX_VOIE_DEFAULT
+            self.set('ban_regex_voie', _stored_vc)
+
         row_cr = QHBoxLayout()
         row_cr.addWidget(QLabel("Regex Chemin rural :"))
-        self.txt_regex_chemin = QLineEdit(self.get('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT) or _BAN_REGEX_CHEMIN_DEFAULT)
+        self.txt_regex_chemin = QLineEdit(_stored_cr)
         self.txt_regex_chemin.setPlaceholderText(_BAN_REGEX_CHEMIN_DEFAULT)
         self.txt_regex_chemin.setMinimumWidth(260)
         row_cr.addWidget(self.txt_regex_chemin)
@@ -327,7 +343,7 @@ class SettingsDialog(QDialog):
 
         row_vc = QHBoxLayout()
         row_vc.addWidget(QLabel("Regex Voie communale :"))
-        self.txt_regex_voie = QLineEdit(self.get('ban_regex_voie', _BAN_REGEX_VOIE_DEFAULT) or _BAN_REGEX_VOIE_DEFAULT)
+        self.txt_regex_voie = QLineEdit(_stored_vc)
         self.txt_regex_voie.setPlaceholderText(_BAN_REGEX_VOIE_DEFAULT)
         self.txt_regex_voie.setMinimumWidth(260)
         row_vc.addWidget(self.txt_regex_voie)
