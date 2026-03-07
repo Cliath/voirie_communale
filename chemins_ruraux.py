@@ -1340,6 +1340,105 @@ class CheminsRuraux:
         QgsMessageLog.logMessage(f"✓ {layer_name} ({layer.featureCount()} entité(s))", "CheminsRuraux", Qgis.Success)
         return True, layer
 
+    def _load_wfs_paginated(self, typename, layer_name, cql_filter,
+                             crs="EPSG:4326", page_size=1000, style_callback=None):
+        """Charge une couche WFS via pagination urllib + /vsimem/ (CQL_FILTER, COUNT + STARTINDEX).
+
+        Contourne la limite serveur de 1 000 entités par requête en bouclant sur STARTINDEX.
+        Assemble toutes les pages en un seul GeoJSON FeatureCollection puis charge via OGR.
+        Aucun fichier créé sur le disque.
+
+        Args:
+            typename:      Nom complet du type WFS (ex. 'BAN.DATA.GOUV:ban')
+            layer_name:    Nom de la couche dans QGIS
+            cql_filter:    Filtre CQL à appliquer (ex. "code_insee='01234'")
+            crs:           Système de référence (défaut EPSG:4326)
+            page_size:     Nombre d'entités par page (défaut 1000, max IGN 10000)
+            style_callback: Callable(layer) appliqué après chargement
+
+        Returns:
+            tuple: (bool, QgsVectorLayer ou None)
+        """
+        from osgeo import gdal
+
+        all_features = []
+        start_index = 0
+        crs_ref = None  # on récupère le CRS depuis la première page
+
+        while True:
+            params = {
+                'SERVICE':      'WFS',
+                'VERSION':      '2.0.0',
+                'REQUEST':      'GetFeature',
+                'TYPENAMES':    typename,
+                'SRSNAME':      crs,
+                'OUTPUTFORMAT': 'application/json',
+                'CQL_FILTER':   cql_filter,
+                'COUNT':        page_size,
+                'STARTINDEX':   start_index,
+            }
+            url = f"{self.WFS_IGN_URL}?{urllib.parse.urlencode(params)}"
+            QgsMessageLog.logMessage(
+                f"WFS paginé {typename} (startIndex={start_index}) : {url}",
+                "CheminsRuraux", Qgis.Info
+            )
+            try:
+                req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    fc = json.loads(resp.read().decode('utf-8'))
+            except Exception as exc:
+                QgsMessageLog.logMessage(
+                    f"✗ WFS paginé {typename} (startIndex={start_index}) : {exc}",
+                    "CheminsRuraux", Qgis.Critical
+                )
+                return False, None
+
+            batch = fc.get('features', [])
+            if crs_ref is None:
+                crs_ref = fc.get('crs', None)
+            all_features.extend(batch)
+            QgsMessageLog.logMessage(
+                f"  page {start_index // page_size + 1} : {len(batch)} entité(s) reçue(s)",
+                "CheminsRuraux", Qgis.Info
+            )
+            if len(batch) < page_size:
+                break
+            start_index += page_size
+
+        if not all_features:
+            QgsMessageLog.logMessage(
+                f"✗ {layer_name} : aucune entité retournée par le WFS",
+                "CheminsRuraux", Qgis.Warning
+            )
+            return False, None
+
+        # Assembler le FeatureCollection complet
+        assembled = {'type': 'FeatureCollection', 'features': all_features}
+        if crs_ref:
+            assembled['crs'] = crs_ref
+
+        vsimem_path = f"/vsimem/{typename.replace(':', '_').replace('.', '_')}_paginated.json"
+        gdal.FileFromMemBuffer(vsimem_path, json.dumps(assembled).encode('utf-8'))
+        layer = QgsVectorLayer(vsimem_path, layer_name, "ogr")
+
+        if not layer.isValid() or layer.featureCount() == 0:
+            gdal.Unlink(vsimem_path)
+            QgsMessageLog.logMessage(
+                f"✗ {layer_name} : couche invalide après assemblage ({len(all_features)} entités collectées)",
+                "CheminsRuraux", Qgis.Warning
+            )
+            return False, None
+
+        self._remove_layers_by_name(layer_name)
+        QgsProject.instance().addMapLayer(layer)
+        if style_callback:
+            style_callback(layer)
+        QgsMessageLog.logMessage(
+            f"✓ {layer_name} ({layer.featureCount()} entité(s), {len(all_features)} chargées en {start_index // page_size + 1} page(s))",
+            "CheminsRuraux", Qgis.Success
+        )
+        return True, layer
+
     def load_commune_wfs(self, code_insee):
         """Charge l'emprise de la commune depuis le WFS Admin Express IGN
         
@@ -1478,25 +1577,32 @@ class CheminsRuraux:
         )
     
     def load_ban_wfs(self, code_insee):
-        """Charge les adresses de la Base Adresse Nationale (BAN)
-        
+        """Charge les adresses de la Base Adresse Nationale (BAN) avec pagination.
+
+        Utilise _load_wfs_paginated pour contourner la limite de 1 000 entités
+        par requête imposée par la Géoplateforme IGN.
+
         Returns:
             tuple: (bool, QgsVectorLayer ou None) - (succès, couche chargée)
         """
-        
-        # Charger les adresses BAN sans message d'attente
-        success, layer = self.load_wfs_layer(
+        success, layer = self._load_wfs_paginated(
             typename="BAN.DATA.GOUV:ban",
             layer_name=f"Adresses BAN {code_insee}",
-            code_insee=code_insee,
+            cql_filter=f"code_insee='{code_insee}'",
             crs="EPSG:4326",
             style_callback=lambda lyr: self.apply_ban_style(
                 lyr,
-                regex_chemin=SettingsDialog.get('ban_regex_chemin', r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b') or r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                regex_voie=SettingsDialog.get('ban_regex_voie', r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b') or r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b',
+                regex_chemin=(
+                    SettingsDialog.get('ban_regex_chemin', r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b')
+                    or r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
+                ),
+                regex_voie=(
+                    SettingsDialog.get('ban_regex_voie', r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b')
+                    or r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
+                ),
             )
         )
-        
+
         if not success:
             QMessageBox.warning(
                 self.iface.mainWindow(),
