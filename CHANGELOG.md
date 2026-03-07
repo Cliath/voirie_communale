@@ -1,3 +1,7 @@
+# [0.13.7] - 2026-03-07
+### Corrigé
+- **Journal des messages QGIS** : toutes les entrées `logMessage` utilisaient deux tags distincts (`"CheminsRuraux"` et `"VoirieCommunale"`). Uniformisation sur `"VoirieCommunale"` (53 occurrences corrigées).
+
 # [0.13.6] - 2026-03-07
 ### Modifié
 - **Interface** : la section "Données à charger" est maintenant organisée en 3 onglets — **Nationales** (toutes les couches existantes : Admin Express, BD TOPO, OSM, MagOSM, DGCL, BAN, MAJIC), **Locales** (vide, prévu pour des données locales), **Autres** (vide, réservé).

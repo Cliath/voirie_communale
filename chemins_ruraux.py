@@ -193,7 +193,7 @@ class CheminsRuraux:
         # Log plugin version
         QgsMessageLog.logMessage(
             f"Voirie Communale v{__version__} charg\u00e9",
-            "CheminsRuraux",
+            "VoirieCommunale",
             Qgis.Info
         )
         # initialize plugin directory
@@ -1101,21 +1101,21 @@ class CheminsRuraux:
                 QgsProject.instance().addMapLayer(layer)
                 QgsMessageLog.logMessage(
                     f"Tuiles XYZ chargées : {display_name}",
-                    "CheminsRuraux",
+                    "VoirieCommunale",
                     Qgis.Info
                 )
                 return True, [layer]
             else:
                 QgsMessageLog.logMessage(
                     f"Impossible de charger les tuiles XYZ : {display_name} \u2014 URI : {uri}",
-                    "CheminsRuraux",
+                    "VoirieCommunale",
                     Qgis.Warning
                 )
                 return False, []
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Erreur chargement tuiles XYZ {display_name} : {str(e)}",
-                "CheminsRuraux",
+                "VoirieCommunale",
                 Qgis.Critical
             )
             return False, []
@@ -1166,12 +1166,12 @@ class CheminsRuraux:
             
             QgsMessageLog.logMessage(
                 f"Tentative de chargement : {layer_info['title']}",
-                "CheminsRuraux",
+                "VoirieCommunale",
                 Qgis.Info
             )
             QgsMessageLog.logMessage(
                 f"URI WMS : {uri}",
-                "CheminsRuraux",
+                "VoirieCommunale",
                 Qgis.Info
             )
             
@@ -1187,7 +1187,7 @@ class CheminsRuraux:
                 loaded_count += 1
                 QgsMessageLog.logMessage(
                     f"✓ Couche {layer_info['title']} chargée avec succès",
-                    "CheminsRuraux",
+                    "VoirieCommunale",
                     Qgis.Success
                 )
             else:
@@ -1195,12 +1195,12 @@ class CheminsRuraux:
                 errors.append(layer_info['title'])
                 QgsMessageLog.logMessage(
                     f"✗ {error_msg}",
-                    "CheminsRuraux",
+                    "VoirieCommunale",
                     Qgis.Warning
                 )
                 QgsMessageLog.logMessage(
                     f"Erreur détaillée : {wms_layer.error().message()}",
-                    "CheminsRuraux",
+                    "VoirieCommunale",
                     Qgis.Warning
                 )
         
@@ -1253,14 +1253,14 @@ class CheminsRuraux:
                 QgsProject.instance().addMapLayer(layer, False)
                 cosia_group.addLayer(layer)
                 created_layers.append(layer)
-                QgsMessageLog.logMessage(f"✓ {display_name} chargée", "CheminsRuraux", Qgis.Success)
+                QgsMessageLog.logMessage(f"✓ {display_name} chargée", "VoirieCommunale", Qgis.Success)
             else:
-                QgsMessageLog.logMessage(f"✗ {display_name} : {layer.error().message()}", "CheminsRuraux", Qgis.Warning)
+                QgsMessageLog.logMessage(f"✗ {display_name} : {layer.error().message()}", "VoirieCommunale", Qgis.Warning)
 
         success = len(created_layers) > 0
         if not success:
             root.removeChildNode(cosia_group)
-            QgsMessageLog.logMessage("Aucune couche CoSIA n'a pu être chargée", "CheminsRuraux", Qgis.Warning)
+            QgsMessageLog.logMessage("Aucune couche CoSIA n'a pu être chargée", "VoirieCommunale", Qgis.Warning)
         return success, created_layers
 
     def load_scan_historique_wms(self, layer_name_wms, display_name):
@@ -1287,7 +1287,7 @@ class CheminsRuraux:
 
         QgsMessageLog.logMessage(
             f"Chargement WMS ({crs}) : {display_name}",
-            "CheminsRuraux", Qgis.Info
+            "VoirieCommunale", Qgis.Info
         )
 
         self._remove_layers_by_name(display_name)
@@ -1297,13 +1297,13 @@ class CheminsRuraux:
             QgsProject.instance().addMapLayer(wms_layer)
             QgsMessageLog.logMessage(
                 f"✓ {display_name} chargée avec succès",
-                "CheminsRuraux", Qgis.Success
+                "VoirieCommunale", Qgis.Success
             )
             return True, [wms_layer]
         else:
             QgsMessageLog.logMessage(
                 f"✗ Impossible de charger {display_name} : {wms_layer.error().message()}",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             return False, []
 
@@ -1331,7 +1331,7 @@ class CheminsRuraux:
         except Exception as exc:
             QgsMessageLog.logMessage(
                 f"layer_order.json illisible ({exc}) — ordre canonique par défaut utilisé",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             # Valeurs de repli (identiques au contenu initial du JSON)
             commune_group = [
@@ -1411,7 +1411,7 @@ class CheminsRuraux:
 
         QgsMessageLog.logMessage(
             f"Couches r\u00e9ordonn\u00e9es selon l\u2019ordre canonique pour {code_insee}",
-            "CheminsRuraux",
+            "VoirieCommunale",
             Qgis.Info
         )
 
@@ -1566,7 +1566,7 @@ class CheminsRuraux:
 
         QgsMessageLog.logMessage(
             f"Couches regroup\u00e9es et r\u00e9ordonn\u00e9es dans '{group_name}'",
-            "CheminsRuraux",
+            "VoirieCommunale",
             Qgis.Info
         )
 
@@ -1592,7 +1592,7 @@ class CheminsRuraux:
         if code_insee:
             uri_string += f"&CQL_FILTER=code_insee='{code_insee}'"
 
-        QgsMessageLog.logMessage(f"WFS code_insee: {uri_string}", "CheminsRuraux", Qgis.Info)
+        QgsMessageLog.logMessage(f"WFS code_insee: {uri_string}", "VoirieCommunale", Qgis.Info)
         wfs_layer = QgsVectorLayer(uri_string, layer_name, "WFS")
 
         if wfs_layer.isValid() and wfs_layer.featureCount() > 0:
@@ -1600,10 +1600,10 @@ class CheminsRuraux:
             QgsProject.instance().addMapLayer(wfs_layer)
             if style_callback:
                 style_callback(wfs_layer)
-            QgsMessageLog.logMessage(f"✓ {layer_name} ({wfs_layer.featureCount()} entité(s))", "CheminsRuraux", Qgis.Success)
+            QgsMessageLog.logMessage(f"✓ {layer_name} ({wfs_layer.featureCount()} entité(s))", "VoirieCommunale", Qgis.Success)
             return True, wfs_layer
         else:
-            QgsMessageLog.logMessage(f"✗ {layer_name} : {wfs_layer.error().message()}", "CheminsRuraux", Qgis.Warning)
+            QgsMessageLog.logMessage(f"✗ {layer_name} : {wfs_layer.error().message()}", "VoirieCommunale", Qgis.Warning)
             return False, None
 
     def _load_wfs_bbox(self, typename, layer_name, bbox, crs="EPSG:4326", geom_field="geom", style_callback=None):
@@ -1622,13 +1622,13 @@ class CheminsRuraux:
             f"&outputFormat=application/json"
             f"&BBOX={xmin},{ymin},{xmax},{ymax},{crs}"
         )
-        QgsMessageLog.logMessage(f"WFS BBOX: {url}", "CheminsRuraux", Qgis.Info)
+        QgsMessageLog.logMessage(f"WFS BBOX: {url}", "VoirieCommunale", Qgis.Info)
 
         try:
             with urllib.request.urlopen(url, timeout=60) as resp:
                 payload = resp.read()
         except Exception as exc:
-            QgsMessageLog.logMessage(f"✗ Téléchargement WFS BBOX {typename}: {exc}", "CheminsRuraux", Qgis.Warning)
+            QgsMessageLog.logMessage(f"✗ Téléchargement WFS BBOX {typename}: {exc}", "VoirieCommunale", Qgis.Warning)
             return False, None
 
         vsimem_path = f"/vsimem/{typename.replace(':', '_').replace('.', '_')}.json"
@@ -1636,14 +1636,14 @@ class CheminsRuraux:
         layer = QgsVectorLayer(vsimem_path, layer_name, "ogr")
         if not layer.isValid() or layer.featureCount() == 0:
             gdal.Unlink(vsimem_path)
-            QgsMessageLog.logMessage(f"✗ {layer_name} : couche invalide ou vide", "CheminsRuraux", Qgis.Warning)
+            QgsMessageLog.logMessage(f"✗ {layer_name} : couche invalide ou vide", "VoirieCommunale", Qgis.Warning)
             return False, None
 
         self._remove_layers_by_name(layer_name)
         QgsProject.instance().addMapLayer(layer)
         if style_callback:
             style_callback(layer)
-        QgsMessageLog.logMessage(f"✓ {layer_name} ({layer.featureCount()} entité(s))", "CheminsRuraux", Qgis.Success)
+        QgsMessageLog.logMessage(f"✓ {layer_name} ({layer.featureCount()} entité(s))", "VoirieCommunale", Qgis.Success)
         return True, layer
 
     @staticmethod
@@ -1665,7 +1665,7 @@ class CheminsRuraux:
         except _re.error:
             QgsMessageLog.logMessage(
                 f"Regex corrompue pour '{key}' ({val!r}), restauration du défaut.",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             SettingsDialog.set(key, default)   # Réparer settings.json
             return default
@@ -1735,7 +1735,7 @@ class CheminsRuraux:
             url = f"{self.WFS_IGN_URL}?{urllib.parse.urlencode(params)}"
             QgsMessageLog.logMessage(
                 f"WFS paginé {typename} (startIndex={start_index}) : {url}",
-                "CheminsRuraux", Qgis.Info
+                "VoirieCommunale", Qgis.Info
             )
             try:
                 req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
@@ -1744,7 +1744,7 @@ class CheminsRuraux:
             except Exception as exc:
                 QgsMessageLog.logMessage(
                     f"✗ WFS paginé {typename} (startIndex={start_index}) : {exc}",
-                    "CheminsRuraux", Qgis.Critical
+                    "VoirieCommunale", Qgis.Critical
                 )
                 return False, None
 
@@ -1754,7 +1754,7 @@ class CheminsRuraux:
             all_features.extend(batch)
             QgsMessageLog.logMessage(
                 f"  page {start_index // page_size + 1} : {len(batch)} entité(s) reçue(s)",
-                "CheminsRuraux", Qgis.Info
+                "VoirieCommunale", Qgis.Info
             )
             if len(batch) < page_size:
                 break
@@ -1763,7 +1763,7 @@ class CheminsRuraux:
         if not all_features:
             QgsMessageLog.logMessage(
                 f"✗ {layer_name} : aucune entité retournée par le WFS",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             return False, None
 
@@ -1780,7 +1780,7 @@ class CheminsRuraux:
             gdal.Unlink(vsimem_path)
             QgsMessageLog.logMessage(
                 f"✗ {layer_name} : couche invalide après assemblage ({len(all_features)} entités collectées)",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             return False, None
 
@@ -1790,7 +1790,7 @@ class CheminsRuraux:
             style_callback(layer)
         QgsMessageLog.logMessage(
             f"✓ {layer_name} ({layer.featureCount()} entité(s), {len(all_features)} chargées en {start_index // page_size + 1} page(s))",
-            "CheminsRuraux", Qgis.Success
+            "VoirieCommunale", Qgis.Success
         )
         return True, layer
 
@@ -1836,7 +1836,7 @@ class CheminsRuraux:
         if layer.fields().indexOf(field_name) == -1:
             QgsMessageLog.logMessage(
                 f"Le champ '{field_name}' n'existe pas dans la couche BAN",
-                "CheminsRuraux",
+                "VoirieCommunale",
                 Qgis.Warning
             )
             return
@@ -1902,7 +1902,7 @@ class CheminsRuraux:
         
         QgsMessageLog.logMessage(
             "Style différencié et étiquettes appliqués à la couche BAN (Chemins ruraux / Voies communales)",
-            "CheminsRuraux",
+            "VoirieCommunale",
             Qgis.Success
         )
     
@@ -1988,7 +1988,7 @@ class CheminsRuraux:
 
         QgsMessageLog.logMessage(
             f"MAJIC : chargement des attributs pour {code_insee}",
-            "CheminsRuraux", Qgis.Info
+            "VoirieCommunale", Qgis.Info
         )
 
         majic_by_parcelle = {}
@@ -2031,20 +2031,20 @@ class CheminsRuraux:
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"MAJIC : erreur API Koumoul : {e}",
-                "CheminsRuraux", Qgis.Critical
+                "VoirieCommunale", Qgis.Critical
             )
             return False, None
 
         if not majic_by_parcelle:
             QgsMessageLog.logMessage(
                 f"MAJIC : aucune parcelle trouvée pour {code_insee}",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             return False, None
 
         QgsMessageLog.logMessage(
             f"MAJIC : {len(majic_by_parcelle)} parcelles MAJIC trouvées pour {code_insee}",
-            "CheminsRuraux", Qgis.Info
+            "VoirieCommunale", Qgis.Info
         )
 
         # ── Étape 2 : polygones depuis le WFS IGN ─────────────────────────────
@@ -2078,7 +2078,7 @@ class CheminsRuraux:
                 url = f"{WFS_URL}?{urllib.parse.urlencode(params)}"
                 QgsMessageLog.logMessage(
                     f"MAJIC WFS parcelles (startIndex={start_index}) : {url}",
-                    "CheminsRuraux", Qgis.Info
+                    "VoirieCommunale", Qgis.Info
                 )
                 req = urllib.request.Request(
                     url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'}
@@ -2095,13 +2095,13 @@ class CheminsRuraux:
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"MAJIC : erreur WFS IGN parcelles : {e}",
-                "CheminsRuraux", Qgis.Critical
+                "VoirieCommunale", Qgis.Critical
             )
             return False, None
 
         QgsMessageLog.logMessage(
             f"MAJIC : {len(wfs_features)} polygones WFS chargés pour {code_insee}",
-            "CheminsRuraux", Qgis.Info
+            "VoirieCommunale", Qgis.Info
         )
 
         # ── Étape 3 : jointure et création de la couche polygone ─────────────
@@ -2204,7 +2204,7 @@ class CheminsRuraux:
         QgsMessageLog.logMessage(
             f"MAJIC : {matched} parcelles polygones chargées pour {code_insee} "
             f"({len(majic_by_parcelle) - matched} non géolocalisées dans WFS)",
-            "CheminsRuraux", Qgis.Info
+            "VoirieCommunale", Qgis.Info
         )
         return True, layer
 
@@ -2232,7 +2232,7 @@ class CheminsRuraux:
 
         QgsMessageLog.logMessage(
             f"Requête Overpass OSM (routes ref C/R) pour {code_insee}",
-            "CheminsRuraux",
+            "VoirieCommunale",
             Qgis.Info
         )
 
@@ -2248,7 +2248,7 @@ class CheminsRuraux:
         except Exception as exc:
             QgsMessageLog.logMessage(
                 f"Erreur Overpass OSM: {exc}",
-                "CheminsRuraux",
+                "VoirieCommunale",
                 Qgis.Warning
             )
             QMessageBox.warning(
@@ -2264,7 +2264,7 @@ class CheminsRuraux:
         except Exception as exc:
             QgsMessageLog.logMessage(
                 f"Erreur parsing JSON Overpass: {exc}",
-                "CheminsRuraux",
+                "VoirieCommunale",
                 Qgis.Warning
             )
             return False, None
@@ -2434,7 +2434,7 @@ class CheminsRuraux:
         if bbox is None:
             QgsMessageLog.logMessage(
                 "MagOSM : BBOX requis pour charger la couche highways_line",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             return False, None
 
@@ -2458,7 +2458,7 @@ class CheminsRuraux:
             url = f"{self.MAGOSM_WFS_URL}?{urllib.parse.urlencode(params)}"
             QgsMessageLog.logMessage(
                 f"WFS MagOSM (startIndex={start_index}) : {url}",
-                "CheminsRuraux", Qgis.Info
+                "VoirieCommunale", Qgis.Info
             )
             try:
                 req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
@@ -2467,7 +2467,7 @@ class CheminsRuraux:
             except Exception as exc:
                 QgsMessageLog.logMessage(
                     f"✗ WFS MagOSM (startIndex={start_index}) : {exc}",
-                    "CheminsRuraux", Qgis.Critical
+                    "VoirieCommunale", Qgis.Critical
                 )
                 QMessageBox.warning(
                     self.iface.mainWindow(),
@@ -2484,7 +2484,7 @@ class CheminsRuraux:
             all_features.extend(batch)
             QgsMessageLog.logMessage(
                 f"  page {start_index // page_size + 1} : {len(batch)} entité(s) reçue(s)",
-                "CheminsRuraux", Qgis.Info
+                "VoirieCommunale", Qgis.Info
             )
             if len(batch) < page_size:
                 break
@@ -2493,7 +2493,7 @@ class CheminsRuraux:
         if not all_features:
             QgsMessageLog.logMessage(
                 f"✗ {layer_name} : aucune entité retournée par MagOSM",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             QMessageBox.warning(
                 self.iface.mainWindow(),
@@ -2515,7 +2515,7 @@ class CheminsRuraux:
             gdal.Unlink(vsimem_path)
             QgsMessageLog.logMessage(
                 f"✗ {layer_name} : couche invalide après assemblage",
-                "CheminsRuraux", Qgis.Warning
+                "VoirieCommunale", Qgis.Warning
             )
             return False, None
 
@@ -2531,7 +2531,7 @@ class CheminsRuraux:
         QgsMessageLog.logMessage(
             f"✓ {layer_name} ({layer.featureCount()} entité(s), {len(all_features)} features "
             f"en {start_index // page_size + 1} page(s))",
-            "CheminsRuraux", Qgis.Success
+            "VoirieCommunale", Qgis.Success
         )
         return True, layer
 
@@ -2628,7 +2628,7 @@ class CheminsRuraux:
 
         QgsMessageLog.logMessage(
             "Style différencié appliqué à la couche MagOSM (highway)",
-            "CheminsRuraux", Qgis.Success
+            "VoirieCommunale", Qgis.Success
         )
 
     def run(self):

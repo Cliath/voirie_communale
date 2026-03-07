@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.13.6
+version=0.13.7
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/chemins_ruraux
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.13.6 (2026-03-07)
+changelog=    Version 0.13.7 (2026-03-07)
+    - Journal des messages QGIS : toutes les entrées logMessage utilisaient deux tags distincts ("CheminsRuraux" et "VoirieCommunale"). Uniformisation sur "VoirieCommunale" (53 occurrences corrigées).
+    Version 0.13.6 (2026-03-07)
     - Interface : la section "Données à charger" est maintenant organisée en 3 onglets — Nationales (toutes les couches existantes : Admin Express, BD TOPO, OSM, MagOSM, DGCL, BAN, MAJIC), Locales (vide, prévu pour des données locales), Autres (vide, réservé).
     Version 0.13.5 (2026-03-07)
     - Regex BAN chemin rural : réécriture pour couvrir toutes les abréviations courantes (ch, che, chem, chin, chemin, cheminement, sen, sente, sentier) avec suffixe rural tronqué (r, ru, rur, ral, rle, rural, rurale), plus point optionnel entre préfixe et suffixe. Ancienne regex : (?i)(che(?:min)?|sen(?:tier)?) rural|C\.?R\.?.
@@ -38,8 +40,6 @@ changelog=    Version 0.13.6 (2026-03-07)
     - Stockage des paramètres : settings.json déplacé du profil QGIS vers le dossier du plugin, pour être partagé (versionné git). Le fichier est intégré au package ZIP et déployé avec le plugin. Au premier accès, toutes les clés manquantes sont complétées avec leurs valeurs par défaut (y compris ban_regex_chemin et ban_regex_voie même sans jamais ouvrir le dialogue Paramètres). Le dictionnaire _DEFAULTS centralise toutes les valeurs par défaut.
     Version 0.12.10 (2026-03-07)
     - Stockage des paramètres : QgsSettings (registre Windows) remplacé par un fichier settings.json dans le profil QGIS (<profil>/chemins_ruraux/settings.json). Le fichier est UTF-8, indenté, lisible et éditable manuellement. Même emplacement que TODO.md. L'API interne SettingsDialog.get()/set() est inchangée.
-    Version 0.12.9 (2026-03-07)
-    - Étiquettes BAN : expression "numero" || ' ' || "nom_voie" au lieu du seul champ nom_voie.
 homepage=https://github.com/votre-username/chemins_ruraux
 category=Plugins
 icon=icon.png
