@@ -16,6 +16,7 @@
     "DGCL Voirie communale retenue DSR 2025 {code_insee}",
     "DGCL Voirie départementale retenue DGF 2025 {code_insee}",
     "OSM Routes {code_insee}",
+    "MagOSM Routes {code_insee}",
     "Adresses BAN {code_insee}",
     "Parcelles MAJIC {code_insee}",
     "Commune {code_insee}",

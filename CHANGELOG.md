@@ -1,3 +1,7 @@
+# [0.13.2] - 2026-03-07
+### Corrigé
+- **Ordre canonique** : `MagOSM Routes {code_insee}` ajouté dans `layer_order.json`, juste après `OSM Routes {code_insee}`.
+
 # [0.13.1] - 2026-03-07
 ### Ajouté
 - **Réseau routier OSM via MagOSM** : nouvelle case à cocher "Réseau routier OSM (MagOSM)" qui charge la couche `magosm:highways_line` depuis le WFS public de Magellium (`https://magosm.magellium.com/geoserver/ows`). Le chargement est paginé (500 entités/page, timeout 180 s) pour s'adapter à la lenteur du service. Le style est calqué sur BD TOPO tronçons : règles regex CR/VC prioritaires sur le champ `name`, puis catégorisation par valeur du champ `highway` (motorway → steps), étiquettes sur `name`.
