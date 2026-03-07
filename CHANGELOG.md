@@ -1,3 +1,9 @@
+# [0.13.5] - 2026-03-07
+### Modifié
+- **Regex BAN chemin rural** : réécriture pour couvrir toutes les abréviations courantes (`ch`, `che`, `chem`, `chin`, `chemin`, `cheminement`, `sen`, `sente`, `sentier`) avec suffixe rural tronqué (`r`, `ru`, `rur`, `ral`, `rle`, `rural`, `rurale`), plus point optionnel entre préfixe et suffixe. Ancienne regex : `(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b`.
+- **Regex BAN voie communale** : réécriture symétrique couvrant les préfixes `voi`/`voie`, `ch`→`cheminement`, `rout`/`route` et les suffixes communal tronqués (`c`, `com`, `commun`, `communal`, `communale`, `cal`, `cale`, `cle`). Ancienne regex : `(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b`.
+- Mise à jour dans `chemins_ruraux.py` (3 occurrences) et `settings.json` (valeurs par défaut).
+
 # [0.13.4] - 2026-03-07
 ### Ajouté
 - **`build.bat`** : crée un tag `vX.Y.Z` après chaque commit et une GitHub Release avec le ZIP attaché (`gh release create --generate-notes`). Requiert le GitHub CLI (`gh`) installé et authentifié (`gh auth login`).
