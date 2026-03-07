@@ -842,36 +842,24 @@ class CheminsRuraux:
 
         layer.setRenderer(QgsRuleBasedRenderer(root_rule))
 
-        # ---- Étiquettes via QgsRuleBasedLabeling ----
-        # Une règle par catégorie concernée ; champ brut, sans regex dans l'étiquette.
-        def _make_lbl(field):
-            s = QgsPalLayerSettings()
-            s.isExpression = False
-            s.fieldName = field
-            s.enabled = True
-            s.placement = QgsPalLayerSettings.Line
-            fmt = QgsTextFormat()
-            fmt.setSize(8)
-            fmt.setColor(QColor(0, 0, 0))
-            buf = QgsTextBufferSettings()
-            buf.setEnabled(True)
-            buf.setSize(0.5)
-            buf.setColor(QColor(255, 255, 255))
-            fmt.setBuffer(buf)
-            s.setFormat(fmt)
-            return s
-
-        root_lbl = QgsRuleBasedLabeling.Rule(None)
-
-        rule_lbl_cr = QgsRuleBasedLabeling.Rule(_make_lbl(nom_field))
-        rule_lbl_cr.setFilterExpression(f"regexp_match(\"{nom_field}\", '{regex_chemin}') > 0")
-        root_lbl.appendChild(rule_lbl_cr)
-
-        rule_lbl_vc = QgsRuleBasedLabeling.Rule(_make_lbl(nom_field))
-        rule_lbl_vc.setFilterExpression(f"regexp_match(\"{nom_field}\", '{regex_voie}') > 0")
-        root_lbl.appendChild(rule_lbl_vc)
-
-        layer.setLabeling(QgsRuleBasedLabeling(root_lbl))
+        # ---- Étiquettes : champ brut, aucune regex ----
+        # Le renderer gère déjà la catégorisation. Le labeling affiche simplement
+        # nom_collaboratif_gauche ; QGIS n'affiche rien si le champ est null/vide.
+        lbl = QgsPalLayerSettings()
+        lbl.isExpression = False
+        lbl.fieldName = nom_field
+        lbl.enabled = True
+        lbl.placement = QgsPalLayerSettings.Line
+        fmt = QgsTextFormat()
+        fmt.setSize(8)
+        fmt.setColor(QColor(0, 0, 0))
+        buf = QgsTextBufferSettings()
+        buf.setEnabled(True)
+        buf.setSize(0.5)
+        buf.setColor(QColor(255, 255, 255))
+        fmt.setBuffer(buf)
+        lbl.setFormat(fmt)
+        layer.setLabeling(QgsVectorLayerSimpleLabeling(lbl))
         layer.setLabelsEnabled(True)
         layer.triggerRepaint()
 
