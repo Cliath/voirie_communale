@@ -8,6 +8,13 @@ __version__ = "0.12.0"
 __version_info__ = (0, 12, 0)
 
 VERSION_HISTORY = {
+    "0.12.0": {
+        "date": "2026-03-07",
+        "changes": [
+            "Ajouté : option 'Découper les couches sur l'emprise communale' dans les Paramètres, avec buffer configurable (0–10 000 m, défaut 25 m).",
+            "Ajouté : méthode _clip_layer_to_commune() — filtre les entités BBOX par intersection avec le buffer communal (calcul métrique en EPSG:2154).",
+        ]
+    },
     "0.9.74": {
         "date": "2026-03-01",
         "changes": [

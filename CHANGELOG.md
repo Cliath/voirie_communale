@@ -1,3 +1,12 @@
+# [0.12.0] - 2026-03-07
+### Ajouté
+- **Paramètres** : option "Découper les couches sur l'emprise communale" avec buffer configurable (0–10 000 m, défaut 25 m). Les couches filtrées par BBOX (Voirie comm., Voirie dép., OSM Routes, BD TOPO Routes nommées, BD TOPO Tronçons) sont découpées après chargement via `_clip_layer_to_commune()`.
+- `_clip_layer_to_commune()` : filtre les entités intersectant le buffer communal (calcul en EPSG:2154 pour être métrique, puis transformé dans le CRS de la couche).
+- `QSpinBox` ajouté aux imports de `chemins_ruraux_dialog.py` ; clés QgsSettings `clip_to_commune` et `clip_buffer_m`.
+
+# [0.11.10] - 2026-03-06
+### Corrigé
+- Bug : l'emprise communale était re-téléchargée à chaque chargement de couche BBOX (Voirie, OSM, BD TOPO) même si la couche `Commune {code_insee}` existait déjà dans le projet. Fix : détection préalable (`commune_reuse`) avec réutilisation de la couche existante.
 # [0.10.6] - 2026-03-04
 ### Modifié
 - Ordre canonique des couches : BD TOPO → Voirie comm. → Voirie dép. → OSM Routes → BAN → MAJIC → Commune → PLAN IGN → Waze → OSM France → Cadastre → BD ORTHO® → 8×Photos → SCAN 50® → Cassini → État-Major.
