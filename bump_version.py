@@ -59,6 +59,48 @@ def bump(part):
     mpath = BASE / 'metadata.txt'
     meta = mpath.read_text(encoding='utf-8')
     meta = re.sub(r'^version=\d+\.\d+\.\d+', f'version={new}', meta, flags=re.MULTILINE)
+
+    # Synchroniser le champ changelog= depuis CHANGELOG.md (10 dernières versions)
+    clog_path = BASE / 'CHANGELOG.md'
+    if clog_path.exists():
+        clog_content = clog_path.read_text(encoding='utf-8')
+        sections = re.split(r'(?=^# \[)', clog_content, flags=re.MULTILINE)
+        sections = [s.strip() for s in sections if s.strip()][:10]
+        lines_out = []
+        for sec in sections:
+            sec_lines = sec.splitlines()
+            title_m = re.match(r'^# \[(.+?)\]\s*-\s*(\S+)', sec_lines[0])
+            if title_m:
+                lines_out.append(f"    Version {title_m.group(1)} ({title_m.group(2)})")
+            for l in sec_lines[1:]:
+                l = l.strip()
+                if not l:
+                    continue
+                if l.startswith('###'):
+                    pass  # on ignore les sous-titres
+                elif l.startswith('-'):
+                    lines_out.append(f"    {l}")
+        changelog_val = '\n'.join(lines_out)
+        # Nettoyer le markdown et les caractères non-ASCII courants
+        changelog_val = re.sub(r'\*\*(.+?)\*\*', r'\1', changelog_val)  # **bold**
+        changelog_val = re.sub(r'\*(.+?)\*', r'\1', changelog_val)       # *italic*
+        changelog_val = re.sub(r'`(.+?)`', r'\1', changelog_val)         # `code`
+        changelog_val = (changelog_val
+            .replace('\u2192', '->')
+            .replace('\u2190', '<-')
+            .replace('\u2026', '...')
+            .replace('\u2019', "'").replace('\u2018', "'")
+            .replace('\u201c', '"').replace('\u201d', '"')
+            .replace('\u00ae', '(R)').replace('\u00a9', '(c)')
+        )
+        # Remplacer le bloc changelog= (multilignes indentées)
+        meta = re.sub(
+            r'^changelog=.*?(?=^\S|\Z)',
+            f'changelog={changelog_val}\n',
+            meta,
+            flags=re.MULTILINE | re.DOTALL
+        )
+
     mpath.write_text(meta, encoding='utf-8')
 
     # --- README.md ---

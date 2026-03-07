@@ -17,240 +17,29 @@ repository=https://github.com/Cliath/chemins_ruraux
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.9.74 (2026-03-01)
-    - Modifié : mentions de licence retirées des libellés des cases à cocher.
-    Version 0.9.73 (2026-03-01)
-    - Modifié : Photographies aériennes converti en case à cocher ; dialogue de sélection des périodes intégré dans le flux Charger les données.
-    Version 0.9.72 (2026-03-01)
-    - Ajouté : périodes 2000-2005, 2006-2010, 2011-2015, 2016-2020, 2021-2023 dans Photos aériennes historiques.
-    Version 0.9.71 (2026-03-01)
-    - Ajouté : bouton 'Photographies aériennes historiques...' ouvrant un dialogue de sélection WMS (1950-1965, 1965-1980, 1980-1995).
-    Version 0.9.70 (2026-03-01)
-    - Modifié : couche OSM renommée 'OSM Routes {code_insee}' (sans le suffixe '(C/R)').
-    Version 0.9.69 (2026-03-01)
-    - Modifié : Waze placée au-dessus de Cadastre dans l'ordre canonique.
-    Version 0.9.68 (2026-03-01)
-    - Modifié : Parcelles MAJIC placées entre Adresses BAN et Commune dans l'ordre canonique des couches.
-    Version 0.9.67 (2026-03-01)
-    - Ajouté : réordonnancement automatique des couches après chargement (ordre canonique : vecteurs → emprise → cadastre → historiques → tuiles).
-    Version 0.9.66 (2026-03-01)
-    - Corrigé : recherche couche Commune utilise == au lieu de startswith (robustesse multi-couches).
-    Version 0.9.65 (2026-03-01)
-    - Corrigé : zoom sur la commune ne fonctionnait pas après chargement d'une couche tuile seule (Waze) — le zoom cherche maintenant une couche Commune existante dans le projet.
-    Version 0.9.64 (2026-03-01)
-    - Modifié : case 'Tuiles Waze Editor' renommée en 'Waze'.
-    Version 0.9.63 (2026-03-01)
-    - Ajouté : tuiles XYZ Waze Editor dans Plans à charger. Méthode générique load_xyz_tile_layer().
-    Version 0.9.62 (2026-03-01)
-    - Supprimé : case Surfaces non agricoles RPG (SNA) — surchargement inutile.
-    Version 0.9.61 (2026-03-01)
-    - Ajouté : SCAN 50® 1950 dans Plans à charger.
-    Version 0.9.60 (2026-03-01)
-    - Ajouté : Carte d'État-Major et Carte de Cassini dans Plans à charger (WMS Géoplateforme IGN).
-    Version 0.9.59 (2026-03-01)
-    - Déplacé : 'Tout sélectionner' au-dessus du label 'Données à charger'.
-    Version 0.9.58 (2026-03-01)
-    - Déplacé : Cadastre dans la section 'Plans à charger'.
-    Version 0.9.57 (2026-03-01)
-    - Ajouté : section 'Plans à charger' dans la boîte de dialogue.
-    Version 0.9.56 (2026-03-01)
-    - Modifié : TODO.md déplacé vers le profil utilisateur QGIS (persisté entre les mises à jour).
-    Version 0.9.55 (2026-03-01)
-    - Ajouté : suppression automatique des doublons de couches avant rechargement.
-    Version 0.9.54 (2026-03-01)
-    - Modifié : zoom post-chargement sur l'emprise de la commune (au lieu de l'emprise combinée des couches).
-    Version 0.9.53 (2026-03-01)
-    - Modifié : ToDo s'ouvre dans une fenêtre QGIS intégrée (QDialog) éditable avec bouton Enregistrer.
-    Version 0.9.52 (2026-03-01)
-    - Ajouté : entrée de menu 'ToDo' ouvrant TODO.md dans l'éditeur système.
-    Version 0.9.51 (2026-03-01)
-    - Déplacé : menu du plugin de Vecteur vers Extensions.
-    Version 0.9.50 (2026-03-01)
-    - Supprimé : catégorie 'Autre' inutile dans le renderer OSM.
-    Version 0.9.49 (2026-03-01)
-    - Corrigé : AttributeError QgsRectangle __ior__ — remplacé par combineExtentWith().
-    Version 0.9.48 (2026-03-01)
-    - Corrigé : libellés de catégorisation OSM — C = Voie communale, R = Chemin rural, CE = Chemin d'exploitation.
-    Version 0.9.47 (2026-03-01)
-    - Corrigé : catégorisation OSM (CE/C/R) incorrecte pour les tronçons sans ref direct mais rattachés à une relation (rel_ref) — le champ ref stocke maintenant la meilleure référence disponible.
-    Version 0.9.46 (2026-03-01)
-    - Ajouté : barre de progression affichée après 1,5 s, mise à jour par source chargée.
-    Version 0.9.45 (2026-03-01)
-    - SNA RPG : flux WFS non disponible - message d'information affiché à la place.
-    Version 0.9.44 (2026-03-01)
-    - Ajouté : Source Surfaces non agricoles RPG (RPG.LATEST:SNA) filtrée sur l'emprise communale.
-    Version 0.9.43 (2026-03-01)
-    - Correction : case 'Routes numérotées ou nommées (BD TOPO)' manquante dans le groupe Tout sélectionner/Désélectionner.
-    Version 0.9.42 (2026-02-28)
-    - Mise à jour technique : incrémentation automatique de version, workflow automatisé (test).
-    Version 0.9.41 (2026-02-25)
-    - Ajouté : Affichage d'un avertissement à l'utilisateur (QMessageBox.warning) en cas d'échec du chargement MAJIC (personnes morales).
-    Version 0.9.40 (2026-02-25)
-    - Corrigé : mapping MAJIC/WFS amélioré pour géoréférencement maximal des parcelles.
-    Version 0.9.39 (2026-02-25)
-    - Suppression : Retrait complet de la couche BD TOPO Tronçons de route (case à cocher, logique, code, changelog, metadata).
-    Version 0.9.38 (2026-02-25)
-    - Correction : Symbologie BD TOPO limitée à 6 valeurs principales de type_de_route (les autres supprimées).
-    Version 0.9.37 (2026-02-25)
-    - Correction : Symbologie catégorisée mise à jour pour n'utiliser que les valeurs officielles de type_de_route BD TOPO.
-    Version 0.9.36 (2026-02-25)
-    - Ajout : Affichage catégorisé de la couche Routes numérotées ou nommées selon le champ type_de_route.
-    Version 0.9.35 (2026-02-23)
-    - Ajouté : Affichage explicite des licences de chaque source de données dans le menu et la boîte de dialogue À propos (Licence Ouverte 2.0, ODbL, etc.).
-    - Ajouté : Nouvelle donnée : Routes numérotées ou nommées (BD TOPO® IGN) (BDTOPO_V3:route_numerotee_ou_nommee) — case à cocher dédiée, chargement filtré sur la commune, licence ouverte IGN.
-    Version 0.9.34 (2026-02-23)
-    - Corrigé: libellés des codes AU* dans le dictionnaire MAJIC
-    Version 0.9.33 (2026-02-23)
-    - Modifié: MAJIC — catégorisation par groupe_personne (légende identique à Koumoul)
-    Version 0.9.32 (2026-02-23)
-    - Modifié: MAJIC — palette de couleurs fixe et libellés complets par forme juridique
-    Version 0.9.31 (2026-02-23)
-    - Ajouté: rendu catégorisé QGIS sur forme_juridique pour la couche MAJIC
-    Version 0.9.30 (2026-02-22)
-    - Modifié: couche MAJIC — géométrie polygone (WFS IGN Géoplateforme) au lieu de points centroïdes
-    Version 0.9.23 (2026-02-22)
-    - Corrigé: champ géométrie BD TOPO troncon_de_route ('geometrie' au lieu de 'geom')
-    Version 0.9.22 (2026-02-22)
-    Version 0.9.21 (2026-02-22)
-    - Ajouté: boîte de dialogue 'À propos' (version, auteur, lien GitHub)
-    Version 0.9.20 (2026-02-22)
-    - Corrigé: Renommage exhaustif 'Voirie Communale' (compile_plugin.py, compile_simple.py, package.py, QUICKSTART.md, releases/README.md, log de chargement)
-    Version 0.9.19 (2026-02-22)
-    - Modifié: Plugin renommé 'Voirie Communale' (menus, titres, métadonnées, en-têtes)
-    Version 0.9.18 (2026-02-22)
-    - Optimisation: Suppression imports inutilisés, self.temp_files, paramètres show_wait_message
-    - Corrigé: Bug label_settings.fieldName assigné 3 fois dans apply_ban_style
-    Version 0.9.9 (2026-02-17)
-    - Correction: Indentation invalide dans le chargement OSM
-    Version 0.9.8 (2026-02-17)
-    - Correction: Correction du filtre OSM ref C/R (matched_count)
-    Version 0.9.7 (2026-02-17)
-    - Correction: Filtre OSM ref C/R via JSON Overpass et couche mémoire
-    Version 0.9.6 (2026-02-17)
-    - Correction: Filtre OSM ref avec propagation des refs de relations
-    Version 0.9.5 (2026-02-17)
-    - Correction: Filtre OSM ref appliqué localement
-    Version 0.9.4 (2026-02-17)
-    - Correction: Filtre OSM ref via relations route
-    Version 0.9.3 (2026-02-17)
-    - Correction: Filtre OSM ref via relations route=road
-    Version 0.9.2 (2026-02-17)
-    - Ajusté: Filtre OSM routes avec ref commençant par C ou R
-    Version 0.9.1 (2026-02-17)
-    - Ajusté: Téléchargement des routes OSM sans filtres highway/surface
-    Version 0.9.0 (2026-02-17)
-    - Ajout: Téléchargement des routes OSM via Overpass avec filtres highway/surface
-    Version 0.8.12 (2026-02-14)
-    - Correction: Filtre CQL spatial BBOX au lieu du parametre bbox
-    Version 0.8.11 (2026-02-14)
-    - Correction: Format URL standard WFS pour BBOX
-    Version 0.8.10 (2026-02-14)
-    - Test: Format BBOX sans préfixe CRS:
-    Version 0.8.9 (2026-02-14)
-    - Correction: Préfixe CRS: requis dans format BBOX
-    Version 0.8.8 (2026-02-14)
-    - Correction: Format BBOX dans URI WFS doit inclure le CRS
-    Version 0.8.7 (2026-02-14)
-    - Correction: Recherche de couche commune existante dans le projet avant d'en charger une nouvelle pour BBOX voiries
-    Version 0.8.6 (2026-02-14)
-    - Correction: Deux formats d'URI WFS selon type de filtre
-    Version 0.8.5 (2026-02-14)
-    - Correction: Format URI WFS pour que le filtre BBOX soit respecté
-    - Correction: Utilisation de restrictToRequestBBOX=1
-    Version 0.8.4 (2026-02-14)
-    - Correction: Évite le chargement en double de la commune pour le BBOX voirie
-    Version 0.8.3 (2026-02-14)
-    - Correction: Chargement voirie avec filtre BBOX au lieu de code_insee
-    - Amélioration: load_wfs_layer() supporte filtres CQL et BBOX
-    - Correction: Chargement automatique commune si nécessaire pour BBOX voirie
-    Version 0.8.2 (2026-02-14)
-    - Suppression: Message d'attente lors du chargement de la BAN
-    Version 0.8.1 (2026-02-14)
-    - Correction: Tooltips voirie avec la source correcte (calcul IGN pour la DGCL)
-    Version 0.8.0 (2026-02-14)
-    - Ajout: Nouvelle source de données WFS - Voirie départementale (DGCL.2025:voirie_departementale)
-    - Amélioration: Checkbox pour sélectionner la voirie départementale
-    Version 0.7.0 (2026-02-14)
-    - Ajout: Nouvelle source de données WFS - Voirie communale (DGCL.2025:voirie_communale)
-    - Amélioration: Interface avec checkbox pour sélectionner la voirie communale
-    Version 0.6.16 (2026-02-14)
-    - Optimisation: URL WFS IGN mutualisée (constante WFS_IGN_URL)
-    - Nettoyage: Suppression de l'URL redondante /wfs/ows
-    Version 0.6.15 (2026-02-14)
-    - Refactorisation: Méthode générique load_wfs_layer() pour réduire la duplication de code
-    - Amélioration: Code plus maintenable pour l'ajout de nouvelles sources WFS
-    Version 0.6.14 (2026-02-14)
-    - Amélioration: Catégorie 'Autre' désactivée par défaut dans la légende BAN
-    Version 0.6.13 (2026-02-14)
-    - Amélioration: Étiquettes BAN affichées uniquement sur chemins ruraux et voies communales
-    Version 0.6.12 (2026-02-14)
-    - Correction: Placement des étiquettes BAN (AroundPoint au lieu de OverPoint)
-    Version 0.6.11 (2026-02-14)
-    - Amélioration: Nouveau logo du plugin
-    Version 0.6.10 (2026-02-14)
-    - Amélioration: Étiquettes automatiques avec nom de voie sur couche BAN
-    Version 0.6.9 (2026-02-14)
-    - Optimisation: Regex avec groupes non capturants (plus concis)
-    Version 0.6.8 (2026-02-14)
-    - Correction: regexp_match retourne position, test > 0 ajouté
-    Version 0.6.7 (2026-02-14)
-    - Correction: Regex compatible moteur QGIS
-    Version 0.6.6 (2026-02-14)
-    - Correction: Regex voie communale COM au lieu de CO
-    Version 0.6.5 (2026-02-14)
-    - Optimisation: Regex voie communale (VC, V.C., VOI COMMUNALE, etc.)
-    Version 0.6.4 (2026-02-14)
-    - Optimisation: Regex au lieu de LIKE pour meilleure performance
-    Version 0.6.3 (2026-02-14)
-    - Amélioration: Filtres chemins ruraux plus précis (CR, C.R., CHE/SEN RURAL)
-    Version 0.6.2 (2026-02-14)
-    - Ajout: Style différencié BAN (chemins ruraux marron, voies communales bleu)
-    Version 0.6.1 (2026-02-14)
-    - Correction: URL BAN avec paramètres en minuscules + message d'attente
-    Version 0.6.0 (2026-02-14)
-    - Ajout: Chargement des adresses BAN (Base Adresse Nationale)
-    Version 0.5.13 (2026-01-27)
-    - Changement: Utilisation de LIMITES_ADMINISTRATIVES_EXPRESS.LATEST:commune
-    Version 0.5.12 (2026-01-27)
-    - Correction: Transformation CRS de l'emprise vers le CRS du projet avant zoom
-    Version 0.5.11 (2026-01-27)
-    - Correction: Forçage updateExtents() et logs détaillés pour diagnostic zoom WFS
-    Version 0.5.10 (2026-01-27)
-    - Amélioration: Zoom robuste avec priorité emprise vectorielle, marge 5%
-    Version 0.5.9 (2026-01-27)
-    - Amélioration: Zoom uniquement sur les couches nouvellement chargées
-    Version 0.5.8 (2026-01-27)
-    - Simplification: EPSG:4326 (WGS84) utilisé pour tous les territoires français
-    Version 0.5.7 (2026-01-27)
-    - Correction: Support CRS adapté pour DOM-TOM (EPSG:4326 au lieu de EPSG:2154)
-    Version 0.5.6 (2026-01-27)
-    - Correction: Zoom et retour au premier plan centralisés dans validate_and_load()
-    Version 0.5.5 (2026-01-27)
-    - Correction: Zoom sur emprise communale et retour au premier plan restaurés
-    Version 0.5.4 (2026-01-27)
-    - Correction: Construction directe URI WFS avec CQL_FILTER=code_insee='54215'
-    Version 0.5.3 (2026-01-27)
-    - Correction: Filtre CQL sans guillemets (code_insee=54215)
-    Version 0.5.2 (2026-01-27)
-    - Correction: Utilisation de guillemets doubles dans le filtre CQL (pas d'antislash)
-    Version 0.5.1 (2026-01-27)
-    - Correction: Filtre WFS (code_insee au lieu de insee_com)
-    Version 0.5.0 (2026-01-27)
-    - Amélioration: Cases à cocher pour charger plusieurs types de données simultanément
-    - Ajout: Message récapitulatif lors du chargement multiple
-    Version 0.4.0 (2026-01-27)
-    - Ajout: Boutons radio pour choisir entre Cadastre et Emprise communale
-    - Amélioration: Interface plus claire avec sélection explicite
-    Version 0.3.2 (2026-01-27)
-    - Correction: Couche WFS ADMINEXPRESS-COG.LATEST:commune (nom correct)
-    Version 0.3.1 (2026-01-27)
-    - Correction: Couche WFS ADMINEXPRESS.LATEST
-    Version 0.3.0 (2026-01-27)
-    - Ajout: Emprise communale WFS Admin Express IGN
-    Version 0.1.0 (2026-01-25)
-    - Version initiale avec flux WMS cadastre INSPIRE
-
-
+changelog=    Version 0.13.6 (2026-03-07)
+    - Interface : la section "Données à charger" est maintenant organisée en 3 onglets — Nationales (toutes les couches existantes : Admin Express, BD TOPO, OSM, MagOSM, DGCL, BAN, MAJIC), Locales (vide, prévu pour des données locales), Autres (vide, réservé).
+    Version 0.13.5 (2026-03-07)
+    - Regex BAN chemin rural : réécriture pour couvrir toutes les abréviations courantes (ch, che, chem, chin, chemin, cheminement, sen, sente, sentier) avec suffixe rural tronqué (r, ru, rur, ral, rle, rural, rurale), plus point optionnel entre préfixe et suffixe. Ancienne regex : (?i)(che(?:min)?|sen(?:tier)?) rural|C\.?R\.?.
+    - Regex BAN voie communale : réécriture symétrique couvrant les préfixes voi/voie, ch->cheminement, rout/route et les suffixes communal tronqués (c, com, commun, communal, communale, cal, cale, cle). Ancienne regex : (?i)(voi(?:e)?) (com(?:munale)?)|V\.?C\.?.
+    - Mise à jour dans chemins_ruraux.py (3 occurrences) et settings.json (valeurs par défaut).
+    Version 0.13.4 (2026-03-07)
+    - build.bat : crée un tag vX.Y.Z après chaque commit et une GitHub Release avec le ZIP attaché (gh release create --generate-notes). Requiert le GitHub CLI (gh) installé et authentifié (gh auth login).
+    - metadata.txt : name corrigé en Voirie Communale (au lieu de chemins_ruraux), champ tags ajouté (voirie, commune, chemin rural...).
+    Version 0.13.3 (2026-03-07)
+    - README : MagOSM Routes ajouté dans l'ordre canonique, le tableau des couches vectorielles, la section style et la table des services.
+    Version 0.13.2 (2026-03-07)
+    - Ordre canonique : MagOSM Routes {code_insee} ajouté dans layer_order.json, juste après OSM Routes {code_insee}.
+    Version 0.13.1 (2026-03-07)
+    - Réseau routier OSM via MagOSM : nouvelle case à cocher "Réseau routier OSM (MagOSM)" qui charge la couche magosm:highways_line depuis le WFS public de Magellium (https://magosm.magellium.com/geoserver/ows). Le chargement est paginé (500 entités/page, timeout 180 s) pour s'adapter à la lenteur du service. Le style est calqué sur BD TOPO tronçons : règles regex CR/VC prioritaires sur le champ name, puis catégorisation par valeur du champ highway (motorway -> steps), étiquettes sur name.
+    Version 0.13.0 (2026-03-07)
+    - Paramètres dans un fichier JSON : les paramètres du plugin (précédemment stockés dans le registre Windows via QgsSettings) sont désormais persistés dans un fichier settings.json local au dossier du plugin. Le fichier est UTF-8, lisible et éditable manuellement, et se crée automatiquement au premier usage à partir des valeurs par défaut (_DEFAULTS). Il n'est ni inclus dans le ZIP ni versionné dans git, ce qui évite d'écraser les réglages utilisateur lors d'une mise à jour et d'exposer des données personnelles (last_insee, checked_layers) dans le dépôt.
+    Version 0.12.11 (2026-03-07)
+    - Stockage des paramètres : settings.json déplacé du profil QGIS vers le dossier du plugin, pour être partagé (versionné git). Le fichier est intégré au package ZIP et déployé avec le plugin. Au premier accès, toutes les clés manquantes sont complétées avec leurs valeurs par défaut (y compris ban_regex_chemin et ban_regex_voie même sans jamais ouvrir le dialogue Paramètres). Le dictionnaire _DEFAULTS centralise toutes les valeurs par défaut.
+    Version 0.12.10 (2026-03-07)
+    - Stockage des paramètres : QgsSettings (registre Windows) remplacé par un fichier settings.json dans le profil QGIS (<profil>/chemins_ruraux/settings.json). Le fichier est UTF-8, indenté, lisible et éditable manuellement. Même emplacement que TODO.md. L'API interne SettingsDialog.get()/set() est inchangée.
+    Version 0.12.9 (2026-03-07)
+    - Étiquettes BAN : expression "numero" || ' ' || "nom_voie" au lieu du seul champ nom_voie.
 homepage=https://github.com/votre-username/chemins_ruraux
 category=Plugins
 icon=icon.png
