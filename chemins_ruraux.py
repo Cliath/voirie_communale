@@ -781,7 +781,7 @@ class CheminsRuraux:
     def _apply_bdtopo_troncons_style(self, layer,
                                       regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
                                       regex_voie=r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'):
-        """Style à règles : règles BAN (chemin rural / voie communale) en priorité
+        """Style à règles : regex de filtrage (chemin rural / voie communale) en priorité
         sur le champ 'nom_1_gauche', puis catégorisation par 'nature'.
         """
         from qgis.core import (
@@ -795,18 +795,18 @@ class CheminsRuraux:
 
         root_rule = QgsRuleBasedRenderer.Rule(None)  # règle racine (conteneur)
 
-        # ---- 1. Règles issues des regex BAN (champ nom_collaboratif_gauche) ----
+        # ---- 1. Règles de filtrage par regex (champ nom_collaboratif_gauche) ----
         nom_field = 'nom_collaboratif_gauche'
 
         rule_cr = QgsRuleBasedRenderer.Rule(make_line('#A0522D', 0.7))
-        rule_cr.setLabel('Chemin rural (regex BAN)')
+        rule_cr.setLabel('Chemin rural')
         rule_cr.setFilterExpression(
             f"regexp_match(\"{nom_field}\", '{regex_chemin}') > 0"
         )
         root_rule.appendChild(rule_cr)
 
         rule_vc = QgsRuleBasedRenderer.Rule(make_line('#4169E1', 0.7))
-        rule_vc.setLabel('Voie communale (regex BAN)')
+        rule_vc.setLabel('Voie communale')
         rule_vc.setFilterExpression(
             f"regexp_match(\"{nom_field}\", '{regex_voie}') > 0"
         )
@@ -829,7 +829,7 @@ class CheminsRuraux:
         for nature, color, width in nature_map:
             rule = QgsRuleBasedRenderer.Rule(make_line(color, width))
             rule.setLabel(nature)
-            # N'exclut volontairement pas les regex BAN : si un tronçon matcher les deux
+            # N'exclut volontairement pas les règles de filtrage : si un tronçon matche les deux
             # (nom + nature), la première règle matchée s'applique (chemin/voie prioritaire)
             rule.setFilterExpression(f"\"nature\" = '{nature}'")
             root_rule.appendChild(rule)
