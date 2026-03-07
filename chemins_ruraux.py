@@ -12,7 +12,7 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
                        Qgis, QgsApplication, QgsLayerTreeGroup, QgsLayerTreeLayer,
-                       QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsSettings,
+                       QgsCoordinateTransform, QgsCoordinateReferenceSystem, QgsWkbTypes, QgsSettings,
                        QgsRendererCategory, QgsCategorizedSymbolRenderer, QgsSingleSymbolRenderer,
                        QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol, QgsFeature, QgsField,
                        QgsGeometry, QgsPointXY,
@@ -840,13 +840,21 @@ class CheminsRuraux:
                 return layer
 
             # 6. Créer une couche mémoire avec les entités filtrées
-            geom_type_str = QgsVectorLayer.geometryDisplayString(layer.geometryType())
+            # QgsWkbTypes.displayString() retourne "LineString", "MultiLineString", etc.
+            # (contrairement à geometryDisplayString qui retourne "Line" — invalide pour le provider mémoire)
+            geom_type_str = QgsWkbTypes.displayString(layer.wkbType())
             crs_authid = crs_layer.authid()
             mem_layer = QgsVectorLayer(
                 f"{geom_type_str}?crs={crs_authid}",
                 layer.name(),
                 "memory"
             )
+            if not mem_layer.isValid():
+                QgsMessageLog.logMessage(
+                    f"Clip commune : couche mémoire invalide pour '{layer.name()}' (type={geom_type_str}), clip ignoré.",
+                    "VoirieCommunale", Qgis.Warning
+                )
+                return layer
             mem_provider = mem_layer.dataProvider()
             mem_provider.addAttributes(layer.fields().toList())
             mem_layer.updateFields()

@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.12.0"
-__version_info__ = (0, 12, 0)
+__version__ = "0.12.2"
+__version_info__ = (0, 12, 2)
 
 VERSION_HISTORY = {
+    "0.12.1": {
+        "date": "2026-03-07",
+        "changes": [
+            "Corrigé : clip par emprise communale — couche mémoire invalide car geometryDisplayString() retourne 'Line' au lieu de 'LineString'. Corrigé avec QgsWkbTypes.displayString(layer.wkbType()).",
+        ]
+    },
     "0.12.0": {
         "date": "2026-03-07",
         "changes": [

@@ -1,3 +1,7 @@
+# [0.12.1] - 2026-03-07
+### Corrigé
+- **Clip par emprise communale** : la couche mémoire était invalide car `geometryDisplayString()` retourne `"Line"` au lieu de `"LineString"` attendu par le provider mémoire. Corrigé avec `QgsWkbTypes.displayString(layer.wkbType())`. Ajout d'une garde `isValid()` avant remplacement dans le projet.
+
 # [0.12.0] - 2026-03-07
 ### Ajouté
 - **Paramètres** : option "Découper les couches sur l'emprise communale" avec buffer configurable (0–10 000 m, défaut 25 m). Les couches filtrées par BBOX (Voirie comm., Voirie dép., OSM Routes, BD TOPO Routes nommées, BD TOPO Tronçons) sont découpées après chargement via `_clip_layer_to_commune()`.
