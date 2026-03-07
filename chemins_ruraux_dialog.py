@@ -29,7 +29,7 @@ class CheminsRurauxDialog(QtWidgets.QDialog, Ui_CheminsRurauxDialogBase):
             'chkCommune', 'chkBDTopoRoutesNom', 'chkOsmRoutes',
             'chkVoirie', 'chkVoirieDep', 'chkBAN', 'chkMajic',
             'chkCadastre', 'chkPlanIGN', 'chkBDOrtho', 'chkMNTLidar',
-            'chkOsmFR', 'chkWazeTiles', 'chkPhotoAeriennes',
+            'chkOsmFR', 'chkWazeTiles', 'chkCoSIA', 'chkPhotoAeriennes',
             'chkScan50_1950', 'chkScanCassini', 'chkScanEtatMajor'
         ]
         # Utiliser 'clicked' (pas 'stateChanged') pour les clics utilisateur sur la case maître

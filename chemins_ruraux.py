@@ -440,6 +440,7 @@ class CheminsRuraux:
         scan50_1950_checked = hasattr(self.dlg, 'chkScan50_1950') and self.dlg.chkScan50_1950.isChecked()
         waze_tiles_checked = hasattr(self.dlg, 'chkWazeTiles') and self.dlg.chkWazeTiles.isChecked()
         osmfr_checked = hasattr(self.dlg, 'chkOsmFR') and self.dlg.chkOsmFR.isChecked()
+        cosia_checked = hasattr(self.dlg, 'chkCoSIA') and self.dlg.chkCoSIA.isChecked()
         photo_aeriennes_checked = hasattr(self.dlg, 'chkPhotoAeriennes') and self.dlg.chkPhotoAeriennes.isChecked()
         bd_ortho_checked = hasattr(self.dlg, 'chkBDOrtho') and self.dlg.chkBDOrtho.isChecked()
         mnt_lidar_checked = hasattr(self.dlg, 'chkMNTLidar') and self.dlg.chkMNTLidar.isChecked()
@@ -450,7 +451,7 @@ class CheminsRuraux:
         if needs_bbox:
             commune_checked = True
         
-        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not osmfr_checked and not photo_aeriennes_checked and not bd_ortho_checked and not mnt_lidar_checked and not plan_ign_checked:
+        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not bdtopo_routesnom_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not osmfr_checked and not cosia_checked and not photo_aeriennes_checked and not bd_ortho_checked and not mnt_lidar_checked and not plan_ign_checked:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Sélection requise",
@@ -480,7 +481,7 @@ class CheminsRuraux:
             voirie_checked, voirie_dep_checked, osm_routes_checked,
             bdtopo_routesnom_checked, majic_checked,
             scan_etat_major_checked, scan_cassini_checked, scan50_1950_checked,
-            waze_tiles_checked, osmfr_checked, bd_ortho_checked, mnt_lidar_checked, plan_ign_checked
+            waze_tiles_checked, osmfr_checked, cosia_checked, bd_ortho_checked, mnt_lidar_checked, plan_ign_checked
         ]) + len(photo_aeriennes_sources)
 
         progress = QProgressDialog(
@@ -628,6 +629,12 @@ class CheminsRuraux:
             )
             results.append(('OSM France', osmfr_success))
             loaded_layers.extend(osmfr_layers)
+
+        if cosia_checked:
+            advance("Chargement CoSIA (Couverture du Sol par IA)...")
+            cosia_success, cosia_layers = self.load_cosia_wms()
+            results.append(('CoSIA', cosia_success))
+            loaded_layers.extend(cosia_layers)
 
         if bd_ortho_checked:
             advance("Chargement BD ORTHO\u00ae 20 cm...")
@@ -911,6 +918,46 @@ class CheminsRuraux:
             )
             return False, []
 
+    def load_cosia_wms(self):
+        """Charge les 3 millésimes CoSIA (Couverture du Sol par IA) dans un groupe dédié.
+
+        Couches IGN Géoplateforme (ordre décroissant) :
+          IGNF_COSIA_2024-2026, IGNF_COSIA_2021-2023, IGNF_COSIA_2017-2020
+
+        Returns:
+            tuple: (bool, list) - (au moins une couche chargée, liste des couches)
+        """
+        WMS_URL = "https://data.geopf.fr/wms-r"
+        group_name = "CoSIA (Couverture du Sol par IA)"
+        millesimes = [
+            ('IGNF_COSIA_2024-2026', 'CoSIA 2024-2026'),
+            ('IGNF_COSIA_2021-2023', 'CoSIA 2021-2023'),
+            ('IGNF_COSIA_2017-2020', 'CoSIA 2017-2020'),
+        ]
+
+        root = QgsProject.instance().layerTreeRoot()
+        # Supprimer le groupe existant éventuellement présent
+        self._remove_group_by_name(group_name)
+        cosia_group = root.addGroup(group_name)
+
+        created_layers = []
+        for typename, display_name in millesimes:
+            uri = f"crs=EPSG:2154&format=image/png&layers={typename}&styles&url={WMS_URL}"
+            layer = QgsRasterLayer(uri, display_name, 'wms')
+            if layer.isValid():
+                QgsProject.instance().addMapLayer(layer, False)
+                cosia_group.addLayer(layer)
+                created_layers.append(layer)
+                QgsMessageLog.logMessage(f"✓ {display_name} chargée", "CheminsRuraux", Qgis.Success)
+            else:
+                QgsMessageLog.logMessage(f"✗ {display_name} : {layer.error().message()}", "CheminsRuraux", Qgis.Warning)
+
+        success = len(created_layers) > 0
+        if not success:
+            root.removeChildNode(cosia_group)
+            QgsMessageLog.logMessage("Aucune couche CoSIA n'a pu être chargée", "CheminsRuraux", Qgis.Warning)
+        return success, created_layers
+
     def load_scan_historique_wms(self, layer_name_wms, display_name):
         """Charge un scan historique IGN (EPSG:2154). Délègue à _load_wms_layer."""
         return self._load_wms_layer(layer_name_wms, display_name, 'EPSG:2154')
@@ -987,6 +1034,7 @@ class CheminsRuraux:
             "PLAN IGN J+1",
             "Waze",
             "OSM France",
+            "CoSIA (Couverture du Sol par IA)",
             f"Cadastre - {code_insee}",
             "BD ORTHO\u00ae 20 cm",
             "MNT LiDAR HD",

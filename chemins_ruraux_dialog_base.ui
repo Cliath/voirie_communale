@@ -236,6 +236,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="chkCoSIA">
+            <property name="text">
+             <string>CoSIA (Couverture du Sol par IA)</string>
+            </property>
+            <property name="toolTip">
+             <string>Charge les 3 millésimes CoSIA (2017-2020, 2021-2023, 2024-2026) via le WMS IGN Géoplateforme&#10;Licence Ouverte 2.0 (Etalab) — © IGN</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="spacerActuels">
             <property name="orientation"><enum>Qt::Vertical</enum></property>
             <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
