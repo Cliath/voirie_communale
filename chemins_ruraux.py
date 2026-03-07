@@ -747,13 +747,26 @@ class CheminsRuraux:
         Returns:
             tuple: (bool, QgsVectorLayer ou None)
         """
+        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
+        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
+        regex_chemin = (
+            SettingsDialog.get('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
+            or _BAN_REGEX_CHEMIN_DEFAULT
+        )
+        regex_voie = (
+            SettingsDialog.get('ban_regex_voie', _BAN_REGEX_VOIE_DEFAULT)
+            or _BAN_REGEX_VOIE_DEFAULT
+        )
+
         layer_name = f"BD TOPO Tronçons de route {code_insee}"
         success, layer = self._load_wfs_paginated(
             typename="BDTOPO_V3:troncon_de_route",
             layer_name=layer_name,
             crs="EPSG:4326",
             bbox=bbox,
-            style_callback=self._apply_bdtopo_troncons_style,
+            style_callback=lambda lyr: self._apply_bdtopo_troncons_style(
+                lyr, regex_chemin=regex_chemin, regex_voie=regex_voie
+            ),
         )
 
         if not success:
@@ -765,35 +778,69 @@ class CheminsRuraux:
             )
         return success, layer
 
-    def _apply_bdtopo_troncons_style(self, layer):
-        """Applique un style catégorisé sur le champ 'nature' de la couche troncon_de_route."""
-        from qgis.core import QgsCategorizedSymbolRenderer, QgsRendererCategory, QgsSymbol
+    def _apply_bdtopo_troncons_style(self, layer,
+                                      regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
+                                      regex_voie=r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'):
+        """Style à règles : règles BAN (chemin rural / voie communale) en priorité
+        sur le champ 'nom_1_gauche', puis catégorisation par 'nature'.
+        """
+        from qgis.core import (
+            QgsRuleBasedRenderer, QgsSymbol,
+            QgsLineSymbol
+        )
 
-        color_map = [
-            ('Type autoroutier',          '#CC0000', 1.4),
-            ('Route à 2 chaussées',        '#FF6600', 1.0),
-            ('Route à 1 chaussée',         '#FFAA00', 0.8),
-            ('Route empierrée',            '#996633', 0.6),
-            ('Chemin',                     '#C8A46E', 0.5),
-            ('Piste cyclable',             '#00AA00', 0.5),
-            ('Sentier',                    '#DDBB88', 0.4),
-            ('Bac ou liaison maritime',    '#0055CC', 0.5),
-            ('Bretelle',                   '#FF9999', 0.6),
-            ('Rond-point',                 '#FF9999', 0.6),
+        def make_line(color, width):
+            sym = QgsLineSymbol.createSimple({'color': color, 'width': str(width)})
+            return sym
+
+        root_rule = QgsRuleBasedRenderer.Rule(None)  # règle racine (conteneur)
+
+        # ---- 1. Règles issues des regex BAN (champ nom_1_gauche) ----
+        nom_field = 'nom_1_gauche'
+
+        rule_cr = QgsRuleBasedRenderer.Rule(make_line('#A0522D', 0.7))
+        rule_cr.setLabel('Chemin rural (regex BAN)')
+        rule_cr.setFilterExpression(
+            f"regexp_match(\"{nom_field}\", '{regex_chemin}') > 0"
+        )
+        root_rule.appendChild(rule_cr)
+
+        rule_vc = QgsRuleBasedRenderer.Rule(make_line('#4169E1', 0.7))
+        rule_vc.setLabel('Voie communale (regex BAN)')
+        rule_vc.setFilterExpression(
+            f"regexp_match(\"{nom_field}\", '{regex_voie}') > 0"
+        )
+        root_rule.appendChild(rule_vc)
+
+        # ---- 2. Règles par nature (pour tout ce qui n'est pas matché par les regex) ----
+        # IS NULL ou ELSE : condit. "ELSE" en QgsRuleBasedRenderer = is_active + pas de filtre
+        nature_map = [
+            ('Type autoroutier',       '#CC0000', 1.4),
+            ('Route à 2 chaussées',    '#FF6600', 1.0),
+            ('Route à 1 chaussée',     '#FFAA00', 0.8),
+            ('Route empierrée',        '#996633', 0.6),
+            ('Chemin',                 '#C8A46E', 0.5),
+            ('Piste cyclable',         '#00AA00', 0.5),
+            ('Sentier',                '#DDBB88', 0.4),
+            ('Bac ou liaison maritime','#0055CC', 0.5),
+            ('Bretelle',               '#FF9999', 0.6),
+            ('Rond-point',             '#FF9999', 0.6),
         ]
-        categories = []
-        for nature, color, width in color_map:
-            symbol = QgsSymbol.defaultSymbol(layer.geometryType())
-            symbol.setColor(QColor(color))
-            symbol.setWidth(width)
-            categories.append(QgsRendererCategory(nature, symbol, nature))
-        # Catégorie par défaut (valeurs inconnues)
-        sym_default = QgsSymbol.defaultSymbol(layer.geometryType())
-        sym_default.setColor(QColor('#AAAAAA'))
-        sym_default.setWidth(0.4)
-        categories.append(QgsRendererCategory('', sym_default, '(autre)'))
+        for nature, color, width in nature_map:
+            rule = QgsRuleBasedRenderer.Rule(make_line(color, width))
+            rule.setLabel(nature)
+            # N'exclut volontairement pas les regex BAN : si un tronçon matcher les deux
+            # (nom + nature), la première règle matchée s'applique (chemin/voie prioritaire)
+            rule.setFilterExpression(f"\"nature\" = '{nature}'")
+            root_rule.appendChild(rule)
 
-        layer.setRenderer(QgsCategorizedSymbolRenderer('nature', categories))
+        # Règle par défaut (éléments non catégorisés)
+        rule_default = QgsRuleBasedRenderer.Rule(make_line('#AAAAAA', 0.4))
+        rule_default.setLabel('(autre)')
+        rule_default.setIsElse(True)
+        root_rule.appendChild(rule_default)
+
+        layer.setRenderer(QgsRuleBasedRenderer(root_rule))
         layer.triggerRepaint()
 
     def load_bdtopo_routesnom_wfs(self, code_insee, bbox=None):
