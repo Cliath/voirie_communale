@@ -4,10 +4,16 @@ Version management for Voirie Communale plugin
 """
 
 
-__version__ = "0.12.2"
-__version_info__ = (0, 12, 2)
+__version__ = "0.12.4"
+__version_info__ = (0, 12, 4)
 
 VERSION_HISTORY = {
+    "0.12.3": {
+        "date": "2026-03-07",
+        "changes": [
+            "Corrigé : validation des regex chemin/voie dans les Paramètres avant sauvegarde — message d'erreur explicite si invalide.",
+        ]
+    },
     "0.12.1": {
         "date": "2026-03-07",
         "changes": [

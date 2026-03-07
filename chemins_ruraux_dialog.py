@@ -6,6 +6,7 @@ Licence : GNU GPL v2+
 """
 
 import os
+import re
 import json
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtWidgets import (
@@ -407,6 +408,25 @@ class SettingsDialog(QDialog):
         self.btn_cancel.clicked.connect(self.reject)
 
     def _save_and_accept(self):
+        # Valider les regex avant toute sauvegarde
+        for label, txt_widget in [
+            ("Regex chemins", self.txt_regex_chemin),
+            ("Regex voies", self.txt_regex_voie),
+        ]:
+            pattern = txt_widget.text().strip()
+            if pattern:
+                try:
+                    re.compile(pattern)
+                except re.error as exc:
+                    QMessageBox.warning(
+                        self,
+                        "Expression régulière invalide",
+                        f"{label} : expression régulière invalide.\n\nÉchec : {exc}\n\nCorrigez-la avant d'enregistrer."
+                    )
+                    txt_widget.setFocus()
+                    txt_widget.selectAll()
+                    return
+
         self.set('auto_zoom', self.chk_auto_zoom.isChecked())
         self.set('auto_reorder', self.chk_auto_reorder.isChecked())
         self.set('clip_to_commune', self.chk_clip_commune.isChecked())

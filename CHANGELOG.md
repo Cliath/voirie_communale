@@ -1,3 +1,6 @@
+# [0.12.3] - 2026-03-07
+### Corrigé
+- **Paramètres** : validation des expressions régulières (regex chemin/voie) avant sauvegarde. Un message d'erreur explicite est affiché si la regex est invalide, avec focus automatique sur le champ fautif.
 # [0.12.1] - 2026-03-07
 ### Corrigé
 - **Clip par emprise communale** : la couche mémoire était invalide car `geometryDisplayString()` retourne `"Line"` au lieu de `"LineString"` attendu par le provider mémoire. Corrigé avec `QgsWkbTypes.displayString(layer.wkbType())`. Ajout d'une garde `isValid()` avant remplacement dans le projet.
