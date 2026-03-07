@@ -795,8 +795,8 @@ class CheminsRuraux:
 
         root_rule = QgsRuleBasedRenderer.Rule(None)  # règle racine (conteneur)
 
-        # ---- 1. Règles issues des regex BAN (champ nom_1_gauche) ----
-        nom_field = 'nom_1_gauche'
+        # ---- 1. Règles issues des regex BAN (champ nom_voie_ban_gauche) ----
+        nom_field = 'nom_voie_ban_gauche'
 
         rule_cr = QgsRuleBasedRenderer.Rule(make_line('#A0522D', 0.7))
         rule_cr.setLabel('Chemin rural (regex BAN)')
