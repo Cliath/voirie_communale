@@ -1,7 +1,6 @@
-# [0.12.12] - 2026-03-07
-### Modifié
-- **Versionnage de `settings.json`** : le fichier n'est plus inclus dans le ZIP ni versionné dans git. Il est généré au premier usage depuis `_DEFAULTS` (comportement inchangé). Avantage : les paramètres utilisateur ne sont plus écrasés lors d'une mise à jour, et aucune donnée personnelle (`last_insee`, `checked_layers`) n'est commitée dans le dépôt.
-- **`.gitignore`** : `settings.json` ajouté pour éviter tout commit accidentel de données personnelles.
+# [0.13.0] - 2026-03-07
+### Ajouté
+- **Paramètres dans un fichier JSON** : les paramètres du plugin (précédemment stockés dans le registre Windows via `QgsSettings`) sont désormais persistés dans un fichier `settings.json` local au dossier du plugin. Le fichier est UTF-8, lisible et éditable manuellement, et se crée automatiquement au premier usage à partir des valeurs par défaut (`_DEFAULTS`). Il n'est ni inclus dans le ZIP ni versionné dans git, ce qui évite d'écraser les réglages utilisateur lors d'une mise à jour et d'exposer des données personnelles (`last_insee`, `checked_layers`) dans le dépôt.
 
 # [0.12.11] - 2026-03-07
 ### Modifié
