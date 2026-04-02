@@ -24,8 +24,8 @@
   ],
 
   "root": [
-    "__COMMUNE_GROUP__",
     "Géofoncier public",
+    "__COMMUNE_GROUP__",
     "PLAN IGN J+1",
     "Waze",
     "OSM France",
