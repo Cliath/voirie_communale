@@ -1287,7 +1287,7 @@ class VoirieCommunale:
             self._remove_layers_by_name(display_name)
             layer = QgsRasterLayer(uri, display_name, 'wms')
             if layer.isValid():
-                QgsProject.instance().addMapLayer(layer)
+                QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
                 QgsMessageLog.logMessage(
                     f"Tuiles XYZ chargées : {display_name}",
                     "VoirieCommunale",
@@ -1540,7 +1540,7 @@ class VoirieCommunale:
         wms_layer = QgsRasterLayer(uri, display_name, 'wms')
 
         if wms_layer.isValid():
-            QgsProject.instance().addMapLayer(wms_layer)
+            QgsProject.instance().addMapLayer(wms_layer, False); QgsProject.instance().layerTreeRoot().addLayer(wms_layer)
             QgsMessageLog.logMessage(
                 f"✓ {display_name} chargée avec succès",
                 "VoirieCommunale", Qgis.Success
@@ -1869,7 +1869,7 @@ class VoirieCommunale:
 
         if wfs_layer.isValid() and wfs_layer.featureCount() > 0:
             self._remove_layers_by_name(layer_name)
-            QgsProject.instance().addMapLayer(wfs_layer)
+            QgsProject.instance().addMapLayer(wfs_layer, False); QgsProject.instance().layerTreeRoot().addLayer(wfs_layer)
             if style_callback:
                 style_callback(wfs_layer)
             QgsMessageLog.logMessage(f"✓ {layer_name} ({wfs_layer.featureCount()} entité(s))", "VoirieCommunale", Qgis.Success)
@@ -1912,7 +1912,7 @@ class VoirieCommunale:
             return False, None
 
         self._remove_layers_by_name(layer_name)
-        QgsProject.instance().addMapLayer(layer)
+        QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
         if style_callback:
             style_callback(layer)
         QgsMessageLog.logMessage(f"✓ {layer_name} ({layer.featureCount()} entité(s))", "VoirieCommunale", Qgis.Success)
@@ -2207,7 +2207,7 @@ class VoirieCommunale:
             )
             return False, None
         self._remove_layers_by_name(layer_name)
-        QgsProject.instance().addMapLayer(layer)
+        QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
         if style_callback:
             style_callback(layer)
         QgsMessageLog.logMessage(
@@ -2313,7 +2313,7 @@ class VoirieCommunale:
             return False, None
 
         self._remove_layers_by_name(layer_name)
-        QgsProject.instance().addMapLayer(layer)
+        QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
         if style_callback:
             style_callback(layer)
         QgsMessageLog.logMessage(
@@ -2727,7 +2727,7 @@ class VoirieCommunale:
         layer.setRenderer(QgsCategorizedSymbolRenderer('groupe_personne', cat_styles))
 
         self._remove_layers_by_name(f"Parcelles MAJIC {code_insee}")
-        QgsProject.instance().addMapLayer(layer)
+        QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
 
         QgsMessageLog.logMessage(
             f"MAJIC : {matched} parcelles polygones chargées pour {code_insee} "
@@ -2881,7 +2881,7 @@ class VoirieCommunale:
             return False, None
 
         self._remove_layers_by_name(layer_name)
-        QgsProject.instance().addMapLayer(filtered_layer)
+        QgsProject.instance().addMapLayer(filtered_layer, False); QgsProject.instance().layerTreeRoot().addLayer(filtered_layer)
         self._style_osm_layer(filtered_layer)
         return True, filtered_layer
 
@@ -3048,7 +3048,7 @@ class VoirieCommunale:
             return False, None
 
         self._remove_layers_by_name(layer_name)
-        QgsProject.instance().addMapLayer(layer)
+        QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
 
         _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)\b(?:ch(?:e(?:m(?:in(?:ement)?)?)?|in)?|sen(?:t(?:e|ier)?)?)\.?\s+r(?:u(?:r(?:al?e?)?)?|al|le)\b|\bC\.?R\.?\b'
         _BAN_REGEX_VOIE_DEFAULT   = r'(?i)\b(?:voi(?:e)?|ch(?:e(?:m(?:in(?:ement)?)?)?)?|rout(?:e)?)\.?\s+c(?:om(?:m(?:un(?:al?e?)?)?)?|al?e?|le)\b|\bV\.?C\.?\b'
