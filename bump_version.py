@@ -94,9 +94,10 @@ def bump(part):
             .replace('\u00ae', '(R)').replace('\u00a9', '(c)')
         )
         # Remplacer le bloc changelog= (multilignes indentées)
+        _repl = f'changelog={changelog_val}\n'
         meta = re.sub(
             r'^changelog=.*?(?=^\S|\Z)',
-            f'changelog={changelog_val}\n',
+            lambda m: _repl,
             meta,
             flags=re.MULTILINE | re.DOTALL
         )

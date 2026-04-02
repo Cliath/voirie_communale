@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.14.7
+version=0.14.9
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,29 +17,31 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.13.10 (2026-04-02)
+changelog=    Version 0.14.8 (2026-04-03)
+    - Pagination WFS : la condition d'arrêt de pagination utilise désormais numberMatched / numberReturned fournis par WFS 2.0 quand disponibles. Évite une requête réseau superflue en fin de série. Fallback sur l'ancien comportement (len(batch) < page_size) si numberMatched est absent ou "unknown" (applicable aux 4 méthodes de pagination : _fetch_wfs_paginated_to_vsimem, _fetch_magosm_to_vsimem, et leurs équivalents synchrones).
+    Version 0.14.7 (2026-04-03)
+    - Zoom : lors du chargement d'un WMS global (Géofoncier, PLAN IGN, etc.) sur une commune absente du projet, la couche commune est désormais téléchargée silencieusement pour permettre le zoom. Si la commune est déjà présente, elle est réutilisée sans requête supplémentaire.
+    Version 0.14.6 (2026-04-03)
+    - Zoom : suppression du zoomToFullExtent() de fallback qui dézoomait sur le monde entier quand aucune couche commune n'était disponible. La vue reste inchangée dans ce cas.
+    Version 0.14.5 (2026-04-03)
+    - Insertion dans les groupes : tous les addMapLayer(layer) sans False convertis en addMapLayer(layer, False) + layerTreeRoot().addLayer(layer) pour bypasser le QgsLayerTreeRegistryBridge. Corrige le bug où les couches d'une nouvelle commune étaient insérées dans le groupe Géofoncier public après un réordonnancement.
+    Version 0.14.4 (2026-04-03)
+    - Ordre canonique : Géofoncier public déplacé en tête de layer_order.json, avant __COMMUNE_GROUP__, pour qu'il reste toujours au-dessus de tous les groupes communes.
+    Version 0.14.3 (2026-04-03)
+    - Ordre canonique multi-communes : _reorder_layers détecte désormais tous les groupes communes présents (préfixe INSEE ^\d{5}) et les repositionne ensemble. La commune courante se retrouve en tête, les précédentes en dessous, et les WMS globaux toujours sous tous les groupes communes.
+    Version 0.14.2 (2026-04-03)
+    - Skip WMS globaux déjà présents : lors du chargement d'une nouvelle commune, les WMS et groupes globaux déjà dans le projet (Waze, OSM France, CoSIA, BD ORTHO, MNT LiDAR, PLAN IGN, Géofoncier, scans historiques, photos aériennes) ne sont plus rechargés. Ils sont réutilisés tels quels, sans requête réseau ni étape supplémentaire dans la barre de progression.
+    - Méthodes utilitaires : _layer_exists_by_name, _get_layers_by_name, _group_exists_by_name, _get_group_layers.
+    Version 0.14.1 (2026-04-02)
+    - Progression : les QMessageBox d'avertissement (OSM sans route C/R, MAJIC introuvable) sont désormais différés après progress.close() via une liste deferred_warnings. La barre de progression se ferme toujours proprement.
+    Version 0.14.0 (2026-04-02)
+    - Chargement WFS parallèle : les 7 couches WFS (BAN, Voirie communale, Voirie départementale, OSM Routes, MagOSM, BD TOPO Routes nommées, BD TOPO Tronçons) sont désormais téléchargées simultanément via QgsTask + QgsTaskManager. La barre de progression avance au fil des completions grâce au signal taskDone.
+    - Nouvelle classe WfsLoadTask(QgsTask) avec signal taskDone(task).
+    - Nouvelles méthodes background-safe : _fetch_wfs_paginated_to_vsimem, _fetch_wfs_bbox_to_vsimem, _fetch_magosm_to_vsimem, _fetch_osm_roads_to_vsimem, _make_layer_from_vsimem.
+    - build.bat : vérification de la syntaxe Python (ast.parse) ajoutée en étape 0, avant le bump de version. Un échec de syntaxe annule le build sans incrémenter la version.
+    - _apply_bdtopo_routesnom_style extrait en méthode dédiée (était inline dans load_bdtopo_routesnom_wfs).
+    Version 0.13.10 (2026-04-02)
     - Ordre canonique : Géofoncier public ajouté dans layer_order.json en tête des items racine (après le groupe commune).
-    Version 0.13.9 (2026-04-02)
-    - Géofoncier public : déplacé dans l'onglet "Plans à charger" -> "Actuels" (c'est une couche WMS raster, pas une donnée vecteur).
-    Version 0.13.8 (2026-04-02)
-    - Géofoncier public : nouvelle case à cocher "Géofoncier public (RFU + Plans d'alignement)" dans l'onglet "Nationales". Charge en WMS dans un groupe dédié les couches RFU_LIMITES, RFU_SOMMETS, PLANS_EMPRISES, PLANS_LIGNES, PLANS_LOCALISANTS depuis le service Géofoncier (OGE, accès libre, EPSG:2154).
-    Version 0.13.7 (2026-03-07)
-    - Journal des messages QGIS : toutes les entrées logMessage utilisaient deux tags distincts ("VoirieCommunale" et "VoirieCommunale"). Uniformisation sur "VoirieCommunale" (53 occurrences corrigées).
-    Version 0.13.6 (2026-03-07)
-    - Interface : la section "Données à charger" est maintenant organisée en 3 onglets — Nationales (toutes les couches existantes : Admin Express, BD TOPO, OSM, MagOSM, DGCL, BAN, MAJIC), Locales (vide, prévu pour des données locales), Autres (vide, réservé).
-    Version 0.13.5 (2026-03-07)
-    - Regex BAN chemin rural : réécriture pour couvrir toutes les abréviations courantes (ch, che, chem, chin, chemin, cheminement, sen, sente, sentier) avec suffixe rural tronqué (r, ru, rur, ral, rle, rural, rurale), plus point optionnel entre préfixe et suffixe. Ancienne regex : (?i)(che(?:min)?|sen(?:tier)?) rural|C\.?R\.?.
-    - Regex BAN voie communale : réécriture symétrique couvrant les préfixes voi/voie, ch->cheminement, rout/route et les suffixes communal tronqués (c, com, commun, communal, communale, cal, cale, cle). Ancienne regex : (?i)(voi(?:e)?) (com(?:munale)?)|V\.?C\.?.
-    - Mise à jour dans voirie_communale.py (3 occurrences) et settings.json (valeurs par défaut).
-    Version 0.13.4 (2026-03-07)
-    - build.bat : crée un tag vX.Y.Z après chaque commit et une GitHub Release avec le ZIP attaché (gh release create --generate-notes). Requiert le GitHub CLI (gh) installé et authentifié (gh auth login).
-    - metadata.txt : name corrigé en Voirie Communale (au lieu de voirie_communale), champ tags ajouté (voirie, commune, chemin rural...).
-    Version 0.13.3 (2026-03-07)
-    - README : MagOSM Routes ajouté dans l'ordre canonique, le tableau des couches vectorielles, la section style et la table des services.
-    Version 0.13.2 (2026-03-07)
-    - Ordre canonique : MagOSM Routes {code_insee} ajouté dans layer_order.json, juste après OSM Routes {code_insee}.
-    Version 0.13.1 (2026-03-07)
-    - Réseau routier OSM via MagOSM : nouvelle case à cocher "Réseau routier OSM (MagOSM)" qui charge la couche magosm:highways_line depuis le WFS public de Magellium (https://magosm.magellium.com/geoserver/ows). Le chargement est paginé (500 entités/page, timeout 180 s) pour s'adapter à la lenteur du service. Le style est calqué sur BD TOPO tronçons : règles regex CR/VC prioritaires sur le champ name, puis catégorisation par valeur du champ highway (motorway -> steps), étiquettes sur name.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png
