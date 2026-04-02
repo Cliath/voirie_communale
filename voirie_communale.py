@@ -5,7 +5,7 @@ Recensement de la voirie communale (voies communales et chemins ruraux).
 Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
 Licence : GNU GPL v2+
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, pyqtSignal
 from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.PyQt.QtWidgets import QAction, QMessageBox, QProgressDialog, QDialog
 from qgis.PyQt.QtCore import Qt
@@ -17,10 +17,11 @@ from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog
                        QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol, QgsFeature, QgsField,
                        QgsGeometry, QgsPointXY,
                        QgsPalLayerSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling,
-                       QgsRuleBasedLabeling, QgsTextBufferSettings)
+                       QgsRuleBasedLabeling, QgsTextBufferSettings, QgsTask)
 import re
 import os
 import os.path
+import time
 import urllib.parse
 import urllib.request
 import json
@@ -174,6 +175,36 @@ MAJIC_GROUPES = {
     9: ("Établissements publics ou organismes associés", "#0521DB"),
 }
 _MAJIC_GROUPE_DEFAULT_COLOR = "#A337F5"
+
+
+class WfsLoadTask(QgsTask):
+    """Exécute un téléchargement WFS en arrière-plan (thread secondaire).
+
+    Le callable fetch_fn doit retourner (success: bool, vsimem_path: str|None, error: str|None).
+    Le signal taskDone(task) est émis sur le thread principal dans finished().
+    """
+
+    taskDone = pyqtSignal(object)
+
+    def __init__(self, label, fetch_fn):
+        super().__init__(label, QgsTask.CanCancel)
+        self.label = label
+        self._fetch_fn = fetch_fn
+        self.success = False
+        self.vsimem_path = None
+        self.error_msg = None
+
+    def run(self):
+        try:
+            self.success, self.vsimem_path, self.error_msg = self._fetch_fn()
+            return self.success
+        except Exception as exc:
+            self.error_msg = str(exc)
+            return False
+
+    def finished(self, result):
+        self.success = result
+        self.taskDone.emit(self)
 
 
 class VoirieCommunale:
@@ -561,70 +592,155 @@ class VoirieCommunale:
             self.dlg.activateWindow()
             return
 
-        if ban_checked:
-            advance(f"Chargement des adresses BAN ({code_insee})...")
-            ban_success, ban_layer = self.load_ban_wfs(code_insee)
-            results.append(('Adresses BAN', ban_success))
-            if ban_layer:
-                loaded_layers.append(ban_layer)
-
-        # Lecture des options de clip géométrique (paramètres une seule fois)
+        # ── Phase parallèle : téléchargement WFS concurrent ──────────────────────
+        # Lecture des options de clip (nécessaires pour Phase 3)
         clip_to_commune = SettingsDialog.get('clip_to_commune', False, bool)
         clip_buffer_m = SettingsDialog.get('clip_buffer_m', 25, int)
 
+        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)\b(?:ch(?:e(?:m(?:in(?:ement)?)?)?|in)?|sen(?:t(?:e|ier)?)?)\.?\s+r(?:u(?:r(?:al?e?)?)?|al|le)\b|\bC\.?R\.?\b'
+        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)\b(?:voi(?:e)?|ch(?:e(?:m(?:in(?:ement)?)?)?)?|rout(?:e)?)\.?\s+c(?:om(?:m(?:un(?:al?e?)?)?)?|al?e?|le)\b|\bV\.?C\.?\b'
+        regex_chemin = self._get_regex_setting('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
+        regex_voie   = self._get_regex_setting('ban_regex_voie',   _BAN_REGEX_VOIE_DEFAULT)
+
+        # Définir les specs de toutes les tâches WFS à lancer en parallèle.
+        # Chaque spec : label, result_key, layer_name, fetch_fn, style_cb, needs_clip
+        parallel_specs = []
+
+        if ban_checked:
+            parallel_specs.append({
+                'label':      f"Adresses BAN ({code_insee})",
+                'result_key': 'Adresses BAN',
+                'layer_name': f"Adresses BAN {code_insee}",
+                'fetch_fn':   lambda: self._fetch_wfs_paginated_to_vsimem(
+                    self.WFS_IGN_URL, 'BAN.DATA.GOUV:ban',
+                    cql_filter=f"code_insee='{code_insee}'"
+                ),
+                'style_cb':   lambda lyr: self.apply_ban_style(
+                    lyr, regex_chemin=regex_chemin, regex_voie=regex_voie
+                ),
+                'needs_clip': False,
+            })
+
         if voirie_checked:
-            advance(f"Chargement de la voirie communale ({code_insee})...")
-            voirie_success, voirie_layer = self.load_voirie_wfs(code_insee, commune_bbox)
-            results.append(('Voirie communale', voirie_success))
-            if voirie_layer:
-                if clip_to_commune and commune_layer:
-                    voirie_layer = self._clip_layer_to_commune(voirie_layer, commune_layer, clip_buffer_m)
-                loaded_layers.append(voirie_layer)
+            parallel_specs.append({
+                'label':      f"Voirie communale ({code_insee})",
+                'result_key': 'Voirie communale',
+                'layer_name': f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
+                'fetch_fn':   lambda: self._fetch_wfs_bbox_to_vsimem(
+                    self.WFS_IGN_URL, 'DGCL.2025:voirie_communale', commune_bbox
+                ),
+                'style_cb':   None,
+                'needs_clip': True,
+            })
 
         if voirie_dep_checked:
-            advance(f"Chargement de la voirie départementale ({code_insee})...")
-            voirie_dep_success, voirie_dep_layer = self.load_voirie_dep_wfs(code_insee, commune_bbox)
-            results.append(('Voirie départementale', voirie_dep_success))
-            if voirie_dep_layer:
-                if clip_to_commune and commune_layer:
-                    voirie_dep_layer = self._clip_layer_to_commune(voirie_dep_layer, commune_layer, clip_buffer_m)
-                loaded_layers.append(voirie_dep_layer)
+            parallel_specs.append({
+                'label':      f"Voirie départementale ({code_insee})",
+                'result_key': 'Voirie départementale',
+                'layer_name': f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
+                'fetch_fn':   lambda: self._fetch_wfs_bbox_to_vsimem(
+                    self.WFS_IGN_URL, 'DGCL.2025:voirie_departementale', commune_bbox
+                ),
+                'style_cb':   None,
+                'needs_clip': True,
+            })
 
         if osm_routes_checked:
-            advance(f"Chargement des routes OSM ({code_insee})...")
-            osm_success, osm_layer = self.load_osm_roads(code_insee, commune_bbox)
-            results.append(('Routes OSM', osm_success))
-            if osm_layer:
-                if clip_to_commune and commune_layer:
-                    osm_layer = self._clip_layer_to_commune(osm_layer, commune_layer, clip_buffer_m)
-                loaded_layers.append(osm_layer)
+            parallel_specs.append({
+                'label':      f"Routes OSM ({code_insee})",
+                'result_key': 'Routes OSM',
+                'layer_name': f"OSM Routes {code_insee}",
+                'fetch_fn':   lambda: self._fetch_osm_roads_to_vsimem(commune_bbox),
+                'style_cb':   lambda lyr: self._style_osm_layer(lyr),
+                'needs_clip': True,
+            })
 
         if magosm_checked:
-            advance(f"Chargement réseau routier OSM MagOSM ({code_insee})...")
-            magosm_success, magosm_layer = self.load_magosm_wfs(code_insee, commune_bbox)
-            results.append(('Réseau routier OSM (MagOSM)', magosm_success))
-            if magosm_layer:
-                if clip_to_commune and commune_layer:
-                    magosm_layer = self._clip_layer_to_commune(magosm_layer, commune_layer, clip_buffer_m)
-                loaded_layers.append(magosm_layer)
+            parallel_specs.append({
+                'label':      f"MagOSM Routes ({code_insee})",
+                'result_key': 'Réseau routier OSM (MagOSM)',
+                'layer_name': f"MagOSM Routes {code_insee}",
+                'fetch_fn':   lambda: self._fetch_magosm_to_vsimem(commune_bbox),
+                'style_cb':   lambda lyr: self._apply_magosm_style(
+                    lyr, regex_chemin=regex_chemin, regex_voie=regex_voie
+                ),
+                'needs_clip': True,
+            })
 
         if bdtopo_routesnom_checked:
-            advance(f"Chargement BD TOPO Routes nommées ({code_insee})...")
-            bdtopo_routesnom_success, bdtopo_routesnom_layer = self.load_bdtopo_routesnom_wfs(code_insee, commune_bbox)
-            results.append(('BD TOPO Routes numérotées ou nommées', bdtopo_routesnom_success))
-            if bdtopo_routesnom_layer:
-                if clip_to_commune and commune_layer:
-                    bdtopo_routesnom_layer = self._clip_layer_to_commune(bdtopo_routesnom_layer, commune_layer, clip_buffer_m)
-                loaded_layers.append(bdtopo_routesnom_layer)
+            parallel_specs.append({
+                'label':      f"BD TOPO Routes nommées ({code_insee})",
+                'result_key': 'BD TOPO Routes numérotées ou nommées',
+                'layer_name': f"BD TOPO Routes numérotées ou nommées {code_insee}",
+                'fetch_fn':   lambda: self._fetch_wfs_bbox_to_vsimem(
+                    self.WFS_IGN_URL, 'BDTOPO_V3:route_numerotee_ou_nommee', commune_bbox
+                ),
+                'style_cb':   lambda lyr: self._apply_bdtopo_routesnom_style(lyr),
+                'needs_clip': True,
+            })
 
         if bdtopo_troncons_checked:
-            advance(f"Chargement BD TOPO Tronçons de route ({code_insee})...")
-            bdtopo_troncons_success, bdtopo_troncons_layer = self.load_bdtopo_troncons_wfs(code_insee, commune_bbox)
-            results.append(('BD TOPO Tronçons de route', bdtopo_troncons_success))
-            if bdtopo_troncons_layer:
-                if clip_to_commune and commune_layer:
-                    bdtopo_troncons_layer = self._clip_layer_to_commune(bdtopo_troncons_layer, commune_layer, clip_buffer_m)
-                loaded_layers.append(bdtopo_troncons_layer)
+            parallel_specs.append({
+                'label':      f"BD TOPO Tronçons de route ({code_insee})",
+                'result_key': 'BD TOPO Tronçons de route',
+                'layer_name': f"BD TOPO Tronçons de route {code_insee}",
+                'fetch_fn':   lambda: self._fetch_wfs_paginated_to_vsimem(
+                    self.WFS_IGN_URL, 'BDTOPO_V3:troncon_de_route',
+                    crs="EPSG:4326", bbox=commune_bbox
+                ),
+                'style_cb':   lambda lyr: self._apply_bdtopo_troncons_style(
+                    lyr, regex_chemin=regex_chemin, regex_voie=regex_voie
+                ),
+                'needs_clip': True,
+            })
+
+        # Lancer toutes les tâches WFS en parallèle
+        parallel_count = len(parallel_specs)
+        tasks_done_count = [0]   # liste pour mutation dans closure
+        task_objects = []
+
+        def on_task_done(task):
+            tasks_done_count[0] += 1
+            advance(f"✓ {task.label} ({tasks_done_count[0]}/{parallel_count})")
+            QApplication.processEvents()
+
+        for spec in parallel_specs:
+            task = WfsLoadTask(spec['label'], spec['fetch_fn'])
+            task.taskDone.connect(on_task_done)
+            task._spec = spec
+            QgsApplication.taskManager().addTask(task)
+            task_objects.append(task)
+
+        # Attendre la fin de toutes les tâches (boucle non bloquante)
+        while tasks_done_count[0] < parallel_count:
+            QApplication.processEvents()
+            time.sleep(0.05)
+
+        # ── Phase 3 : créer les couches sur le thread principal ───────────────
+        for task in task_objects:
+            spec = task._spec
+            if task.success and task.vsimem_path:
+                ok, layer = self._make_layer_from_vsimem(
+                    task.vsimem_path, spec['layer_name'], spec['style_cb']
+                )
+                results.append((spec['result_key'], ok))
+                if layer:
+                    if spec['needs_clip'] and clip_to_commune and commune_layer:
+                        layer = self._clip_layer_to_commune(layer, commune_layer, clip_buffer_m)
+                    loaded_layers.append(layer)
+            else:
+                results.append((spec['result_key'], False))
+                # Message spécifique pour OSM "aucune route"
+                if spec['result_key'] == 'Routes OSM' and task.error_msg == "Aucune route C/R trouvée":
+                    QMessageBox.warning(
+                        self.iface.mainWindow(), "Aucune route C/R",
+                        "Aucune route avec un 'ref' commençant par C ou R n'a été trouvée."
+                    )
+                elif task.error_msg:
+                    QgsMessageLog.logMessage(
+                        f"✗ {spec['result_key']} : {task.error_msg}",
+                        "VoirieCommunale", Qgis.Warning
+                    )
 
         if majic_checked:
             advance(f"Chargement des parcelles MAJIC ({code_insee})...")
@@ -1039,6 +1155,25 @@ class VoirieCommunale:
         layer.setLabelsEnabled(True)
         layer.triggerRepaint()
 
+    def _apply_bdtopo_routesnom_style(self, layer):
+        """Applique une symbologie catégorisée sur 'type_de_route' aux routes BD TOPO nommées."""
+        from qgis.core import QgsCategorizedSymbolRenderer, QgsRendererCategory, QgsSymbol
+        color_map = {
+            'Autoroute': '#FF0000',
+            'Nationale': '#0000FF',
+            'Départementale': '#00AA00',
+            'Route intercommunale': '#FF69B4',
+            'Voie communale': '#FFD700',
+            'Chemin rural': '#A0522D'
+        }
+        categories = []
+        for route_type, color in color_map.items():
+            symbol = QgsSymbol.defaultSymbol(layer.geometryType())
+            symbol.setColor(QColor(color))
+            categories.append(QgsRendererCategory(route_type, symbol, route_type))
+        layer.setRenderer(QgsCategorizedSymbolRenderer('type_de_route', categories))
+        layer.triggerRepaint()
+
     def load_bdtopo_routesnom_wfs(self, code_insee, bbox=None):
         """Charge les routes numérotées ou nommées depuis le WFS BD TOPO IGN Géoplateforme.
 
@@ -1057,27 +1192,8 @@ class VoirieCommunale:
             geom_field="geometrie"
         )
 
-        # Appliquer une symbologie catégorisée sur 'type_de_route'
         if layer and layer.isValid():
-            from qgis.core import QgsCategorizedSymbolRenderer, QgsRendererCategory, QgsSymbol
-            categories = []
-            # Exemple de catégories (adapter selon les valeurs réelles du champ type_de_route)
-            color_map = {
-                'Autoroute': '#FF0000',
-                'Nationale': '#0000FF',
-                'Départementale': '#00AA00',
-                'Route intercommunale': '#FF69B4',
-                'Voie communale': '#FFD700',
-                'Chemin rural': '#A0522D'
-            }
-            for route_type, color in color_map.items():
-                symbol = QgsSymbol.defaultSymbol(layer.geometryType())
-                symbol.setColor(QColor(color))
-                category = QgsRendererCategory(route_type, symbol, route_type)
-                categories.append(category)
-            renderer = QgsCategorizedSymbolRenderer('type_de_route', categories)
-            layer.setRenderer(renderer)
-            layer.triggerRepaint()
+            self._apply_bdtopo_routesnom_style(layer)
 
         if not success:
             QMessageBox.warning(
@@ -1752,6 +1868,262 @@ class VoirieCommunale:
             str: Regex avec backslashes doublés, prête à être insérée dans ``'...'``.
         """
         return regex.replace('\\', '\\\\')
+
+    # ------------------------------------------------------------------
+    # Méthodes fetch-to-vsimem (background-safe, sans objets QGIS)
+    # Utilisées par WfsLoadTask pour le chargement WFS parallèle
+    # ------------------------------------------------------------------
+
+    def _fetch_wfs_paginated_to_vsimem(self, wfs_url, typename, cql_filter=None,
+                                        crs="EPSG:4326", page_size=1000, bbox=None):
+        """[background-safe] Télécharge un WFS paginé et écrit le résultat dans /vsimem/.
+
+        Returns:
+            tuple: (success: bool, vsimem_path: str|None, error: str|None)
+        """
+        from osgeo import gdal
+        all_features = []
+        start_index = 0
+        crs_ref = None
+        while True:
+            params = {
+                'SERVICE': 'WFS', 'VERSION': '2.0.0', 'REQUEST': 'GetFeature',
+                'TYPENAMES': typename, 'SRSNAME': crs,
+                'OUTPUTFORMAT': 'application/json',
+                'COUNT': page_size, 'STARTINDEX': start_index,
+            }
+            if cql_filter:
+                params['CQL_FILTER'] = cql_filter
+            if bbox:
+                xmin, ymin, xmax, ymax = bbox
+                params['BBOX'] = f"{xmin},{ymin},{xmax},{ymax},{crs}"
+            url = f"{wfs_url}?{urllib.parse.urlencode(params)}"
+            QgsMessageLog.logMessage(
+                f"[parallèle] WFS {typename} (startIndex={start_index}): {url}",
+                "VoirieCommunale", Qgis.Info
+            )
+            try:
+                req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    fc = json.loads(resp.read().decode('utf-8'))
+            except Exception as exc:
+                return False, None, str(exc)
+            batch = fc.get('features', [])
+            if crs_ref is None:
+                crs_ref = fc.get('crs', None)
+            all_features.extend(batch)
+            if len(batch) < page_size:
+                break
+            start_index += page_size
+        if not all_features:
+            return False, None, "Aucune entité retournée"
+        assembled = {'type': 'FeatureCollection', 'features': all_features}
+        if crs_ref:
+            assembled['crs'] = crs_ref
+        vsimem_path = f"/vsimem/{typename.replace(':', '_').replace('.', '_')}_par.json"
+        gdal.FileFromMemBuffer(vsimem_path, json.dumps(assembled).encode('utf-8'))
+        return True, vsimem_path, None
+
+    def _fetch_wfs_bbox_to_vsimem(self, wfs_url, typename, bbox, crs="EPSG:4326"):
+        """[background-safe] Télécharge un WFS single-shot BBOX et écrit dans /vsimem/.
+
+        Returns:
+            tuple: (success: bool, vsimem_path: str|None, error: str|None)
+        """
+        from osgeo import gdal
+        xmin, ymin, xmax, ymax = bbox
+        url = (f"{wfs_url}?service=WFS&version=2.0.0&request=GetFeature"
+               f"&typename={typename}&srsname={crs}&outputFormat=application/json"
+               f"&BBOX={xmin},{ymin},{xmax},{ymax},{crs}")
+        QgsMessageLog.logMessage(
+            f"[parallèle] WFS BBOX {typename}: {url}", "VoirieCommunale", Qgis.Info
+        )
+        try:
+            with urllib.request.urlopen(url, timeout=60) as resp:
+                payload = resp.read()
+        except Exception as exc:
+            return False, None, str(exc)
+        vsimem_path = f"/vsimem/{typename.replace(':', '_').replace('.', '_')}_bbox_par.json"
+        gdal.FileFromMemBuffer(vsimem_path, payload)
+        return True, vsimem_path, None
+
+    def _fetch_magosm_to_vsimem(self, bbox, page_size=500):
+        """[background-safe] Télécharge MagOSM WFS paginé et écrit dans /vsimem/.
+
+        Returns:
+            tuple: (success: bool, vsimem_path: str|None, error: str|None)
+        """
+        from osgeo import gdal
+        typename = "magosm:highways_line"
+        crs = "EPSG:4326"
+        xmin, ymin, xmax, ymax = bbox
+        all_features = []
+        start_index = 0
+        crs_ref = None
+        while True:
+            params = {
+                'SERVICE': 'WFS', 'VERSION': '2.0.0', 'REQUEST': 'GetFeature',
+                'TYPENAMES': typename, 'SRSNAME': crs,
+                'OUTPUTFORMAT': 'application/json',
+                'COUNT': page_size, 'STARTINDEX': start_index,
+                'BBOX': f"{xmin},{ymin},{xmax},{ymax},{crs}",
+            }
+            url = f"{self.MAGOSM_WFS_URL}?{urllib.parse.urlencode(params)}"
+            try:
+                req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
+                with urllib.request.urlopen(req, timeout=180) as resp:
+                    fc = json.loads(resp.read().decode('utf-8'))
+            except Exception as exc:
+                return False, None, str(exc)
+            batch = fc.get('features', [])
+            if crs_ref is None:
+                crs_ref = fc.get('crs', None)
+            all_features.extend(batch)
+            if len(batch) < page_size:
+                break
+            start_index += page_size
+        if not all_features:
+            return False, None, "Aucune entité retournée"
+        assembled = {'type': 'FeatureCollection', 'features': all_features}
+        if crs_ref:
+            assembled['crs'] = crs_ref
+        vsimem_path = "/vsimem/magosm_highways_line_par.json"
+        gdal.FileFromMemBuffer(vsimem_path, json.dumps(assembled).encode('utf-8'))
+        return True, vsimem_path, None
+
+    def _fetch_osm_roads_to_vsimem(self, bbox):
+        """[background-safe] Télécharge routes OSM via Overpass et convertit en GeoJSON /vsimem/.
+
+        Returns:
+            tuple: (success: bool, vsimem_path: str|None, error: str|None)
+        """
+        from osgeo import gdal
+        xmin, ymin, xmax, ymax = bbox
+        south, west, north, east = ymin, xmin, ymax, xmax
+        query = (
+            "[out:json][timeout:120];"
+            "("
+            f"way[\"highway\"][\"ref\"~\"^(C|R)\"]({south},{west},{north},{east});"
+            f"relation[\"route\"][\"ref\"~\"^(C|R)\"]({south},{west},{north},{east});"
+            ");"
+            "out geom;"
+        )
+        try:
+            data = urllib.parse.urlencode({"data": query}).encode("utf-8")
+            request = urllib.request.Request(
+                "https://overpass-api.de/api/interpreter", data=data,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            with urllib.request.urlopen(request, timeout=180) as response:
+                payload = response.read().decode("utf-8")
+        except Exception as exc:
+            return False, None, str(exc)
+        try:
+            data_json = json.loads(payload)
+        except Exception as exc:
+            return False, None, f"Parsing Overpass JSON: {exc}"
+
+        elements = data_json.get("elements", [])
+        relation_refs = {}
+        for elem in elements:
+            if elem.get("type") == "relation":
+                ref_val = elem.get("tags", {}).get("ref")
+                if not ref_val:
+                    continue
+                for member in elem.get("members", []):
+                    if member.get("type") == "way":
+                        relation_refs.setdefault(member.get("ref"), set()).add(ref_val)
+
+        def way_to_geojson(tags, geometry_points, ref_value, rel_ref_value):
+            highway = tags.get("highway")
+            if not highway:
+                return None
+            chosen_ref = ref_value or rel_ref_value
+            if not chosen_ref:
+                return None
+            ref_text = str(chosen_ref).strip().upper()
+            if not (ref_text.startswith("C") or ref_text.startswith("R")):
+                return None
+            coords = [[p["lon"], p["lat"]] for p in geometry_points if "lon" in p and "lat" in p]
+            if len(coords) < 2:
+                return None
+            return {
+                "type": "Feature",
+                "geometry": {"type": "LineString", "coordinates": coords},
+                "properties": {
+                    "ref": chosen_ref,
+                    "name": tags.get("name", ""),
+                    "highway": highway,
+                    "rel_ref": rel_ref_value or ""
+                }
+            }
+
+        features = []
+        added_way_ids = set()
+        for elem in elements:
+            if elem.get("type") != "way" or "geometry" not in elem:
+                continue
+            way_id = elem.get("id")
+            tags = elem.get("tags", {})
+            ref_value = tags.get("ref")
+            rel_ref_value = ", ".join(sorted(relation_refs[way_id])) if way_id in relation_refs else None
+            feat = way_to_geojson(tags, elem["geometry"], ref_value, rel_ref_value)
+            if feat:
+                features.append(feat)
+                added_way_ids.add(way_id)
+        for elem in elements:
+            if elem.get("type") != "relation":
+                continue
+            rel_ref = elem.get("tags", {}).get("ref", "")
+            if not rel_ref:
+                continue
+            for member in elem.get("members", []):
+                if member.get("type") != "way" or "geometry" not in member:
+                    continue
+                way_id = member.get("ref")
+                if way_id in added_way_ids:
+                    continue
+                tags = member.get("tags", {}) or {}
+                feat = way_to_geojson(tags, member["geometry"], tags.get("ref"), rel_ref)
+                if feat:
+                    features.append(feat)
+                    added_way_ids.add(way_id)
+
+        if not features:
+            return False, None, "Aucune route C/R trouvée"
+        geojson = {
+            "type": "FeatureCollection",
+            "crs": {"type": "name", "properties": {"name": "EPSG:4326"}},
+            "features": features
+        }
+        vsimem_path = "/vsimem/osm_roads_par.json"
+        gdal.FileFromMemBuffer(vsimem_path, json.dumps(geojson).encode('utf-8'))
+        return True, vsimem_path, None
+
+    def _make_layer_from_vsimem(self, vsimem_path, layer_name, style_callback=None):
+        """[thread principal] Crée un QgsVectorLayer depuis /vsimem/ et l'ajoute au projet.
+
+        Returns:
+            tuple: (bool, QgsVectorLayer ou None)
+        """
+        from osgeo import gdal
+        layer = QgsVectorLayer(vsimem_path, layer_name, "ogr")
+        if not layer.isValid() or layer.featureCount() == 0:
+            gdal.Unlink(vsimem_path)
+            QgsMessageLog.logMessage(
+                f"✗ {layer_name} : couche invalide depuis vsimem",
+                "VoirieCommunale", Qgis.Warning
+            )
+            return False, None
+        self._remove_layers_by_name(layer_name)
+        QgsProject.instance().addMapLayer(layer)
+        if style_callback:
+            style_callback(layer)
+        QgsMessageLog.logMessage(
+            f"✓ {layer_name} ({layer.featureCount()} entité(s))",
+            "VoirieCommunale", Qgis.Success
+        )
+        return True, layer
 
     def _load_wfs_paginated(self, typename, layer_name, cql_filter=None,
                              crs="EPSG:4326", page_size=1000, style_callback=None,
