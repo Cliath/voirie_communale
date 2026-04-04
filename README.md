@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.15.12** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.15.13** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -105,11 +105,11 @@ Le style utilise un `QgsRuleBasedRenderer` sur la couche `magosm:highways_line` 
 | Nationale | trunk, primary (+ _link) | `#f2a824` |
 | Départementale | secondary, secondary_link | `#F2D7A2` |
 | Route intercommunale | tertiary, tertiary_link | `#2db9fc` |
-| Desserte | unclassified, residential, service, living_street | `#ededed` |
+| Desserte | residential, service, living_street | `#ededed` |
 | Chemin | track, path, bridleway | `#8C7274` |
 | Sentier | footway, steps | `#8C7274` (pointillés) |
 | Piste cyclable | cycleway | `#9B5CCC` |
-| (autre) | — | `#969696` |
+| (autre) | unclassified, … | `#969696` |
 
 Service parfois lent — timeout 180 s par page, pagination 500 entités/page.
 

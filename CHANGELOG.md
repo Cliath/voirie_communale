@@ -1,6 +1,6 @@
 # [0.15.12] - 2026-04-04
 ### Modifié
-- **MagOSM** : catégorie *Voie communale* (residential) fusionnée dans *Desserte* — Desserte couvre désormais `unclassified`, `residential`, `service`, `living_street`.
+- **MagOSM** : catégorie *Voie communale* (residential) fusionnée dans *Desserte* — Desserte couvre désormais `residential`, `service`, `living_street`. `unclassified` classé dans *(autre)*.
 - **MagOSM** : catégorie *Chemin rural* scindée en *Chemin* (`track`, `path`, `bridleway`) et *Sentier* (`footway`, `steps`, pointillés).
 
 # [0.15.11] - 2026-04-04

@@ -3161,7 +3161,7 @@ class VoirieCommunale:
             ('Nationale',            ['trunk', 'trunk_link', 'primary', 'primary_link'],               '#f2a824', 1.0, False),
             ('Départementale',       ['secondary', 'secondary_link'],                                 '#F2D7A2', 0.8, False),
             ('Route intercommunale', ['tertiary', 'tertiary_link'],                                    '#2db9fc', 0.7, False),
-            ('Desserte',             ['unclassified', 'residential', 'service', 'living_street'],      '#ededed', 0.6, False),
+            ('Desserte',             ['residential', 'service', 'living_street'],                       '#ededed', 0.6, False),
             ('Chemin',               ['track', 'path', 'bridleway'],                                   '#8C7274', 0.5, False),
             ('Sentier',              ['footway', 'steps'],                                             '#8C7274', 0.4, True),
             ('Piste cyclable',       ['cycleway'],                                                     '#9B5CCC', 0.4, False),

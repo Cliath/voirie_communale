@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.15.12
+version=0.15.13
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -18,7 +18,7 @@ repository=https://github.com/Cliath/voirie_communale
 # Recommended items:
 hasProcessingProvider=no
 changelog=    Version 0.15.12 (2026-04-04)
-    - MagOSM : catégorie Voie communale (residential) fusionnée dans Desserte — Desserte couvre désormais unclassified, residential, service, living_street.
+    - MagOSM : catégorie Voie communale (residential) fusionnée dans Desserte — Desserte couvre désormais residential, service, living_street. unclassified classé dans (autre).
     - MagOSM : catégorie Chemin rural scindée en Chemin (track, path, bridleway) et Sentier (footway, steps, pointillés).
     Version 0.15.11 (2026-04-04)
     - MagOSM : harmonisation des couleurs avec la palette BD TOPO — Autoroute #f26119, Nationale #f2a824, Départementale #F2D7A2, Route intercommunale #2db9fc, Desserte #ededed. Renommage Desserte locale -> Desserte.
