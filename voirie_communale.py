@@ -680,7 +680,10 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
                 majic_success, majic_layer = self.load_majic_parcelles(code_insee)
                 results.append(('Parcelles MAJIC', majic_success))
                 if majic_layer:
-                    self._save_layer_to_cache(code_insee, 'majic', majic_layer)
+                    if self._save_layer_to_cache(code_insee, 'majic', majic_layer):
+                        majic_layer = self._reload_layer_from_cache_preserving_style(
+                            code_insee, 'majic', majic_layer, f"Parcelles MAJIC {code_insee}"
+                        )
                     loaded_layers.append(majic_layer)
                 elif not majic_success:
                     deferred_warnings.append((
@@ -702,7 +705,10 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
                 filaires_bal_success, filaires_bal_layer, filaires_bal_no_data = self.load_filaires_bal(code_insee)
                 results.append(('Filaires de voie BAL', filaires_bal_success))
                 if filaires_bal_layer:
-                    self._save_layer_to_cache(code_insee, 'filaires_bal', filaires_bal_layer)
+                    if self._save_layer_to_cache(code_insee, 'filaires_bal', filaires_bal_layer):
+                        filaires_bal_layer = self._reload_layer_from_cache_preserving_style(
+                            code_insee, 'filaires_bal', filaires_bal_layer, f"Filaires de voie BAL {code_insee}"
+                        )
                     loaded_layers.append(filaires_bal_layer)
                 elif filaires_bal_no_data:
                     deferred_warnings.append((

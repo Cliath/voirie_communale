@@ -1,3 +1,7 @@
+# [0.17.2] - 2026-08-02
+### Corrigé
+- **Cache** : la couche MAJIC (et Filaires de voie BAL) apparaissait comme « couche temporaire » dans QGIS lors d'un premier téléchargement (ou après « Forcer le rechargement »), car elle était construite avec le provider `memory`. Après écriture réussie dans le cache GeoPackage, la couche du projet est désormais rechargée depuis le fichier `.gpkg` (provider `ogr`), avec conservation du style et de sa position dans l'arbre des couches — elle n'est plus signalée comme temporaire.
+
 # [0.17.1] - 2026-08-02
 ### Corrigé
 - **Packaging** : `cache_manager.py` manquait dans la liste des fichiers empaquetés (`package.py`), rendant le ZIP v0.17.0 inutilisable (erreur d'import au chargement du plugin). Le fichier est désormais bien inclus dans le ZIP.

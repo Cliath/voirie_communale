@@ -128,3 +128,46 @@ class CacheManagerMixin:
             "VoirieCommunale", Qgis.Info
         )
         return True
+
+    def _reload_layer_from_cache_preserving_style(self, code_insee, layer_key, old_layer, display_name):
+        """Remplace une couche fraîchement mise en cache (souvent en provider
+        'memory') par sa version chargée depuis le GeoPackage (provider
+        'ogr'), afin qu'elle ne soit plus signalée par QGIS comme « couche
+        temporaire ». Le style et la position dans l'arbre des couches de la
+        couche d'origine sont conservés.
+
+        Best-effort : si le rechargement échoue, `old_layer` est retournée
+        inchangée (le cache reste une optimisation, jamais une dépendance
+        bloquante).
+        """
+        new_layer = self._load_layer_from_cache(code_insee, layer_key, display_name)
+        if new_layer is None:
+            return old_layer
+
+        try:
+            renderer = old_layer.renderer()
+            if renderer:
+                new_layer.setRenderer(renderer.clone())
+            new_layer.setOpacity(old_layer.opacity())
+        except Exception as exc:
+            QgsMessageLog.logMessage(
+                f"Cache : impossible de recopier le style de {display_name} : {exc}",
+                "VoirieCommunale", Qgis.Warning
+            )
+
+        project = QgsProject.instance()
+        root = project.layerTreeRoot()
+        old_node = root.findLayer(old_layer.id())
+        parent, index = root, None
+        if old_node is not None:
+            parent = old_node.parent() or root
+            index = parent.children().index(old_node)
+
+        project.addMapLayer(new_layer, False)
+        if index is not None:
+            parent.insertLayer(index, new_layer)
+        else:
+            root.addLayer(new_layer)
+        project.removeMapLayer(old_layer.id())
+
+        return new_layer
