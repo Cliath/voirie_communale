@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.15.23
+version=0.16.0
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.15.23 (2026-08-02)
+changelog=    Version 0.16.0 (2026-08-02)
+    - Bouton "Liste des tâches" et gestion du TODO.md interne : retiré de la barre de lancement du plugin (LauncherDialog ne propose plus que 4 actions : Charger des données, Numériser des données, Paramètres, À propos). Suppression complète du code associé — classe TodoDialog, méthode show_todo(), action de menu "ToDo", fichier modèle TODO.md du dépôt et son entrée .gitignore. La gestion des tâches est désormais assurée en dehors du plugin. Le fichier TODO.md éventuellement déjà présent dans le profil utilisateur QGIS n'est pas supprimé (non touché par cette modification).
+    Version 0.15.23 (2026-08-02)
     - Filaires de voie BAL : message d'erreur incohérent : le popup affiché en cas d'échec ("Impossible de charger... vérifiez la connexion internet, le code INSEE...") s'affichait aussi quand la commune n'avait simplement aucune donnée BAL contribuée (cas normal, pas une erreur technique) — le journal indiquait pourtant clairement "aucune voie trouvée pour {code_insee}". load_filaires_bal distingue désormais explicitement les deux cas via un 3e élément de retour (no_data) : un message dédié et rassurant ("Aucune donnée BAL disponible pour cette commune...") s'affiche pour l'absence de données, tandis que le message d'alerte technique reste réservé aux véritables échecs réseau/parsing.
     Version 0.15.22 (2026-08-02)
     - Nouvelle source de données : Filaires de voie des Bases Adresses Locales (BAL) — case à cocher "Filaires de voie (BAL)" dans l'onglet Nationales, entre Adresses BAN et Parcelles MAJIC. L'export national (GeoJSON statique, ~100 Mo, sans filtre serveur) est téléchargé puis filtré côté client sur le code INSEE, à l'image de la stratégie déjà utilisée pour les parcelles MAJIC. Couche mémoire nommée Filaires de voie BAL {code_insee} avec champs nom/commune, style QGIS par défaut. Intégrée à l'ordre canonique des couches (layer_order.json).
@@ -36,9 +38,6 @@ changelog=    Version 0.15.23 (2026-08-02)
     - Optimisation : gestion des exceptions resserrée sur les appels réseau (urllib) et de parsing JSON dans wfs_loader.py, ainsi que sur les lectures/écritures de fichiers (layer_order.json, settings.json, TODO.md) — except Exception remplacé par des types précis (urllib.error.URLError, OSError, json.JSONDecodeError, ValueError). Les quelques frontières volontairement larges restantes (thread d'arrière-plan QGIS, opérations géométriques complexes) sont désormais documentées par un commentaire expliquant pourquoi.
     Version 0.15.15 (2026-08-02)
     - Optimisation : suppression de la boucle d'attente active (time.sleep(0.05) en boucle) lors du chargement parallèle des couches WFS/WMS — remplacée par une boucle d'événements Qt (QEventLoop) qui se termine directement au signal de fin de tâche, sans scruter le CPU inutilement.
-    Version 0.15.14 (2026-08-02)
-    - Refactoring interne : voirie_communale.py (~3250 lignes) scindé en modules dédiés — styles.py (symbologie BD TOPO/BAN/OSM/MagOSM), wfs_loader.py (chargement réseau WFS/WMS/XYZ) et layer_order.py (ordonnancement et regroupement des couches). voirie_communale.py ne contient plus que l'orchestration du plugin. Aucun changement fonctionnel pour l'utilisateur.
-    - package.py et build.bat mis à jour pour inclure/vérifier les nouveaux modules.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png

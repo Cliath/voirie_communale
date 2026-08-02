@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.15.23** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.16.0** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -33,7 +33,7 @@ Ou via `build.bat` qui compile, package, push git et déploie en une commande :
 
 ### Interface
 
-- **Barre de lancement** : le bouton du plugin ouvre 5 actions : *Charger des données*, *Numériser des données* (à venir), *Liste des tâches*, *Paramètres*, *À propos*
+- **Barre de lancement** : le bouton du plugin ouvre 4 actions : *Charger des données*, *Numériser des données* (à venir), *Paramètres*, *À propos*
 - **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
 - **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, et ordre des couches configurable par glisser-déposer
 - **Ordre canonique** configurable via `layer_order.json` (haut → bas) : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → MAJIC → Commune → Cadastre → Géofoncier → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → Photos aériennes → SCAN 50® → Cassini → État-Major

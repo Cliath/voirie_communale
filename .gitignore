@@ -28,8 +28,6 @@ wheels/
 releases/*.zip
 *.zip
 
-# Fichier TODO personnel (stocké dans le profil QGIS, pas dans le dépôt)
-TODO.md
 # Fichiers de test locaux
 test.qgz
 test_espaceco.sqlite

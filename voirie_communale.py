@@ -17,7 +17,7 @@ import os.path
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
-from .voirie_communale_dialog import VoirieCommunaleDialog, TodoDialog, PhotoAeriennesDialog, LauncherDialog, SettingsDialog
+from .voirie_communale_dialog import VoirieCommunaleDialog, PhotoAeriennesDialog, LauncherDialog, SettingsDialog
 # Import version information
 from .version import __version__, get_changelog
 
@@ -175,13 +175,6 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
 
-        self.add_action(
-            icon_path,
-            text=self.tr(u'ToDo'),
-            callback=self.show_todo,
-            add_to_toolbar=False,
-            parent=self.iface.mainWindow())
-
         # will be set False in run()
         self.first_start = True
 
@@ -210,22 +203,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         msg.setTextFormat(1)  # Qt::RichText
         msg.exec_()
 
-    def show_todo(self):
-        """Ouvre la fenêtre ToDo (lit/écrite dans le profil utilisateur QGIS)."""
-        todo_dir = os.path.join(QgsApplication.qgisSettingsDirPath(), 'voirie_communale')
-        os.makedirs(todo_dir, exist_ok=True)
-        todo_path = os.path.join(todo_dir, 'TODO.md')
-        # Créer le fichier avec un contenu initial s'il n'existe pas encore
-        if not os.path.exists(todo_path):
-            plugin_todo = os.path.join(os.path.dirname(__file__), 'TODO.md')
-            if os.path.exists(plugin_todo):
-                import shutil
-                shutil.copy2(plugin_todo, todo_path)
-            else:
-                with open(todo_path, 'w', encoding='utf-8') as f:
-                    f.write('# TODO - Voirie Communale\n\n## En cours\n\n## À faire\n\n## Idées\n')
-        dlg = TodoDialog(todo_path, parent=self.iface.mainWindow())
-        dlg.exec_()
+
 
     def validate_and_load(self):
         """Valide le code INSEE et charge les données selon le bouton radio sélectionné"""
@@ -837,7 +815,6 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 parent=self.iface.mainWindow(),
                 callbacks={
                     'charger':   self.open_charger_dialog,
-                    'todo':      self.show_todo,
                     'settings':  self.show_settings,
                     'about':     self.show_about,
                 }

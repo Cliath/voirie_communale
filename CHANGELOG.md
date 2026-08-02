@@ -1,3 +1,7 @@
+# [0.16.0] - 2026-08-02
+### Supprimé
+- **Bouton "Liste des tâches" et gestion du TODO.md interne** : retiré de la barre de lancement du plugin (`LauncherDialog` ne propose plus que 4 actions : Charger des données, Numériser des données, Paramètres, À propos). Suppression complète du code associé — classe `TodoDialog`, méthode `show_todo()`, action de menu "ToDo", fichier modèle `TODO.md` du dépôt et son entrée `.gitignore`. La gestion des tâches est désormais assurée en dehors du plugin. Le fichier `TODO.md` éventuellement déjà présent dans le profil utilisateur QGIS n'est pas supprimé (non touché par cette modification).
+
 # [0.15.23] - 2026-08-02
 ### Corrigé
 - **Filaires de voie BAL : message d'erreur incohérent** : le popup affiché en cas d'échec ("Impossible de charger... vérifiez la connexion internet, le code INSEE...") s'affichait aussi quand la commune n'avait simplement aucune donnée BAL contribuée (cas normal, pas une erreur technique) — le journal indiquait pourtant clairement "aucune voie trouvée pour {code_insee}". `load_filaires_bal` distingue désormais explicitement les deux cas via un 3e élément de retour (`no_data`) : un message dédié et rassurant ("Aucune donnée BAL disponible pour cette commune...") s'affiche pour l'absence de données, tandis que le message d'alerte technique reste réservé aux véritables échecs réseau/parsing.

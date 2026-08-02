@@ -9,13 +9,12 @@ import os
 import re
 import json
 from qgis.PyQt.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QTextEdit,
+    QDialog, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame,
     QToolButton, QLineEdit, QTabWidget, QListWidget, QListWidgetItem, QAbstractItemView,
     QSpinBox
 )
 from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtGui import QFont
 from qgis.PyQt import QtWidgets
 
 # Importer la classe du fichier UI compilé
@@ -117,66 +116,6 @@ class PhotoAeriennesDialog(QDialog):
             for chk in self._checkboxes
             if chk.isChecked()
         ]
-
-
-class TodoDialog(QDialog):
-    """Fenêtre d'édition du fichier TODO.md."""
-
-    def __init__(self, todo_path, parent=None):
-        super().__init__(parent)
-        self.todo_path = todo_path
-        self.setWindowTitle("ToDo - Voirie Communale")
-        self.resize(600, 500)
-        self.setWindowFlags(self.windowFlags() | Qt.WindowMaximizeButtonHint)
-
-        layout = QVBoxLayout(self)
-
-        # Éditeur
-        self.editor = QTextEdit()
-        font = QFont("Consolas", 10)
-        self.editor.setFont(font)
-        self.editor.setAcceptRichText(False)
-        layout.addWidget(self.editor)
-
-        # Boutons
-        btn_layout = QHBoxLayout()
-        btn_layout.addStretch()
-        self.btn_save = QPushButton("Enregistrer")
-        self.btn_close = QPushButton("Fermer")
-        btn_layout.addWidget(self.btn_save)
-        btn_layout.addWidget(self.btn_close)
-        layout.addLayout(btn_layout)
-
-        self.btn_save.clicked.connect(self._save)
-        self.btn_close.clicked.connect(self.close)
-
-        self._load()
-
-    def _load(self):
-        """Charge le contenu de TODO.md."""
-        try:
-            with open(self.todo_path, 'r', encoding='utf-8') as f:
-                self.editor.setPlainText(f.read())
-        except OSError:
-            self.editor.setPlainText(f"# TODO\n")
-
-    def _save(self):
-        """Enregistre le contenu dans TODO.md."""
-        try:
-            with open(self.todo_path, 'w', encoding='utf-8') as f:
-                f.write(self.editor.toPlainText())
-            self.btn_save.setText("Enregistré ✓")
-            self.btn_save.setEnabled(False)
-            # Réactiver après modification
-            self.editor.textChanged.connect(self._on_modified)
-        except OSError as e:
-            QMessageBox.warning(self, "Erreur", f"Impossible d'enregistrer :\n{e}")
-
-    def _on_modified(self):
-        """Réactive le bouton Enregistrer après une modification."""
-        self.btn_save.setText("Enregistrer")
-        self.btn_save.setEnabled(True)
-        self.editor.textChanged.disconnect(self._on_modified)
 
 
 class SettingsDialog(QDialog):
@@ -572,12 +511,6 @@ class LauncherDialog(QDialog):
                 "Numériser\ndes données",
                 "Numérisation des voies (fonctionnalité à venir)",
                 None,
-            ),
-            (
-                "📋",
-                "Liste des\ntâches",
-                "Ouvre le gestionnaire de tâches",
-                callbacks.get('todo'),
             ),
             (
                 "⚙️",
