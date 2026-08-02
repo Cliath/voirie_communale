@@ -1,3 +1,9 @@
+# [0.15.19] - 2026-08-02
+### Corrigé
+- **Bug critique (régression du refactoring 0.15.14)** : `WfsLoadTask` (tâche d'arrière-plan utilisée pour tout chargement WFS parallèle — BAN, BD TOPO, OSM, MagOSM, etc.) n'était pas importée dans `voirie_communale.py` après son déplacement vers `wfs_loader.py`, provoquant un `NameError` dès la première tentative de chargement de couches. Import corrigé.
+### Modifié
+- Nettoyage des imports inutilisés détectés par analyse statique (`pyflakes`) dans `styles.py` et `wfs_loader.py` (`re`, `QgsRuleBasedLabeling`, `QgsLineSymbol`, `QgsFillSymbol`, `QgsRendererCategory`, `QgsCategorizedSymbolRenderer` au niveau module — déjà réimportés localement là où utilisés ; `time`, `QgsApplication` non utilisés dans `wfs_loader.py`).
+
 # [0.15.18] - 2026-08-02
 ### Corrigé
 - **Bug (régression du refactoring 0.15.14)** : `wfs_loader.py` utilisait `MAJIC_GROUPES`, `_MAJIC_GROUPE_DEFAULT_COLOR`, `QgsFillSymbol`, `QgsRendererCategory` et `QgsCategorizedSymbolRenderer` sans les importer — provoquait un `NameError` au moment d'appliquer le rendu catégorisé des parcelles MAJIC (bouton "Parcelles MAJIC"). Imports ajoutés.

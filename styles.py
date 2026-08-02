@@ -8,13 +8,11 @@ Ce module regroupe la logique de symbologie du plugin : dictionnaires de
 couleurs (MAJIC), et methodes appliquant des QgsRuleBasedRenderer / renderers
 categorises sur les couches chargees (BD TOPO, BAN, OSM, MagOSM).
 """
-import re
 from qgis.PyQt.QtGui import QColor
 from qgis.core import (Qgis, QgsMessageLog,
-                       QgsRendererCategory, QgsCategorizedSymbolRenderer,
-                       QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol,
+                       QgsMarkerSymbol,
                        QgsPalLayerSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling,
-                       QgsRuleBasedLabeling, QgsTextBufferSettings)
+                       QgsTextBufferSettings)
 
 from .voirie_communale_dialog import SettingsDialog
 

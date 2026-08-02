@@ -9,7 +9,6 @@ de telechargement bas niveau (fetch-to-vsimem, utilisees en arriere-plan sans
 objets QGIS), et les methodes de chargement haut niveau de chaque source de
 donnees (BAN, BD TOPO, OSM, MagOSM, MAJIC, cadastre, WMS historiques, etc.).
 """
-import time
 import json
 import urllib.parse
 import urllib.request
@@ -17,7 +16,7 @@ import urllib.error
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
-                       Qgis, QgsApplication, QgsTask,
+                       Qgis, QgsTask,
                        QgsFeature, QgsGeometry, QgsPointXY,
                        QgsFillSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer)
 

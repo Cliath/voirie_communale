@@ -23,7 +23,7 @@ from .version import __version__, get_changelog
 
 # Mixins extraits dans des modules dédiés (styles, réseau/chargement, arbre des couches)
 from .styles import StylesMixin
-from .wfs_loader import WfsLoaderMixin
+from .wfs_loader import WfsLoaderMixin, WfsLoadTask
 from .layer_order import LayerOrderMixin
 
 
