@@ -1,3 +1,7 @@
+# [0.16.1] - 2026-08-02
+### Corrigé
+- **Adresse mail de contact incohérente** : les en-têtes de copyright de plusieurs modules (`voirie_communale.py`, `voirie_communale_dialog.py`, `wfs_loader.py`, `styles.py`, `layer_order.py`, `__init__.py`) ainsi que la boîte de dialogue "À propos" utilisaient `yann.schwarz@ign.fr`, tandis que `metadata.txt` et `README.md` utilisaient `yann.schwarz@gmail.com`. Uniformisé sur `yann.schwarz@gmail.com` partout.
+
 # [0.16.0] - 2026-08-02
 ### Supprimé
 - **Bouton "Liste des tâches" et gestion du TODO.md interne** : retiré de la barre de lancement du plugin (`LauncherDialog` ne propose plus que 4 actions : Charger des données, Numériser des données, Paramètres, À propos). Suppression complète du code associé — classe `TodoDialog`, méthode `show_todo()`, action de menu "ToDo", fichier modèle `TODO.md` du dépôt et son entrée `.gitignore`. La gestion des tâches est désormais assurée en dehors du plugin. Le fichier `TODO.md` éventuellement déjà présent dans le profil utilisateur QGIS n'est pas supprimé (non touché par cette modification).

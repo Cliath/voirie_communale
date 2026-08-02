@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Voirie Communale - Telechargement et construction des couches (WFS/WMS/XYZ)
-Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
+Copyright (C) 2026 Yann Schwarz <yann.schwarz@gmail.com>
 Licence : GNU GPL v2+
 
 Ce module regroupe : la tache asynchrone WfsLoadTask (QgsTask), les fonctions

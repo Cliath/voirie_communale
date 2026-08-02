@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Voirie Communale - Gestion de l'arbre des couches
-Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
+Copyright (C) 2026 Yann Schwarz <yann.schwarz@gmail.com>
 Licence : GNU GPL v2+
 
 Ce module regroupe : la lecture de l'ordre canonique (layer_order.json), le

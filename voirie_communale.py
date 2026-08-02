@@ -2,7 +2,7 @@
 """
 Voirie Communale - Plugin QGIS
 Recensement de la voirie communale (voies communales et chemins ruraux).
-Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
+Copyright (C) 2026 Yann Schwarz <yann.schwarz@gmail.com>
 Licence : GNU GPL v2+
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QEventLoop
@@ -195,7 +195,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
             f"<b>Voirie Communale</b> v{__version__}<br><br>"
             "Plugin QGIS pour le recensement de la voirie communale<br>"
             "(voies communales et chemins ruraux).<br><br>"
-            "<b>Auteur :</b> Yann Schwarz &lt;yann.schwarz@ign.fr&gt;<br>"
+            "<b>Auteur :</b> Yann Schwarz &lt;yann.schwarz@gmail.com&gt;<br>"
             "<b>Licence :</b> GNU GPL v2+<br>"
             "<b>Source :</b> <a href='https://github.com/Cliath/voirie_communale'>"
             "github.com/Cliath/voirie_communale</a>"

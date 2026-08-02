@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Voirie Communale - Symbologie (styles, couleurs, regles de rendu)
-Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
+Copyright (C) 2026 Yann Schwarz <yann.schwarz@gmail.com>
 Licence : GNU GPL v2+
 
 Ce module regroupe la logique de symbologie du plugin : dictionnaires de

@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.16.0
+version=0.16.1
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.16.0 (2026-08-02)
+changelog=    Version 0.16.1 (2026-08-02)
+    - Adresse mail de contact incohérente : les en-têtes de copyright de plusieurs modules (voirie_communale.py, voirie_communale_dialog.py, wfs_loader.py, styles.py, layer_order.py, __init__.py) ainsi que la boîte de dialogue "À propos" utilisaient yann.schwarz@ign.fr, tandis que metadata.txt et README.md utilisaient yann.schwarz@gmail.com. Uniformisé sur yann.schwarz@gmail.com partout.
+    Version 0.16.0 (2026-08-02)
     - Bouton "Liste des tâches" et gestion du TODO.md interne : retiré de la barre de lancement du plugin (LauncherDialog ne propose plus que 4 actions : Charger des données, Numériser des données, Paramètres, À propos). Suppression complète du code associé — classe TodoDialog, méthode show_todo(), action de menu "ToDo", fichier modèle TODO.md du dépôt et son entrée .gitignore. La gestion des tâches est désormais assurée en dehors du plugin. Le fichier TODO.md éventuellement déjà présent dans le profil utilisateur QGIS n'est pas supprimé (non touché par cette modification).
     Version 0.15.23 (2026-08-02)
     - Filaires de voie BAL : message d'erreur incohérent : le popup affiché en cas d'échec ("Impossible de charger... vérifiez la connexion internet, le code INSEE...") s'affichait aussi quand la commune n'avait simplement aucune donnée BAL contribuée (cas normal, pas une erreur technique) — le journal indiquait pourtant clairement "aucune voie trouvée pour {code_insee}". load_filaires_bal distingue désormais explicitement les deux cas via un 3e élément de retour (no_data) : un message dédié et rassurant ("Aucune donnée BAL disponible pour cette commune...") s'affiche pour l'absence de données, tandis que le message d'alerte technique reste réservé aux véritables échecs réseau/parsing.
@@ -36,8 +38,6 @@ changelog=    Version 0.16.0 (2026-08-02)
     - Optimisation : factorisation de la logique commune de chargement de groupes de couches WMS (load_cadastre_wms, load_geofoncier_wms, load_cosia_wms dans wfs_loader.py) dans une méthode partagée _load_wms_layer_group — création du groupe, boucle de chargement avec vérification isValid(), collecte des erreurs. Réduit la duplication de code (~140 lignes économisées) sans changement de comportement.
     Version 0.15.16 (2026-08-02)
     - Optimisation : gestion des exceptions resserrée sur les appels réseau (urllib) et de parsing JSON dans wfs_loader.py, ainsi que sur les lectures/écritures de fichiers (layer_order.json, settings.json, TODO.md) — except Exception remplacé par des types précis (urllib.error.URLError, OSError, json.JSONDecodeError, ValueError). Les quelques frontières volontairement larges restantes (thread d'arrière-plan QGIS, opérations géométriques complexes) sont désormais documentées par un commentaire expliquant pourquoi.
-    Version 0.15.15 (2026-08-02)
-    - Optimisation : suppression de la boucle d'attente active (time.sleep(0.05) en boucle) lors du chargement parallèle des couches WFS/WMS — remplacée par une boucle d'événements Qt (QEventLoop) qui se termine directement au signal de fin de tâche, sans scruter le CPU inutilement.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png

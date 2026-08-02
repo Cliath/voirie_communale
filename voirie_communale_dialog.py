@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Voirie Communale - Dialogue principal
-Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
+Copyright (C) 2026 Yann Schwarz <yann.schwarz@gmail.com>
 Licence : GNU GPL v2+
 """
 
