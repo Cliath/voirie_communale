@@ -1,3 +1,7 @@
+# [0.16.3] - 2026-08-02
+### Corrigé
+- **README** : ajout du lien source manquant pour les Filaires de voie des Bases Adresses Locales (data.gouv.fr) dans le tableau "Sources de données".
+
 # [0.16.2] - 2026-08-02
 ### Modifié
 - **Intitulés Voirie DGCL** : "Voirie communale (DGCL 2026)" → "Voirie communale retenue DSR 2026 (DGCL)", "Voirie départementale (DGCL 2026)" → "Voirie départementale retenue DGF 2026 (DGCL)". Uniquement les libellés de l'interface (cases à cocher) et du README ; aucun changement fonctionnel (typenames WFS et noms de couches chargées inchangés).

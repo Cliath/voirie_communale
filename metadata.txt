@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.16.2
+version=0.16.3
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.16.2 (2026-08-02)
+changelog=    Version 0.16.3 (2026-08-02)
+    - README : ajout du lien source manquant pour les Filaires de voie des Bases Adresses Locales (data.gouv.fr) dans le tableau "Sources de données".
+    Version 0.16.2 (2026-08-02)
     - Intitulés Voirie DGCL : "Voirie communale (DGCL 2026)" -> "Voirie communale retenue DSR 2026 (DGCL)", "Voirie départementale (DGCL 2026)" -> "Voirie départementale retenue DGF 2026 (DGCL)". Uniquement les libellés de l'interface (cases à cocher) et du README ; aucun changement fonctionnel (typenames WFS et noms de couches chargées inchangés).
     Version 0.16.1 (2026-08-02)
     - Adresse mail de contact incohérente : les en-têtes de copyright de plusieurs modules (voirie_communale.py, voirie_communale_dialog.py, wfs_loader.py, styles.py, layer_order.py, __init__.py) ainsi que la boîte de dialogue "À propos" utilisaient yann.schwarz@ign.fr, tandis que metadata.txt et README.md utilisaient yann.schwarz@gmail.com. Uniformisé sur yann.schwarz@gmail.com partout.
@@ -36,8 +38,6 @@ changelog=    Version 0.16.2 (2026-08-02)
     - Nettoyage des imports inutilisés détectés par analyse statique (pyflakes) dans styles.py et wfs_loader.py (re, QgsRuleBasedLabeling, QgsLineSymbol, QgsFillSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer au niveau module — déjà réimportés localement là où utilisés ; time, QgsApplication non utilisés dans wfs_loader.py).
     Version 0.15.18 (2026-08-02)
     - Bug (régression du refactoring 0.15.14) : wfs_loader.py utilisait MAJIC_GROUPES, _MAJIC_GROUPE_DEFAULT_COLOR, QgsFillSymbol, QgsRendererCategory et QgsCategorizedSymbolRenderer sans les importer — provoquait un NameError au moment d'appliquer le rendu catégorisé des parcelles MAJIC (bouton "Parcelles MAJIC"). Imports ajoutés.
-    Version 0.15.17 (2026-08-02)
-    - Optimisation : factorisation de la logique commune de chargement de groupes de couches WMS (load_cadastre_wms, load_geofoncier_wms, load_cosia_wms dans wfs_loader.py) dans une méthode partagée _load_wms_layer_group — création du groupe, boucle de chargement avec vérification isValid(), collecte des erreurs. Réduit la duplication de code (~140 lignes économisées) sans changement de comportement.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png

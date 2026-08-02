@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.16.2** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.16.3** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -183,6 +183,7 @@ voirie_communale/
 | MagOSM WFS (Magellium) | `https://magosm.magellium.com/geoserver/ows` |
 | API Koumoul (MAJIC) | `https://koumoul.com/data-fair/api/v1/datasets/parcelles-des-personnes-morales` |
 | Géofoncier WMS public | `https://api2.geofoncier.fr/api/referentielsoge/wxs` |
+| Filaires de voie des Bases Adresses Locales (data.gouv.fr) | [https://www.data.gouv.fr/datasets/filaires-de-voie-des-bases-adresses-locales-publiees-via-mes-adresses](https://www.data.gouv.fr/datasets/filaires-de-voie-des-bases-adresses-locales-publiees-via-mes-adresses) |
 
 ## Licence
 
