@@ -18,7 +18,7 @@ echo.
 
 REM Etape 0 : Verification syntaxe Python
 echo [0/4] Verification de la syntaxe Python...
-python -c "import ast, sys; ast.parse(open('voirie_communale.py', encoding='utf-8-sig').read()); print('  Syntaxe OK')"
+python -c "import ast, sys; [ast.parse(open(f, encoding='utf-8-sig').read()) for f in ['voirie_communale.py', 'styles.py', 'wfs_loader.py', 'layer_order.py']]; print('  Syntaxe OK')"
 if !ERRORLEVEL! NEQ 0 (
     echo Erreur de syntaxe Python - build annule
     exit /b 1

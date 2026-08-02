@@ -1,3 +1,8 @@
+# [0.15.14] - 2026-08-02
+### Modifié
+- **Refactoring interne** : `voirie_communale.py` (~3250 lignes) scindé en modules dédiés — `styles.py` (symbologie BD TOPO/BAN/OSM/MagOSM), `wfs_loader.py` (chargement réseau WFS/WMS/XYZ) et `layer_order.py` (ordonnancement et regroupement des couches). `voirie_communale.py` ne contient plus que l'orchestration du plugin. Aucun changement fonctionnel pour l'utilisateur.
+- `package.py` et `build.bat` mis à jour pour inclure/vérifier les nouveaux modules.
+
 # [0.15.12] - 2026-04-04
 ### Modifié
 - **MagOSM** : catégorie *Voie communale* (residential) fusionnée dans *Desserte* — Desserte couvre désormais `residential`, `service`, `living_street`. `unclassified` classé dans *(autre)*.
