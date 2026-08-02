@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.16.3** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.16.4** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -184,6 +184,18 @@ voirie_communale/
 | API Koumoul (MAJIC) | `https://koumoul.com/data-fair/api/v1/datasets/parcelles-des-personnes-morales` |
 | Géofoncier WMS public | `https://api2.geofoncier.fr/api/referentielsoge/wxs` |
 | Filaires de voie des Bases Adresses Locales (data.gouv.fr) | [https://www.data.gouv.fr/datasets/filaires-de-voie-des-bases-adresses-locales-publiees-via-mes-adresses](https://www.data.gouv.fr/datasets/filaires-de-voie-des-bases-adresses-locales-publiees-via-mes-adresses) |
+| Emprise communale — Admin Express (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_ADMIN-EXPRESS](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_ADMIN-EXPRESS) |
+| Adresses BAN (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BAN-PLUS](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BAN-PLUS) |
+| Voirie communale/départementale DGCL (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_VOIRIE-DGF](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_VOIRIE-DGF) |
+| BD TOPO (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BD-TOPO](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BD-TOPO) |
+| OSM France — serveur de tuiles (wiki OSM) | [https://wiki.openstreetmap.org/wiki/FR:Serveurs/tile.openstreetmap.fr](https://wiki.openstreetmap.org/wiki/FR:Serveurs/tile.openstreetmap.fr) |
+| CoSIA (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_COSIA](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_COSIA) |
+| BD ORTHO® (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BD-ORTHO](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BD-ORTHO) |
+| Photos aériennes historiques (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BD-ORTHO-HISTO](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BD-ORTHO-HISTO) |
+| SCAN 50® historique (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_SCAN-50-HISTO](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_SCAN-50-HISTO) |
+| Carte de Cassini (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/ARCHIVES-NATIONALES_CASSINI-ROI](https://cartes.gouv.fr/rechercher-une-donnee/dataset/ARCHIVES-NATIONALES_CASSINI-ROI) |
+| Carte de l'État-Major (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_SCAN-EM-10K](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_SCAN-EM-10K) |
+| MNT LiDAR HD (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_MNT-LIDAR-HD](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_MNT-LIDAR-HD) |
 
 ## Licence
 

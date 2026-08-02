@@ -1,3 +1,7 @@
+# [0.16.4] - 2026-08-02
+### Corrigé
+- **README** : ajout des liens sources manquants dans le tableau "Sources de données" — Emprise communale (Admin Express), Adresses BAN, Voirie communale/départementale DGCL, BD TOPO, OSM France (serveur de tuiles), CoSIA, BD ORTHO®, Photos aériennes historiques, SCAN 50® historique, Carte de Cassini, Carte de l'État-Major, MNT LiDAR HD (tous via cartes.gouv.fr). Waze et Plan IGN J+1 restent sans lien dédié (pas de page source officielle).
+
 # [0.16.3] - 2026-08-02
 ### Corrigé
 - **README** : ajout du lien source manquant pour les Filaires de voie des Bases Adresses Locales (data.gouv.fr) dans le tableau "Sources de données".
