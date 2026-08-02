@@ -23,6 +23,7 @@ FILES_TO_INCLUDE = [
     'styles.py',
     'wfs_loader.py',
     'layer_order.py',
+    'cache_manager.py',
     'voirie_communale_dialog.py',
     'voirie_communale_dialog_base.py',
     'resources.py',
