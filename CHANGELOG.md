@@ -1,3 +1,7 @@
+# [0.15.22] - 2026-08-02
+### Ajouté
+- **Nouvelle source de données** : Filaires de voie des Bases Adresses Locales (BAL) — case à cocher "Filaires de voie (BAL)" dans l'onglet Nationales, entre Adresses BAN et Parcelles MAJIC. L'export national (GeoJSON statique, ~100 Mo, sans filtre serveur) est téléchargé puis filtré côté client sur le code INSEE, à l'image de la stratégie déjà utilisée pour les parcelles MAJIC. Couche mémoire nommée `Filaires de voie BAL {code_insee}` avec champs `nom`/`commune`, style QGIS par défaut. Intégrée à l'ordre canonique des couches (`layer_order.json`).
+
 # [0.15.21] - 2026-08-02
 ### Corrigé
 - **Voirie DGCL 2026** : correction du `typename` WFS — `DGF_2026_:_voirie-retenue-communes` et `DGF_2026_:_voirie-retenue-departements` (underscores autour des deux-points, conformes au nommage réel du service, corrige une erreur introduite en 0.15.20 où le format `workspace:layer` classique avait été utilisé par erreur).

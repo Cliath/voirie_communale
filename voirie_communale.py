@@ -281,6 +281,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         cadastre_checked = self.dlg.chkCadastre.isChecked()
         commune_checked = self.dlg.chkCommune.isChecked()
         ban_checked = self.dlg.chkBAN.isChecked()
+        filaires_bal_checked = hasattr(self.dlg, 'chkFilairesBAL') and self.dlg.chkFilairesBAL.isChecked()
         voirie_checked = self.dlg.chkVoirie.isChecked()
         voirie_dep_checked = self.dlg.chkVoirieDep.isChecked()
         osm_routes_checked = self.dlg.chkOsmRoutes.isChecked()
@@ -307,7 +308,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
 
         # Pour les données sans BBOX (WMS globaux, cadastre, BAN, MAJIC), forcer le
         # chargement de la commune pour le zoom uniquement si elle n'est pas déjà dans le projet
-        needs_zoom = (cadastre_checked or ban_checked or majic_checked or
+        needs_zoom = (cadastre_checked or ban_checked or filaires_bal_checked or majic_checked or
                       scan_etat_major_checked or scan_cassini_checked or scan50_1950_checked or
                       waze_tiles_checked or osmfr_checked or cosia_checked or
                       bd_ortho_checked or mnt_lidar_checked or plan_ign_checked or
@@ -321,7 +322,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
             if not commune_already_loaded:
                 commune_checked = True
         
-        if not cadastre_checked and not commune_checked and not ban_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not magosm_checked and not bdtopo_routesnom_checked and not bdtopo_troncons_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not osmfr_checked and not cosia_checked and not photo_aeriennes_checked and not bd_ortho_checked and not mnt_lidar_checked and not plan_ign_checked and not geofoncier_checked:
+        if not cadastre_checked and not commune_checked and not ban_checked and not filaires_bal_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not magosm_checked and not bdtopo_routesnom_checked and not bdtopo_troncons_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not osmfr_checked and not cosia_checked and not photo_aeriennes_checked and not bd_ortho_checked and not mnt_lidar_checked and not plan_ign_checked and not geofoncier_checked:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Sélection requise",
@@ -373,6 +374,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         # Les WMS globaux déjà présents ne comptent pas non plus
         steps = sum([
             cadastre_checked, commune_checked and not commune_reuse, ban_checked,
+            filaires_bal_checked,
             voirie_checked, voirie_dep_checked, osm_routes_checked, magosm_checked,
             bdtopo_routesnom_checked, bdtopo_troncons_checked, majic_checked,
             scan_etat_major_checked and not skip_scan_etat_major,
@@ -613,6 +615,19 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 deferred_warnings.append((
                     "Erreur MAJIC",
                     "Impossible de charger les parcelles MAJIC pour la commune sélectionnée.\n\n"
+                    "Vérifiez la connexion internet, le code INSEE, ou consultez le journal des messages pour plus de détails."
+                ))
+
+        if filaires_bal_checked:
+            advance(f"Chargement des filaires de voie BAL ({code_insee})...")
+            filaires_bal_success, filaires_bal_layer = self.load_filaires_bal(code_insee)
+            results.append(('Filaires de voie BAL', filaires_bal_success))
+            if filaires_bal_layer:
+                loaded_layers.append(filaires_bal_layer)
+            elif not filaires_bal_success:
+                deferred_warnings.append((
+                    "Erreur Filaires de voie BAL",
+                    "Impossible de charger les filaires de voie BAL pour la commune sélectionnée.\n\n"
                     "Vérifiez la connexion internet, le code INSEE, ou consultez le journal des messages pour plus de détails."
                 ))
 

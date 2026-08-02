@@ -30,7 +30,7 @@ class VoirieCommunaleDialog(QtWidgets.QDialog, Ui_VoirieCommunaleDialogBase):
         # Liste de toutes les cases à cocher de sélection de couches
         self._layer_checkboxes = [
             'chkCommune', 'chkBDTopoRoutesNom', 'chkBDTopoTroncons', 'chkOsmRoutes', 'chkMagOsm',
-            'chkVoirie', 'chkVoirieDep', 'chkBAN', 'chkMajic', 'chkGeofoncier',
+            'chkVoirie', 'chkVoirieDep', 'chkBAN', 'chkFilairesBAL', 'chkMajic', 'chkGeofoncier',
             'chkCadastre', 'chkPlanIGN', 'chkBDOrtho', 'chkMNTLidar',
             'chkOsmFR', 'chkWazeTiles', 'chkCoSIA', 'chkPhotoAeriennes',
             'chkScan50_1950', 'chkScanCassini', 'chkScanEtatMajor'

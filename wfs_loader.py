@@ -1172,6 +1172,94 @@ class WfsLoaderMixin:
         return True, layer
 
 
+    # URL de l'export national des filaires de voie des Bases Adresses Locales (BAL)
+    FILAIRES_BAL_URL = "https://base-adresse-locale-prod-filaires-de-voie.s3.fr-par.scw.cloud/export-filaires-de-voie.json"
+
+    def load_filaires_bal(self, code_insee):
+        """Charge les filaires de voie des Bases Adresses Locales (BAL) pour une commune.
+
+        L'export est un unique GeoJSON national (~100 Mo) sans filtre serveur possible :
+        le fichier est téléchargé intégralement puis filtré côté client sur la propriété
+        'commune' (code INSEE), à l'image de la stratégie utilisée pour les parcelles MAJIC.
+
+        Args:
+            code_insee: Code INSEE de la commune (5 caractères)
+
+        Returns:
+            tuple: (bool, QgsVectorLayer ou None) - (succès, couche chargée)
+        """
+        layer_name = f"Filaires de voie BAL {code_insee}"
+
+        QgsMessageLog.logMessage(
+            f"Filaires de voie BAL : téléchargement de l'export national pour {code_insee}",
+            "VoirieCommunale", Qgis.Info
+        )
+
+        try:
+            req = urllib.request.Request(
+                self.FILAIRES_BAL_URL, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'}
+            )
+            with urllib.request.urlopen(req, timeout=120) as response:
+                data = json.loads(response.read().decode('utf-8'))
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
+            QgsMessageLog.logMessage(
+                f"Filaires de voie BAL : erreur de téléchargement/parsing : {e}",
+                "VoirieCommunale", Qgis.Critical
+            )
+            return False, None
+
+        features_in = [
+            feat for feat in data.get('features', [])
+            if feat.get('properties', {}).get('commune') == code_insee
+        ]
+
+        if not features_in:
+            QgsMessageLog.logMessage(
+                f"Filaires de voie BAL : aucune voie trouvée pour {code_insee}",
+                "VoirieCommunale", Qgis.Warning
+            )
+            return False, None
+
+        uri = "LineString?crs=EPSG:4326&field=nom:string&field=commune:string"
+        layer = QgsVectorLayer(uri, layer_name, "memory")
+        provider = layer.dataProvider()
+
+        features = []
+        for feat_in in features_in:
+            coords = feat_in.get('geometry', {}).get('coordinates', [])
+            if not coords:
+                continue
+            points = [QgsPointXY(x, y) for x, y in coords]
+            geom = QgsGeometry.fromPolylineXY(points)
+            if geom.isNull() or geom.isEmpty():
+                continue
+
+            props = feat_in.get('properties', {})
+            feat = QgsFeature()
+            feat.setGeometry(geom)
+            feat.setAttributes([props.get('nom', ''), props.get('commune', '')])
+            features.append(feat)
+
+        if not features:
+            QgsMessageLog.logMessage(
+                f"Filaires de voie BAL : géométries invalides pour {code_insee}",
+                "VoirieCommunale", Qgis.Warning
+            )
+            return False, None
+
+        provider.addFeatures(features)
+        layer.updateExtents()
+
+        self._remove_layers_by_name(layer_name)
+        QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
+
+        QgsMessageLog.logMessage(
+            f"Filaires de voie BAL : {len(features)} voie(s) chargée(s) pour {code_insee}",
+            "VoirieCommunale", Qgis.Success
+        )
+        return True, layer
+
+
     def load_osm_roads(self, code_insee, bbox=None):
         """Charge les routes OSM via Overpass API.
 

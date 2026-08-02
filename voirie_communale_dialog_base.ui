@@ -171,6 +171,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="chkFilairesBAL">
+            <property name="text">
+             <string>Filaires de voie (BAL)</string>
+            </property>
+            <property name="toolTip">
+             <string>Charge les filaires de voie des Bases Adresses Locales pour la commune&#10;Licence Ouverte 2.0 (Etalab) — © DINUM / collectivités</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="chkMajic">
             <property name="text">
              <string>Parcelles personnes morales (MAJIC)</string>

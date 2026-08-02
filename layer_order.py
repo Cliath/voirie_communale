@@ -183,6 +183,7 @@ class LayerOrderMixin:
                 "DGCL Voirie d\u00e9partementale retenue DGF 2026 {code_insee}",
                 "OSM Routes {code_insee}",
                 "Adresses BAN {code_insee}",
+                "Filaires de voie BAL {code_insee}",
                 "Parcelles MAJIC {code_insee}",
                 "Commune {code_insee}",
                 "Cadastre - {code_insee}",

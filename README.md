@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.15.21** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.15.22** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -36,7 +36,7 @@ Ou via `build.bat` qui compile, package, push git et déploie en une commande :
 - **Barre de lancement** : le bouton du plugin ouvre 5 actions : *Charger des données*, *Numériser des données* (à venir), *Liste des tâches*, *Paramètres*, *À propos*
 - **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
 - **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, et ordre des couches configurable par glisser-déposer
-- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → MAJIC → Commune → Cadastre → Géofoncier → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → Photos aériennes → SCAN 50® → Cassini → État-Major
+- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → MAJIC → Commune → Cadastre → Géofoncier → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → Photos aériennes → SCAN 50® → Cassini → État-Major
 
 ### Données vectorielles (filtrées par code INSEE ou BBOX communale)
 
@@ -44,6 +44,7 @@ Ou via `build.bat` qui compile, package, push git et déploie en une commande :
 |--------|--------|--------|
 | **Emprise communale** | IGN Géoplateforme WFS — Admin Express | code INSEE |
 | **Adresses BAN** (paginée, toutes adresses) | IGN Géoplateforme WFS | code INSEE |
+| **Filaires de voie BAL** | Export national statique (S3, ~100 Mo) | code INSEE (filtrage client) |
 | **Voirie communale DGCL 2026** | IGN Géoplateforme WFS | BBOX commune |
 | **Voirie départementale DGCL 2026** | IGN Géoplateforme WFS | BBOX commune |
 | **Routes OSM** (CE / C / R) | Overpass API | BBOX commune |
