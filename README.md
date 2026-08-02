@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.16.6** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.16.7** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -11,23 +11,6 @@ Version actuelle : **0.16.6** — voir [CHANGELOG](CHANGELOG.md)
 2. QGIS → **Extensions** → **Installer/Gérer les extensions** → onglet **Installer depuis un ZIP**
 3. Sélectionnez le fichier `voirie_communale-X.X.X.zip` et cliquez sur **Installer l'extension**
 4. Activez le plugin dans l'onglet **Installées**
-
-### En mode développement
-
-```powershell
-# Déployer manuellement dans le répertoire des plugins QGIS
-$pluginDir = "$env:APPDATA\QGIS\QGIS3\profiles\default\python\plugins\voirie_communale"
-if (Test-Path $pluginDir) { Remove-Item -Recurse -Force $pluginDir }
-Copy-Item -Recurse -Force <dossier_du_dépôt> $pluginDir
-```
-
-Ou via `build.bat` qui compile, package, push git et déploie en une commande :
-
-```powershell
-.\build.bat patch   # patch version (0.0.X)
-.\build.bat minor   # minor version (0.X.0)
-.\build.bat major   # major version (X.0.0)
-```
 
 ## Fonctionnalités
 

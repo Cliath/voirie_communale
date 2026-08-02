@@ -1,3 +1,7 @@
+# [0.16.7] - 2026-08-02
+### Modifié
+- **README** : suppression de la section « En mode développement » (déploiement manuel via lien symbolique / `build.bat`), jugée peu utile pour les utilisateurs du plugin. L'installation depuis un ZIP reste documentée.
+
 # [0.16.6] - 2026-08-02
 ### Corrigé
 - **README** : ajout d'une sous-section « Filaires de voie BAL — style par défaut » précisant qu'aucun style personnalisé n'est appliqué à cette couche (style aléatoire QGIS par défaut), pour compléter la documentation des styles déjà présente pour BD TOPO, OSM, BAN et MagOSM.
