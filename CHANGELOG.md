@@ -1,3 +1,7 @@
+# [0.15.18] - 2026-08-02
+### Corrigé
+- **Bug (régression du refactoring 0.15.14)** : `wfs_loader.py` utilisait `MAJIC_GROUPES`, `_MAJIC_GROUPE_DEFAULT_COLOR`, `QgsFillSymbol`, `QgsRendererCategory` et `QgsCategorizedSymbolRenderer` sans les importer — provoquait un `NameError` au moment d'appliquer le rendu catégorisé des parcelles MAJIC (bouton "Parcelles MAJIC"). Imports ajoutés.
+
 # [0.15.17] - 2026-08-02
 ### Modifié
 - **Optimisation** : factorisation de la logique commune de chargement de groupes de couches WMS (`load_cadastre_wms`, `load_geofoncier_wms`, `load_cosia_wms` dans `wfs_loader.py`) dans une méthode partagée `_load_wms_layer_group` — création du groupe, boucle de chargement avec vérification `isValid()`, collecte des erreurs. Réduit la duplication de code (~140 lignes économisées) sans changement de comportement.

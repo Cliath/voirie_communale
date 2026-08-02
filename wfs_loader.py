@@ -18,7 +18,10 @@ from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
                        Qgis, QgsApplication, QgsTask,
-                       QgsFeature, QgsGeometry, QgsPointXY)
+                       QgsFeature, QgsGeometry, QgsPointXY,
+                       QgsFillSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer)
+
+from .styles import MAJIC_GROUPES, _MAJIC_GROUPE_DEFAULT_COLOR
 
 
 class WfsLoadTask(QgsTask):
