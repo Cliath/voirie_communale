@@ -17,10 +17,8 @@ from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
                        Qgis, QgsTask,
-                       QgsFeature, QgsGeometry, QgsPointXY,
-                       QgsFillSymbol, QgsRendererCategory, QgsCategorizedSymbolRenderer)
+                       QgsFeature, QgsGeometry, QgsPointXY)
 
-from .styles import MAJIC_GROUPES, _MAJIC_GROUPE_DEFAULT_COLOR
 
 
 class WfsLoadTask(QgsTask):
@@ -1144,22 +1142,7 @@ class WfsLoaderMixin:
         layer.updateExtents()
 
         # ── Rendu catégorisé par groupe_personne (légende identique à Koumoul) ──
-        # Seuls les groupes présents dans les données sont ajoutés
-        unique_groupes = sorted({
-            int(v['groupe_personne'])
-            for v in majic_by_parcelle.values()
-            if v.get('groupe_personne') is not None
-        })
-        cat_styles = []
-        for g in unique_groupes:
-            libelle, couleur = MAJIC_GROUPES.get(g, (f'Groupe {g}', _MAJIC_GROUPE_DEFAULT_COLOR))
-            symbol = QgsFillSymbol.createSimple({
-                'color': couleur,
-                'outline_color': '#333333',
-                'outline_width': '0.25',
-            })
-            cat_styles.append(QgsRendererCategory(g, symbol, libelle))
-        layer.setRenderer(QgsCategorizedSymbolRenderer('groupe_personne', cat_styles))
+        self.apply_majic_style(layer)
 
         self._remove_layers_by_name(f"Parcelles MAJIC {code_insee}")
         QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)

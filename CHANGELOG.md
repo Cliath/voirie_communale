@@ -1,3 +1,7 @@
+# [0.17.4] - 2026-08-02
+### Corrigé
+- **Cache** : la couche MAJIC chargée depuis le cache local GeoPackage conservait bien son style (v0.17.3), mais uniquement dans le cas d'un cache-miss (premier téléchargement) : la logique d'application du rendu catégorisé (par `groupe_personne`) n'était appelée que juste après le téléchargement Koumoul/WFS. Lors d'un chargement direct depuis le cache d'une session précédente (cas le plus fréquent), la couche gardait le style aléatoire par défaut de QGIS. La logique de style a été extraite en une méthode réutilisable (`apply_majic_style`) reconstruisant les catégories à partir des valeurs `groupe_personne` déjà présentes dans la couche, appelée aussi bien après téléchargement qu'après un chargement depuis le cache.
+
 # [0.17.3] - 2026-08-02
 ### Corrigé
 - **Cache** : la correction précédente (v0.17.2) recréait une nouvelle couche depuis le GeoPackage et ne recopiait que le renderer et l'opacité, perdant les autres aspects du style (étiquettes, mode de fusion, jointures...). La bascule vers le cache utilise désormais `QgsVectorLayer.setDataSource()` sur la couche existante : le style est conservé intégralement puisqu'il s'agit du même objet couche (même id, même renderer, mêmes labels), seule la source de données change de `memory` vers le fichier GeoPackage.

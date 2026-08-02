@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.17.3
+version=0.17.4
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.17.3 (2026-08-02)
+changelog=    Version 0.17.4 (2026-08-02)
+    - Cache : la couche MAJIC chargée depuis le cache local GeoPackage conservait bien son style (v0.17.3), mais uniquement dans le cas d'un cache-miss (premier téléchargement) : la logique d'application du rendu catégorisé (par groupe_personne) n'était appelée que juste après le téléchargement Koumoul/WFS. Lors d'un chargement direct depuis le cache d'une session précédente (cas le plus fréquent), la couche gardait le style aléatoire par défaut de QGIS. La logique de style a été extraite en une méthode réutilisable (apply_majic_style) reconstruisant les catégories à partir des valeurs groupe_personne déjà présentes dans la couche, appelée aussi bien après téléchargement qu'après un chargement depuis le cache.
+    Version 0.17.3 (2026-08-02)
     - Cache : la correction précédente (v0.17.2) recréait une nouvelle couche depuis le GeoPackage et ne recopiait que le renderer et l'opacité, perdant les autres aspects du style (étiquettes, mode de fusion, jointures...). La bascule vers le cache utilise désormais QgsVectorLayer.setDataSource() sur la couche existante : le style est conservé intégralement puisqu'il s'agit du même objet couche (même id, même renderer, mêmes labels), seule la source de données change de memory vers le fichier GeoPackage.
     Version 0.17.2 (2026-08-02)
     - Cache : la couche MAJIC (et Filaires de voie BAL) apparaissait comme « couche temporaire » dans QGIS lors d'un premier téléchargement (ou après « Forcer le rechargement »), car elle était construite avec le provider memory. Après écriture réussie dans le cache GeoPackage, la couche du projet est désormais rechargée depuis le fichier .gpkg (provider ogr), avec conservation du style et de sa position dans l'arbre des couches — elle n'est plus signalée comme temporaire.
@@ -39,8 +41,6 @@ changelog=    Version 0.17.3 (2026-08-02)
     - README : ajout des liens sources manquants dans le tableau "Sources de données" — Emprise communale (Admin Express), Adresses BAN, Voirie communale/départementale DGCL, BD TOPO, OSM France (serveur de tuiles), CoSIA, BD ORTHO(R), Photos aériennes historiques, SCAN 50(R) historique, Carte de Cassini, Carte de l'État-Major, MNT LiDAR HD (tous via cartes.gouv.fr). Waze et Plan IGN J+1 restent sans lien dédié (pas de page source officielle).
     Version 0.16.3 (2026-08-02)
     - README : ajout du lien source manquant pour les Filaires de voie des Bases Adresses Locales (data.gouv.fr) dans le tableau "Sources de données".
-    Version 0.16.2 (2026-08-02)
-    - Intitulés Voirie DGCL : "Voirie communale (DGCL 2026)" -> "Voirie communale retenue DSR 2026 (DGCL)", "Voirie départementale (DGCL 2026)" -> "Voirie départementale retenue DGF 2026 (DGCL)". Uniquement les libellés de l'interface (cases à cocher) et du README ; aucun changement fonctionnel (typenames WFS et noms de couches chargées inchangés).
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png

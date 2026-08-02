@@ -670,6 +670,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
         if majic_checked:
             if 'majic' in cache_hits:
                 majic_layer = cache_hits['majic']
+                self.apply_majic_style(majic_layer)
                 self._remove_layers_by_name(f"Parcelles MAJIC {code_insee}")
                 QgsProject.instance().addMapLayer(majic_layer, False)
                 QgsProject.instance().layerTreeRoot().addLayer(majic_layer)

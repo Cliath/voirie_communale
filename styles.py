@@ -163,6 +163,36 @@ _MAJIC_GROUPE_DEFAULT_COLOR = "#A337F5"
 class StylesMixin:
     """Regroupe les methodes de symbologie (styles, couleurs, regles) du plugin."""
 
+    def apply_majic_style(self, layer):
+        """Applique le rendu catégorisé MAJIC (par 'groupe_personne') à `layer`.
+
+        Construit les catégories à partir des valeurs de `groupe_personne`
+        réellement présentes dans les attributs de la couche (et non depuis
+        les données Koumoul brutes), afin de pouvoir être réutilisée aussi
+        bien juste après téléchargement que lors d'un chargement depuis le
+        cache local (où seule la couche polygone existe, sans accès aux
+        données API d'origine).
+        """
+        from qgis.core import QgsFillSymbol, QgsCategorizedSymbolRenderer, QgsRendererCategory
+
+        if layer.fields().indexOf('groupe_personne') < 0:
+            return
+
+        unique_groupes = sorted({
+            int(v) for v in layer.uniqueValues(layer.fields().indexOf('groupe_personne'))
+            if v is not None
+        })
+        cat_styles = []
+        for g in unique_groupes:
+            libelle, couleur = MAJIC_GROUPES.get(g, (f'Groupe {g}', _MAJIC_GROUPE_DEFAULT_COLOR))
+            symbol = QgsFillSymbol.createSimple({
+                'color': couleur,
+                'outline_color': '#333333',
+                'outline_width': '0.25',
+            })
+            cat_styles.append(QgsRendererCategory(g, symbol, libelle))
+        layer.setRenderer(QgsCategorizedSymbolRenderer('groupe_personne', cat_styles))
+
     def _apply_bdtopo_troncons_style(self, layer,
                                       regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
                                       regex_voie=r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'):
