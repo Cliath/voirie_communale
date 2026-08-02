@@ -483,7 +483,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 'result_key': 'Voirie communale',
                 'layer_name': f"DGCL Voirie communale retenue DSR 2026 {code_insee}",
                 'fetch_fn':   lambda: self._fetch_wfs_bbox_to_vsimem(
-                    self.WFS_IGN_URL, 'DGF_2026:voirie-retenue-communes', commune_bbox
+                    self.WFS_IGN_URL, 'DGF_2026_:_voirie-retenue-communes', commune_bbox
                 ),
                 'style_cb':   None,
                 'needs_clip': True,
@@ -495,7 +495,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 'result_key': 'Voirie départementale',
                 'layer_name': f"DGCL Voirie départementale retenue DGF 2026 {code_insee}",
                 'fetch_fn':   lambda: self._fetch_wfs_bbox_to_vsimem(
-                    self.WFS_IGN_URL, 'DGF_2026:voirie-retenue-departements', commune_bbox
+                    self.WFS_IGN_URL, 'DGF_2026_:_voirie-retenue-departements', commune_bbox
                 ),
                 'style_cb':   None,
                 'needs_clip': True,

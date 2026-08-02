@@ -1,3 +1,7 @@
+# [0.15.21] - 2026-08-02
+### Corrigé
+- **Voirie DGCL 2026** : correction du `typename` WFS — `DGF_2026_:_voirie-retenue-communes` et `DGF_2026_:_voirie-retenue-departements` (underscores autour des deux-points, conformes au nommage réel du service, corrige une erreur introduite en 0.15.20 où le format `workspace:layer` classique avait été utilisé par erreur).
+
 # [0.15.20] - 2026-08-02
 ### Modifié
 - **Voirie DGCL** : mise à jour vers le millésime 2026 — couches WFS `DGF_2026:voirie-retenue-communes` et `DGF_2026:voirie-retenue-departements` (remplacent `DGCL.2025:voirie_communale`/`voirie_departementale`). Intitulés mis à jour dans l'interface ("Voirie communale (DGCL 2026)", "Voirie départementale (DGCL 2026)") et noms de couches chargées ("DGCL Voirie communale retenue DSR 2026", "DGCL Voirie départementale retenue DGF 2026"). `layer_order.json`/`layer_order.py` et `README.md` synchronisés.
