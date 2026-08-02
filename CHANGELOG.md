@@ -1,3 +1,9 @@
+# [0.17.0] - 2026-08-02
+### Ajouté
+- **Cache local GeoPackage par commune** : les 10 couches vecteur par commune (Emprise communale, BAN, Filaires BAL, Voirie communale/départementale DGCL, Routes OSM, MagOSM, BD TOPO routes nommées/tronçons, MAJIC) sont désormais mises en cache automatiquement dans un fichier `voirie_{code_insee}.gpkg` stocké dans le profil QGIS de l'utilisateur. Le cache est transparent : réutilisé s'il existe, alimenté après chaque téléchargement réussi. Aucune expiration automatique — un message d'alerte s'affiche si le cache dépasse un seuil configurable (30 jours par défaut, réglable dans les Paramètres), sans jamais bloquer.
+- **Bouton « Forcer le rechargement »** dans la fenêtre de chargement : ignore le cache local et retélécharge systématiquement toutes les données sélectionnées depuis leurs sources d'origine.
+- Nouveau module `cache_manager.py` (mixin `CacheManagerMixin`) et nouveau paramètre `cache_warning_days`.
+
 # [0.16.7] - 2026-08-02
 ### Modifié
 - **README** : suppression de la section « En mode développement » (déploiement manuel via lien symbolique / `build.bat`), jugée peu utile pour les utilisateurs du plugin. L'installation depuis un ZIP reste documentée.

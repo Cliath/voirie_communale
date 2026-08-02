@@ -25,9 +25,10 @@ from .version import __version__, get_changelog
 from .styles import StylesMixin
 from .wfs_loader import WfsLoaderMixin, WfsLoadTask
 from .layer_order import LayerOrderMixin
+from .cache_manager import CacheManagerMixin
 
 
-class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
+class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManagerMixin):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -205,8 +206,13 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
 
 
 
-    def validate_and_load(self):
-        """Valide le code INSEE et charge les données selon le bouton radio sélectionné"""
+    def validate_and_load(self, force_refresh=False):
+        """Valide le code INSEE et charge les données selon le bouton radio sélectionné.
+
+        Args:
+            force_refresh: si True, ignore le cache GeoPackage local et retélécharge
+                systématiquement toutes les couches vecteur par commune.
+        """
         
         # Récupérer le code INSEE saisi par l'utilisateur
         code_insee = self.dlg.txtCodeInsee.text().strip().upper()
@@ -312,6 +318,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         results = []
         loaded_layers = []
         commune_layer = None
+        deferred_warnings = []  # messages à afficher après fermeture de la barre de progression
 
         # Si photos aériennes cochées, ouvrir le dialogue de sélection avant la progression
         photo_aeriennes_sources = []
@@ -335,6 +342,40 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                     commune_reuse = True
                     break
 
+        # ── Cache local (GeoPackage) : vérifier les couches vecteur déjà en cache ──
+        # Indépendant du BBOX communal (celui-ci n'est pas encore connu à ce stade).
+        # Ignoré entièrement si force_refresh (bouton "Forcer le rechargement").
+        cache_hits = {}  # layer_key -> QgsVectorLayer chargée depuis le cache
+        if not force_refresh:
+            for key, checked, layer_name in [
+                ('commune',               commune_checked and not commune_reuse, f"Commune {code_insee}"),
+                ('ban',                   ban_checked,               f"Adresses BAN {code_insee}"),
+                ('voirie_communale',      voirie_checked,            f"DGCL Voirie communale retenue DSR 2026 {code_insee}"),
+                ('voirie_departementale', voirie_dep_checked,        f"DGCL Voirie départementale retenue DGF 2026 {code_insee}"),
+                ('osm_routes',            osm_routes_checked,        f"OSM Routes {code_insee}"),
+                ('magosm_routes',         magosm_checked,            f"MagOSM Routes {code_insee}"),
+                ('bdtopo_routesnom',      bdtopo_routesnom_checked,  f"BD TOPO Routes numérotées ou nommées {code_insee}"),
+                ('bdtopo_troncons',       bdtopo_troncons_checked,   f"BD TOPO Tronçons de route {code_insee}"),
+                ('majic',                 majic_checked,             f"Parcelles MAJIC {code_insee}"),
+                ('filaires_bal',          filaires_bal_checked,      f"Filaires de voie BAL {code_insee}"),
+            ]:
+                if checked:
+                    cached = self._load_layer_from_cache(code_insee, key, layer_name)
+                    if cached:
+                        cache_hits[key] = cached
+
+        if cache_hits:
+            cache_age = self._cache_age_days(code_insee)
+            warn_days = SettingsDialog.get('cache_warning_days', 30, int)
+            if cache_age is not None and cache_age > warn_days:
+                deferred_warnings.append((
+                    "Cache local ancien",
+                    f"Les données mises en cache pour la commune {code_insee} datent de "
+                    f"{int(cache_age)} jour(s) (seuil d'alerte : {warn_days} j).\n\n"
+                    "Utilisez le bouton « Forcer le rechargement » pour retélécharger des "
+                    "données à jour."
+                ))
+
         # Déterminer les couches WMS globales déjà présentes (skip = pas de rechargement)
         skip_scan_etat_major = scan_etat_major_checked and self._layer_exists_by_name("Carte d'État-Major")
         skip_scan_cassini    = scan_cassini_checked    and self._layer_exists_by_name("Carte de Cassini")
@@ -349,12 +390,19 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
 
         # Compter le nombre d'étapes pour la barre de progression
         # La commune n'est pas comptée si elle est réutilisée (pas de téléchargement)
-        # Les WMS globaux déjà présents ne comptent pas non plus
+        # Les WMS globaux déjà présents ne comptent pas non plus, ni les couches en cache
         steps = sum([
-            cadastre_checked, commune_checked and not commune_reuse, ban_checked,
-            filaires_bal_checked,
-            voirie_checked, voirie_dep_checked, osm_routes_checked, magosm_checked,
-            bdtopo_routesnom_checked, bdtopo_troncons_checked, majic_checked,
+            cadastre_checked,
+            commune_checked and not commune_reuse and 'commune' not in cache_hits,
+            ban_checked and 'ban' not in cache_hits,
+            filaires_bal_checked and 'filaires_bal' not in cache_hits,
+            voirie_checked and 'voirie_communale' not in cache_hits,
+            voirie_dep_checked and 'voirie_departementale' not in cache_hits,
+            osm_routes_checked and 'osm_routes' not in cache_hits,
+            magosm_checked and 'magosm_routes' not in cache_hits,
+            bdtopo_routesnom_checked and 'bdtopo_routesnom' not in cache_hits,
+            bdtopo_troncons_checked and 'bdtopo_troncons' not in cache_hits,
+            majic_checked and 'majic' not in cache_hits,
             scan_etat_major_checked and not skip_scan_etat_major,
             scan_cassini_checked    and not skip_scan_cassini,
             scan50_1950_checked     and not skip_scan50,
@@ -396,10 +444,20 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
             if commune_reuse:
                 # Couche existante réutilisée, pas de téléchargement ni de comptage
                 pass
+            elif 'commune' in cache_hits:
+                commune_layer = cache_hits['commune']
+                commune_layer_name = f"Commune {code_insee}"
+                self._remove_layers_by_name(commune_layer_name)
+                QgsProject.instance().addMapLayer(commune_layer, False)
+                QgsProject.instance().layerTreeRoot().addLayer(commune_layer)
+                results.append(('Emprise communale', True))
+                loaded_layers.append(commune_layer)
             else:
                 advance(f"Chargement de l'emprise communale ({code_insee})...")
                 commune_success, commune_layer = self.load_commune_wfs(code_insee)
                 results.append(('Emprise communale', commune_success))
+                if commune_success and commune_layer:
+                    self._save_layer_to_cache(code_insee, 'commune', commune_layer)
                 if commune_layer:
                     loaded_layers.append(commune_layer)
 
@@ -439,11 +497,17 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         regex_voie   = self._get_regex_setting('ban_regex_voie',   _BAN_REGEX_VOIE_DEFAULT)
 
         # Définir les specs de toutes les tâches WFS à lancer en parallèle.
-        # Chaque spec : label, result_key, layer_name, fetch_fn, style_cb, needs_clip
+        # Chaque spec : label, result_key, layer_name, fetch_fn, style_cb, needs_clip, cache_key
+        # Si la couche est déjà en cache (cache_hits), la spec est déroutée vers
+        # cache_hit_specs et traitée sans téléchargement réseau.
         parallel_specs = []
+        cache_hit_specs = []
+
+        def _dispatch(spec):
+            (cache_hit_specs if spec['cache_key'] in cache_hits else parallel_specs).append(spec)
 
         if ban_checked:
-            parallel_specs.append({
+            _dispatch({
                 'label':      f"Adresses BAN ({code_insee})",
                 'result_key': 'Adresses BAN',
                 'layer_name': f"Adresses BAN {code_insee}",
@@ -455,10 +519,11 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                     lyr, regex_chemin=regex_chemin, regex_voie=regex_voie
                 ),
                 'needs_clip': False,
+                'cache_key':  'ban',
             })
 
         if voirie_checked:
-            parallel_specs.append({
+            _dispatch({
                 'label':      f"Voirie communale ({code_insee})",
                 'result_key': 'Voirie communale',
                 'layer_name': f"DGCL Voirie communale retenue DSR 2026 {code_insee}",
@@ -467,10 +532,11 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 ),
                 'style_cb':   None,
                 'needs_clip': True,
+                'cache_key':  'voirie_communale',
             })
 
         if voirie_dep_checked:
-            parallel_specs.append({
+            _dispatch({
                 'label':      f"Voirie départementale ({code_insee})",
                 'result_key': 'Voirie départementale',
                 'layer_name': f"DGCL Voirie départementale retenue DGF 2026 {code_insee}",
@@ -479,20 +545,22 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 ),
                 'style_cb':   None,
                 'needs_clip': True,
+                'cache_key':  'voirie_departementale',
             })
 
         if osm_routes_checked:
-            parallel_specs.append({
+            _dispatch({
                 'label':      f"Routes OSM ({code_insee})",
                 'result_key': 'Routes OSM',
                 'layer_name': f"OSM Routes {code_insee}",
                 'fetch_fn':   lambda: self._fetch_osm_roads_to_vsimem(commune_bbox),
                 'style_cb':   lambda lyr: self._style_osm_layer(lyr),
                 'needs_clip': True,
+                'cache_key':  'osm_routes',
             })
 
         if magosm_checked:
-            parallel_specs.append({
+            _dispatch({
                 'label':      f"MagOSM Routes ({code_insee})",
                 'result_key': 'Réseau routier OSM (MagOSM)',
                 'layer_name': f"MagOSM Routes {code_insee}",
@@ -501,10 +569,11 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                     lyr, regex_chemin=regex_chemin, regex_voie=regex_voie
                 ),
                 'needs_clip': True,
+                'cache_key':  'magosm_routes',
             })
 
         if bdtopo_routesnom_checked:
-            parallel_specs.append({
+            _dispatch({
                 'label':      f"BD TOPO Routes nommées ({code_insee})",
                 'result_key': 'BD TOPO Routes numérotées ou nommées',
                 'layer_name': f"BD TOPO Routes numérotées ou nommées {code_insee}",
@@ -513,10 +582,11 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 ),
                 'style_cb':   lambda lyr: self._apply_bdtopo_routesnom_style(lyr),
                 'needs_clip': True,
+                'cache_key':  'bdtopo_routesnom',
             })
 
         if bdtopo_troncons_checked:
-            parallel_specs.append({
+            _dispatch({
                 'label':      f"BD TOPO Tronçons de route ({code_insee})",
                 'result_key': 'BD TOPO Tronçons de route',
                 'layer_name': f"BD TOPO Tronçons de route {code_insee}",
@@ -528,6 +598,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                     lyr, regex_chemin=regex_chemin, regex_voie=regex_voie
                 ),
                 'needs_clip': True,
+                'cache_key':  'bdtopo_troncons',
             })
 
         # Lancer toutes les tâches WFS en parallèle
@@ -557,8 +628,20 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         if parallel_count > 0:
             wait_loop.exec_()
 
+        # ── Couches déjà en cache : ajout direct sans passer par les tâches réseau ──
+        for spec in cache_hit_specs:
+            layer = cache_hits[spec['cache_key']]
+            self._remove_layers_by_name(spec['layer_name'])
+            QgsProject.instance().addMapLayer(layer, False)
+            QgsProject.instance().layerTreeRoot().addLayer(layer)
+            if spec['style_cb']:
+                spec['style_cb'](layer)
+            results.append((spec['result_key'], True))
+            if spec['needs_clip'] and clip_to_commune and commune_layer:
+                layer = self._clip_layer_to_commune(layer, commune_layer, clip_buffer_m)
+            loaded_layers.append(layer)
+
         # ── Phase 3 : créer les couches sur le thread principal ───────────────
-        deferred_warnings = []  # messages à afficher après progress.close()
         for task in task_objects:
             spec = task._spec
             if task.success and task.vsimem_path:
@@ -567,6 +650,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                 )
                 results.append((spec['result_key'], ok))
                 if layer:
+                    self._save_layer_to_cache(code_insee, spec['cache_key'], layer)
                     if spec['needs_clip'] and clip_to_commune and commune_layer:
                         layer = self._clip_layer_to_commune(layer, commune_layer, clip_buffer_m)
                     loaded_layers.append(layer)
@@ -584,36 +668,54 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
                         ))
 
         if majic_checked:
-            advance(f"Chargement des parcelles MAJIC ({code_insee})...")
-            majic_success, majic_layer = self.load_majic_parcelles(code_insee)
-            results.append(('Parcelles MAJIC', majic_success))
-            if majic_layer:
+            if 'majic' in cache_hits:
+                majic_layer = cache_hits['majic']
+                self._remove_layers_by_name(f"Parcelles MAJIC {code_insee}")
+                QgsProject.instance().addMapLayer(majic_layer, False)
+                QgsProject.instance().layerTreeRoot().addLayer(majic_layer)
+                results.append(('Parcelles MAJIC', True))
                 loaded_layers.append(majic_layer)
-            elif not majic_success:
-                deferred_warnings.append((
-                    "Erreur MAJIC",
-                    "Impossible de charger les parcelles MAJIC pour la commune sélectionnée.\n\n"
-                    "Vérifiez la connexion internet, le code INSEE, ou consultez le journal des messages pour plus de détails."
-                ))
+            else:
+                advance(f"Chargement des parcelles MAJIC ({code_insee})...")
+                majic_success, majic_layer = self.load_majic_parcelles(code_insee)
+                results.append(('Parcelles MAJIC', majic_success))
+                if majic_layer:
+                    self._save_layer_to_cache(code_insee, 'majic', majic_layer)
+                    loaded_layers.append(majic_layer)
+                elif not majic_success:
+                    deferred_warnings.append((
+                        "Erreur MAJIC",
+                        "Impossible de charger les parcelles MAJIC pour la commune sélectionnée.\n\n"
+                        "Vérifiez la connexion internet, le code INSEE, ou consultez le journal des messages pour plus de détails."
+                    ))
 
         if filaires_bal_checked:
-            advance(f"Chargement des filaires de voie BAL ({code_insee})...")
-            filaires_bal_success, filaires_bal_layer, filaires_bal_no_data = self.load_filaires_bal(code_insee)
-            results.append(('Filaires de voie BAL', filaires_bal_success))
-            if filaires_bal_layer:
+            if 'filaires_bal' in cache_hits:
+                filaires_bal_layer = cache_hits['filaires_bal']
+                self._remove_layers_by_name(f"Filaires de voie BAL {code_insee}")
+                QgsProject.instance().addMapLayer(filaires_bal_layer, False)
+                QgsProject.instance().layerTreeRoot().addLayer(filaires_bal_layer)
+                results.append(('Filaires de voie BAL', True))
                 loaded_layers.append(filaires_bal_layer)
-            elif filaires_bal_no_data:
-                deferred_warnings.append((
-                    "Aucune donnée BAL",
-                    "Aucun filaire de voie n'est disponible pour cette commune dans la Base "
-                    "Adresse Locale.\n\nToutes les communes n'ont pas encore contribué à ce jeu de données."
-                ))
-            elif not filaires_bal_success:
-                deferred_warnings.append((
-                    "Erreur Filaires de voie BAL",
-                    "Impossible de charger les filaires de voie BAL pour la commune sélectionnée.\n\n"
-                    "Vérifiez la connexion internet, ou consultez le journal des messages pour plus de détails."
-                ))
+            else:
+                advance(f"Chargement des filaires de voie BAL ({code_insee})...")
+                filaires_bal_success, filaires_bal_layer, filaires_bal_no_data = self.load_filaires_bal(code_insee)
+                results.append(('Filaires de voie BAL', filaires_bal_success))
+                if filaires_bal_layer:
+                    self._save_layer_to_cache(code_insee, 'filaires_bal', filaires_bal_layer)
+                    loaded_layers.append(filaires_bal_layer)
+                elif filaires_bal_no_data:
+                    deferred_warnings.append((
+                        "Aucune donnée BAL",
+                        "Aucun filaire de voie n'est disponible pour cette commune dans la Base "
+                        "Adresse Locale.\n\nToutes les communes n'ont pas encore contribué à ce jeu de données."
+                    ))
+                elif not filaires_bal_success:
+                    deferred_warnings.append((
+                        "Erreur Filaires de voie BAL",
+                        "Impossible de charger les filaires de voie BAL pour la commune sélectionnée.\n\n"
+                        "Vérifiez la connexion internet, ou consultez le journal des messages pour plus de détails."
+                    ))
 
         if scan_etat_major_checked:
             if skip_scan_etat_major:
@@ -837,7 +939,8 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         if not hasattr(self, 'dlg') or self.dlg is None:
             self.dlg = VoirieCommunaleDialog()
             self.dlg.setWindowTitle(f"Voirie Communale v{__version__} – Chargement des données")
-            self.dlg.btnLoadCadastre.clicked.connect(self.validate_and_load)
+            self.dlg.btnLoadCadastre.clicked.connect(lambda: self.validate_and_load(force_refresh=False))
+            self.dlg.btnForceReload.clicked.connect(lambda: self.validate_and_load(force_refresh=True))
         # Restaurer le dernier code INSEE
         last_insee = SettingsDialog.get('last_insee', '')
         if last_insee:

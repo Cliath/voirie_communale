@@ -135,6 +135,7 @@ class SettingsDialog(QDialog):
         "ban_regex_voie":    r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b',
         "last_insee":        "",
         "checked_layers":    [],
+        "cache_warning_days": 30,
     }
 
     @staticmethod
@@ -289,6 +290,34 @@ class SettingsDialog(QDialog):
         lay_general.addWidget(note)
 
         lay_general.addSpacing(4)
+        sep_cache = QFrame(); sep_cache.setFrameShape(QFrame.HLine); sep_cache.setFrameShadow(QFrame.Sunken)
+        lay_general.addWidget(sep_cache)
+        lay_general.addSpacing(4)
+
+        # --- Cache local des couches vecteur ---
+        lay_general.addWidget(QLabel("<b>Cache local des couches par commune</b>"))
+
+        row_cache = QHBoxLayout()
+        row_cache.addWidget(QLabel("Alerte si le cache dépasse :"))
+        self.spn_cache_warning_days = QSpinBox()
+        self.spn_cache_warning_days.setRange(1, 3650)
+        self.spn_cache_warning_days.setValue(self.get('cache_warning_days', 30, int))
+        self.spn_cache_warning_days.setSuffix(" jour(s)")
+        self.spn_cache_warning_days.setMaximumWidth(120)
+        row_cache.addWidget(self.spn_cache_warning_days)
+        row_cache.addStretch()
+        lay_general.addLayout(row_cache)
+
+        note_cache = QLabel(
+            "<small><i>Les données par commune (BAN, MAJIC, Filaires BAL, Voirie DGCL, "
+            "OSM Routes, MagOSM, BD TOPO...) sont mises en cache localement (GeoPackage) "
+            "pour éviter de retélécharger à chaque ouverture. Utilisez le bouton "
+            "« Forcer le rechargement » pour ignorer le cache et retélécharger.</i></small>"
+        )
+        note_cache.setWordWrap(True)
+        lay_general.addWidget(note_cache)
+
+        lay_general.addSpacing(4)
         sep2 = QFrame(); sep2.setFrameShape(QFrame.HLine); sep2.setFrameShadow(QFrame.Sunken)
         lay_general.addWidget(sep2)
         lay_general.addSpacing(4)
@@ -439,6 +468,7 @@ class SettingsDialog(QDialog):
         self.set('clip_buffer_m', self.spn_clip_buffer.value())
         self.set('ban_regex_chemin', self.txt_regex_chemin.text().strip())
         self.set('ban_regex_voie', self.txt_regex_voie.text().strip())
+        self.set('cache_warning_days', self.spn_cache_warning_days.value())
 
         # Sauvegarder l'ordre des couches dans layer_order.json
         commune_group = [

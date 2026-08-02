@@ -437,14 +437,28 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnLoadCadastre">
-        <property name="text">
-         <string>Charger les données</string>
-        </property>
-        <property name="toolTip">
-         <string>Charge les données sélectionnées pour le code INSEE saisi</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="layoutLoadButtons">
+        <item>
+         <widget class="QPushButton" name="btnLoadCadastre">
+          <property name="text">
+           <string>Charger les données</string>
+          </property>
+          <property name="toolTip">
+           <string>Charge les données sélectionnées pour le code INSEE saisi (utilise le cache local si disponible)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnForceReload">
+          <property name="text">
+           <string>Forcer le rechargement</string>
+          </property>
+          <property name="toolTip">
+           <string>Ignore le cache local et retélécharge toutes les données depuis les sources d'origine</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

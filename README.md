@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.16.7** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.17.0** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -18,7 +18,7 @@ Version actuelle : **0.16.7** — voir [CHANGELOG](CHANGELOG.md)
 
 - **Barre de lancement** : le bouton du plugin ouvre 4 actions : *Charger des données*, *Numériser des données* (à venir), *Paramètres*, *À propos*
 - **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
-- **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, découpage des couches sur l'emprise communale (buffer configurable 0–10 000 m), et ordre des couches configurable par glisser-déposer
+- **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, découpage des couches sur l'emprise communale (buffer configurable 0–10 000 m), seuil d'alerte du cache local (jours), et ordre des couches configurable par glisser-déposer
 - **Ordre canonique** configurable via `layer_order.json` (haut → bas) : Géofoncier → [groupe commune : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → MAJIC → Commune → Cadastre] → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → MNT LiDAR HD → Photos aériennes → SCAN 50® → Cassini → État-Major
 
 ### Données vectorielles (filtrées par code INSEE ou BBOX communale)
@@ -35,6 +35,22 @@ Version actuelle : **0.16.7** — voir [CHANGELOG](CHANGELOG.md)
 | **BD TOPO routes nommées** | IGN Géoplateforme WFS | BBOX commune |
 | **BD TOPO tronçons de route** (paginé) | IGN Géoplateforme WFS | BBOX commune |
 | **Parcelles MAJIC** (personnes morales) | API Koumoul (DGFiP) + IGN WFS | code INSEE |
+
+#### Cache local (GeoPackage)
+
+Les 10 couches vecteur par commune ci-dessus (Emprise communale, BAN, Filaires BAL, Voirie
+communale/départementale, Routes OSM, MagOSM, BD TOPO routes nommées/tronçons, MAJIC) sont mises
+en cache automatiquement dans un fichier `voirie_{code_insee}.gpkg`, stocké dans le profil QGIS de
+l'utilisateur (invisible, géré par le plugin).
+
+- **Transparent** : au chargement, le plugin réutilise le cache local s'il existe (pas de
+  retéléchargement), sinon il télécharge puis alimente le cache pour la prochaine fois.
+- **Pas d'expiration automatique** : le cache reste valide indéfiniment. Un message d'alerte
+  s'affiche uniquement si son âge dépasse le seuil configuré dans les Paramètres (30 jours par
+  défaut), sans jamais bloquer ni forcer un rechargement.
+- **Bouton « Forcer le rechargement »** : ignore le cache et retélécharge systématiquement toutes
+  les données sélectionnées depuis les sources d'origine.
+- Le cadastre et les fonds de carte (WMS/tuiles) ne sont pas concernés par ce cache.
 
 #### BD TOPO tronçons de route — style par règles
 
