@@ -1,3 +1,7 @@
+# [0.16.2] - 2026-08-02
+### Modifié
+- **Intitulés Voirie DGCL** : "Voirie communale (DGCL 2026)" → "Voirie communale retenue DSR 2026 (DGCL)", "Voirie départementale (DGCL 2026)" → "Voirie départementale retenue DGF 2026 (DGCL)". Uniquement les libellés de l'interface (cases à cocher) et du README ; aucun changement fonctionnel (typenames WFS et noms de couches chargées inchangés).
+
 # [0.16.1] - 2026-08-02
 ### Corrigé
 - **Adresse mail de contact incohérente** : les en-têtes de copyright de plusieurs modules (`voirie_communale.py`, `voirie_communale_dialog.py`, `wfs_loader.py`, `styles.py`, `layer_order.py`, `__init__.py`) ainsi que la boîte de dialogue "À propos" utilisaient `yann.schwarz@ign.fr`, tandis que `metadata.txt` et `README.md` utilisaient `yann.schwarz@gmail.com`. Uniformisé sur `yann.schwarz@gmail.com` partout.

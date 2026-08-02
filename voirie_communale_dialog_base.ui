@@ -143,7 +143,7 @@
           <item>
            <widget class="QCheckBox" name="chkVoirie">
             <property name="text">
-             <string>Voirie communale (DGCL 2026)</string>
+             <string>Voirie communale retenue DSR 2026 (DGCL)</string>
             </property>
             <property name="toolTip">
              <string>Charge le réseau de voirie communale (calcul IGN pour la DGCL)&#10;Licence Ouverte 2.0 (Etalab) — © IGN / DGCL</string>
@@ -153,7 +153,7 @@
           <item>
            <widget class="QCheckBox" name="chkVoirieDep">
             <property name="text">
-             <string>Voirie départementale (DGCL 2026)</string>
+             <string>Voirie départementale retenue DGF 2026 (DGCL)</string>
             </property>
             <property name="toolTip">
              <string>Charge le réseau de voirie départementale (calcul IGN pour la DGCL)&#10;Licence Ouverte 2.0 (Etalab) — © IGN / DGCL</string>
