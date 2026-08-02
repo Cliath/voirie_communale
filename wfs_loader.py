@@ -1186,7 +1186,9 @@ class WfsLoaderMixin:
             code_insee: Code INSEE de la commune (5 caractères)
 
         Returns:
-            tuple: (bool, QgsVectorLayer ou None) - (succès, couche chargée)
+            tuple: (bool, QgsVectorLayer ou None, bool) - (succès, couche chargée, aucune_donnee)
+                Le 3e élément vaut True si la commune n'a simplement aucune donnée BAL
+                disponible (cas normal, pas une erreur technique).
         """
         layer_name = f"Filaires de voie BAL {code_insee}"
 
@@ -1206,7 +1208,7 @@ class WfsLoaderMixin:
                 f"Filaires de voie BAL : erreur de téléchargement/parsing : {e}",
                 "VoirieCommunale", Qgis.Critical
             )
-            return False, None
+            return False, None, False
 
         features_in = [
             feat for feat in data.get('features', [])
@@ -1218,7 +1220,7 @@ class WfsLoaderMixin:
                 f"Filaires de voie BAL : aucune voie trouvée pour {code_insee}",
                 "VoirieCommunale", Qgis.Warning
             )
-            return False, None
+            return False, None, True
 
         uri = "LineString?crs=EPSG:4326&field=nom:string&field=commune:string"
         layer = QgsVectorLayer(uri, layer_name, "memory")
@@ -1245,7 +1247,7 @@ class WfsLoaderMixin:
                 f"Filaires de voie BAL : géométries invalides pour {code_insee}",
                 "VoirieCommunale", Qgis.Warning
             )
-            return False, None
+            return False, None, False
 
         provider.addFeatures(features)
         layer.updateExtents()
@@ -1257,7 +1259,7 @@ class WfsLoaderMixin:
             f"Filaires de voie BAL : {len(features)} voie(s) chargée(s) pour {code_insee}",
             "VoirieCommunale", Qgis.Success
         )
-        return True, layer
+        return True, layer, False
 
 
     def load_osm_roads(self, code_insee, bbox=None):

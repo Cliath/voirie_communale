@@ -620,15 +620,21 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
 
         if filaires_bal_checked:
             advance(f"Chargement des filaires de voie BAL ({code_insee})...")
-            filaires_bal_success, filaires_bal_layer = self.load_filaires_bal(code_insee)
+            filaires_bal_success, filaires_bal_layer, filaires_bal_no_data = self.load_filaires_bal(code_insee)
             results.append(('Filaires de voie BAL', filaires_bal_success))
             if filaires_bal_layer:
                 loaded_layers.append(filaires_bal_layer)
+            elif filaires_bal_no_data:
+                deferred_warnings.append((
+                    "Aucune donnée BAL",
+                    "Aucun filaire de voie n'est disponible pour cette commune dans la Base "
+                    "Adresse Locale.\n\nToutes les communes n'ont pas encore contribué à ce jeu de données."
+                ))
             elif not filaires_bal_success:
                 deferred_warnings.append((
                     "Erreur Filaires de voie BAL",
                     "Impossible de charger les filaires de voie BAL pour la commune sélectionnée.\n\n"
-                    "Vérifiez la connexion internet, le code INSEE, ou consultez le journal des messages pour plus de détails."
+                    "Vérifiez la connexion internet, ou consultez le journal des messages pour plus de détails."
                 ))
 
         if scan_etat_major_checked:

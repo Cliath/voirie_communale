@@ -1,3 +1,7 @@
+# [0.15.23] - 2026-08-02
+### Corrigé
+- **Filaires de voie BAL : message d'erreur incohérent** : le popup affiché en cas d'échec ("Impossible de charger... vérifiez la connexion internet, le code INSEE...") s'affichait aussi quand la commune n'avait simplement aucune donnée BAL contribuée (cas normal, pas une erreur technique) — le journal indiquait pourtant clairement "aucune voie trouvée pour {code_insee}". `load_filaires_bal` distingue désormais explicitement les deux cas via un 3e élément de retour (`no_data`) : un message dédié et rassurant ("Aucune donnée BAL disponible pour cette commune...") s'affiche pour l'absence de données, tandis que le message d'alerte technique reste réservé aux véritables échecs réseau/parsing.
+
 # [0.15.22] - 2026-08-02
 ### Ajouté
 - **Nouvelle source de données** : Filaires de voie des Bases Adresses Locales (BAL) — case à cocher "Filaires de voie (BAL)" dans l'onglet Nationales, entre Adresses BAN et Parcelles MAJIC. L'export national (GeoJSON statique, ~100 Mo, sans filtre serveur) est téléchargé puis filtré côté client sur le code INSEE, à l'image de la stratégie déjà utilisée pour les parcelles MAJIC. Couche mémoire nommée `Filaires de voie BAL {code_insee}` avec champs `nom`/`commune`, style QGIS par défaut. Intégrée à l'ordre canonique des couches (`layer_order.json`).
