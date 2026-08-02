@@ -8,7 +8,7 @@ import os
 import time
 
 from qgis.core import (QgsVectorLayer, QgsVectorFileWriter, QgsProject,
-                        QgsMessageLog, Qgis, QgsApplication)
+                        QgsMessageLog, Qgis, QgsApplication, QgsDataProvider)
 
 
 class CacheManagerMixin:
@@ -129,45 +129,43 @@ class CacheManagerMixin:
         )
         return True
 
-    def _reload_layer_from_cache_preserving_style(self, code_insee, layer_key, old_layer, display_name):
-        """Remplace une couche fraîchement mise en cache (souvent en provider
-        'memory') par sa version chargée depuis le GeoPackage (provider
-        'ogr'), afin qu'elle ne soit plus signalée par QGIS comme « couche
-        temporaire ». Le style et la position dans l'arbre des couches de la
-        couche d'origine sont conservés.
+    def _reload_layer_from_cache_preserving_style(self, code_insee, layer_key, layer, display_name):
+        """Bascule la source de données de `layer` (initialement en provider
+        'memory') vers sa version fraîchement écrite dans le GeoPackage de
+        cache (provider 'ogr'), afin qu'elle ne soit plus signalée par QGIS
+        comme « couche temporaire ».
 
-        Best-effort : si le rechargement échoue, `old_layer` est retournée
-        inchangée (le cache reste une optimisation, jamais une dépendance
-        bloquante).
+        Utilise `QgsVectorLayer.setDataSource()` plutôt que de recréer une
+        nouvelle couche : il s'agit du même objet QgsVectorLayer (même id,
+        même renderer, mêmes labels, jointures, etc.), donc tout le style est
+        conservé automatiquement, sans recopie manuelle.
+
+        Best-effort : si le cache est absent/invalide ou si la bascule
+        échoue, `layer` est retournée inchangée (le cache reste une
+        optimisation, jamais une dépendance bloquante).
         """
-        new_layer = self._load_layer_from_cache(code_insee, layer_key, display_name)
-        if new_layer is None:
-            return old_layer
+        # Vérifie d'abord que le cache est exploitable avant de basculer la
+        # source de la couche réelle, pour ne jamais la rendre invalide.
+        check = self._load_layer_from_cache(code_insee, layer_key, display_name)
+        if check is None:
+            return layer
 
+        path = self._cache_gpkg_path(code_insee)
+        uri = f"{path}|layername={layer_key}"
         try:
-            renderer = old_layer.renderer()
-            if renderer:
-                new_layer.setRenderer(renderer.clone())
-            new_layer.setOpacity(old_layer.opacity())
+            layer.setDataSource(uri, display_name, "ogr", QgsDataProvider.ProviderOptions())
         except Exception as exc:
             QgsMessageLog.logMessage(
-                f"Cache : impossible de recopier le style de {display_name} : {exc}",
+                f"Cache : impossible de basculer la source de {display_name} vers le cache : {exc}",
                 "VoirieCommunale", Qgis.Warning
             )
+            return layer
 
-        project = QgsProject.instance()
-        root = project.layerTreeRoot()
-        old_node = root.findLayer(old_layer.id())
-        parent, index = root, None
-        if old_node is not None:
-            parent = old_node.parent() or root
-            index = parent.children().index(old_node)
+        if not layer.isValid():
+            QgsMessageLog.logMessage(
+                f"Cache : bascule de source invalide pour {display_name}, couche laissée en mémoire",
+                "VoirieCommunale", Qgis.Warning
+            )
+            return layer
 
-        project.addMapLayer(new_layer, False)
-        if index is not None:
-            parent.insertLayer(index, new_layer)
-        else:
-            root.addLayer(new_layer)
-        project.removeMapLayer(old_layer.id())
-
-        return new_layer
+        return layer

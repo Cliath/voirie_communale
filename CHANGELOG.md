@@ -1,3 +1,7 @@
+# [0.17.3] - 2026-08-02
+### Corrigé
+- **Cache** : la correction précédente (v0.17.2) recréait une nouvelle couche depuis le GeoPackage et ne recopiait que le renderer et l'opacité, perdant les autres aspects du style (étiquettes, mode de fusion, jointures...). La bascule vers le cache utilise désormais `QgsVectorLayer.setDataSource()` sur la couche existante : le style est conservé intégralement puisqu'il s'agit du même objet couche (même id, même renderer, mêmes labels), seule la source de données change de `memory` vers le fichier GeoPackage.
+
 # [0.17.2] - 2026-08-02
 ### Corrigé
 - **Cache** : la couche MAJIC (et Filaires de voie BAL) apparaissait comme « couche temporaire » dans QGIS lors d'un premier téléchargement (ou après « Forcer le rechargement »), car elle était construite avec le provider `memory`. Après écriture réussie dans le cache GeoPackage, la couche du projet est désormais rechargée depuis le fichier `.gpkg` (provider `ogr`), avec conservation du style et de sa position dans l'arbre des couches — elle n'est plus signalée comme temporaire.

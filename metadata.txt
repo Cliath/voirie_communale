@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.17.2
+version=0.17.3
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.17.2 (2026-08-02)
+changelog=    Version 0.17.3 (2026-08-02)
+    - Cache : la correction précédente (v0.17.2) recréait une nouvelle couche depuis le GeoPackage et ne recopiait que le renderer et l'opacité, perdant les autres aspects du style (étiquettes, mode de fusion, jointures...). La bascule vers le cache utilise désormais QgsVectorLayer.setDataSource() sur la couche existante : le style est conservé intégralement puisqu'il s'agit du même objet couche (même id, même renderer, mêmes labels), seule la source de données change de memory vers le fichier GeoPackage.
+    Version 0.17.2 (2026-08-02)
     - Cache : la couche MAJIC (et Filaires de voie BAL) apparaissait comme « couche temporaire » dans QGIS lors d'un premier téléchargement (ou après « Forcer le rechargement »), car elle était construite avec le provider memory. Après écriture réussie dans le cache GeoPackage, la couche du projet est désormais rechargée depuis le fichier .gpkg (provider ogr), avec conservation du style et de sa position dans l'arbre des couches — elle n'est plus signalée comme temporaire.
     Version 0.17.1 (2026-08-02)
     - Packaging : cache_manager.py manquait dans la liste des fichiers empaquetés (package.py), rendant le ZIP v0.17.0 inutilisable (erreur d'import au chargement du plugin). Le fichier est désormais bien inclus dans le ZIP.
@@ -39,8 +41,6 @@ changelog=    Version 0.17.2 (2026-08-02)
     - README : ajout du lien source manquant pour les Filaires de voie des Bases Adresses Locales (data.gouv.fr) dans le tableau "Sources de données".
     Version 0.16.2 (2026-08-02)
     - Intitulés Voirie DGCL : "Voirie communale (DGCL 2026)" -> "Voirie communale retenue DSR 2026 (DGCL)", "Voirie départementale (DGCL 2026)" -> "Voirie départementale retenue DGF 2026 (DGCL)". Uniquement les libellés de l'interface (cases à cocher) et du README ; aucun changement fonctionnel (typenames WFS et noms de couches chargées inchangés).
-    Version 0.16.1 (2026-08-02)
-    - Adresse mail de contact incohérente : les en-têtes de copyright de plusieurs modules (voirie_communale.py, voirie_communale_dialog.py, wfs_loader.py, styles.py, layer_order.py, __init__.py) ainsi que la boîte de dialogue "À propos" utilisaient yann.schwarz@ign.fr, tandis que metadata.txt et README.md utilisaient yann.schwarz@gmail.com. Uniformisé sur yann.schwarz@gmail.com partout.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png
