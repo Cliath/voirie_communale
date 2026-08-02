@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.16.5** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.16.6** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -115,6 +115,10 @@ Le style utilise un `QgsRuleBasedRenderer` sur la couche `magosm:highways_line` 
 | (autre) | unclassified, … | `#969696` |
 
 Service parfois lent — timeout 180 s par page, pagination 500 entités/page.
+
+#### Filaires de voie BAL — style par défaut
+
+Aucun style personnalisé n'est appliqué à cette couche : elle utilise le style aléatoire par défaut de QGIS pour les couches mémoire. Les attributs `nom` et `commune` sont disponibles pour un habillage manuel si besoin.
 
 ### Plans de fond
 

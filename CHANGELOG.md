@@ -1,3 +1,7 @@
+# [0.16.6] - 2026-08-02
+### Corrigé
+- **README** : ajout d'une sous-section « Filaires de voie BAL — style par défaut » précisant qu'aucun style personnalisé n'est appliqué à cette couche (style aléatoire QGIS par défaut), pour compléter la documentation des styles déjà présente pour BD TOPO, OSM, BAN et MagOSM.
+
 # [0.16.5] - 2026-08-02
 ### Corrigé
 - **README** : documentation de la structure du projet mise à jour (ajout de `styles.py`, `wfs_loader.py`, `layer_order.py` scindés depuis `voirie_communale.py`), ordre canonique des couches corrigé (Géofoncier en tête, MNT LiDAR HD ajouté), mention de la fonctionnalité de découpage sur emprise communale (buffer configurable), et MagOSM ajouté à la liste des couches à filtrage géographique/pagination.
