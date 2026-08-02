@@ -179,8 +179,8 @@ class LayerOrderMixin:
             commune_group = [
                 "BD TOPO Tron\u00e7ons de route {code_insee}",
                 "BD TOPO Routes num\u00e9rot\u00e9es ou nomm\u00e9es {code_insee}",
-                "DGCL Voirie communale retenue DSR 2025 {code_insee}",
-                "DGCL Voirie d\u00e9partementale retenue DGF 2025 {code_insee}",
+                "DGCL Voirie communale retenue DSR 2026 {code_insee}",
+                "DGCL Voirie d\u00e9partementale retenue DGF 2026 {code_insee}",
                 "OSM Routes {code_insee}",
                 "Adresses BAN {code_insee}",
                 "Parcelles MAJIC {code_insee}",

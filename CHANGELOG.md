@@ -1,3 +1,7 @@
+# [0.15.20] - 2026-08-02
+### Modifié
+- **Voirie DGCL** : mise à jour vers le millésime 2026 — couches WFS `DGF_2026:voirie-retenue-communes` et `DGF_2026:voirie-retenue-departements` (remplacent `DGCL.2025:voirie_communale`/`voirie_departementale`). Intitulés mis à jour dans l'interface ("Voirie communale (DGCL 2026)", "Voirie départementale (DGCL 2026)") et noms de couches chargées ("DGCL Voirie communale retenue DSR 2026", "DGCL Voirie départementale retenue DGF 2026"). `layer_order.json`/`layer_order.py` et `README.md` synchronisés.
+
 # [0.15.19] - 2026-08-02
 ### Corrigé
 - **Bug critique (régression du refactoring 0.15.14)** : `WfsLoadTask` (tâche d'arrière-plan utilisée pour tout chargement WFS parallèle — BAN, BD TOPO, OSM, MagOSM, etc.) n'était pas importée dans `voirie_communale.py` après son déplacement vers `wfs_loader.py`, provoquant un `NameError` dès la première tentative de chargement de couches. Import corrigé.

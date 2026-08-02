@@ -905,8 +905,8 @@ class WfsLoaderMixin:
     def load_voirie_wfs(self, code_insee, bbox=None):
         """Charge la voirie communale depuis le WFS DGCL (filtre BBOX)."""
         return self.load_wfs_layer(
-            typename="DGCL.2025:voirie_communale",
-            layer_name=f"DGCL Voirie communale retenue DSR 2025 {code_insee}",
+            typename="DGF_2026:voirie-retenue-communes",
+            layer_name=f"DGCL Voirie communale retenue DSR 2026 {code_insee}",
             crs="EPSG:4326",
             bbox=bbox,
             geom_field="geom"
@@ -916,8 +916,8 @@ class WfsLoaderMixin:
     def load_voirie_dep_wfs(self, code_insee, bbox=None):
         """Charge la voirie départementale depuis le WFS DGCL (filtre BBOX)."""
         return self.load_wfs_layer(
-            typename="DGCL.2025:voirie_departementale",
-            layer_name=f"DGCL Voirie départementale retenue DGF 2025 {code_insee}",
+            typename="DGF_2026:voirie-retenue-departements",
+            layer_name=f"DGCL Voirie départementale retenue DGF 2026 {code_insee}",
             crs="EPSG:4326",
             bbox=bbox,
             geom_field="geom"

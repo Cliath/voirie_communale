@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.15.19** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.15.20** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -44,8 +44,8 @@ Ou via `build.bat` qui compile, package, push git et déploie en une commande :
 |--------|--------|--------|
 | **Emprise communale** | IGN Géoplateforme WFS — Admin Express | code INSEE |
 | **Adresses BAN** (paginée, toutes adresses) | IGN Géoplateforme WFS | code INSEE |
-| **Voirie communale DGCL 2025** | IGN Géoplateforme WFS | BBOX commune |
-| **Voirie départementale DGCL 2025** | IGN Géoplateforme WFS | BBOX commune |
+| **Voirie communale DGCL 2026** | IGN Géoplateforme WFS | BBOX commune |
+| **Voirie départementale DGCL 2026** | IGN Géoplateforme WFS | BBOX commune |
 | **Routes OSM** (CE / C / R) | Overpass API | BBOX commune |
 | **Réseau routier OSM MagOSM** (paginé) | MagOSM WFS — Magellium | BBOX commune |
 | **BD TOPO routes nommées** | IGN Géoplateforme WFS | BBOX commune |
