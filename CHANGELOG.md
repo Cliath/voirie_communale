@@ -1,6 +1,15 @@
+# [0.15.16] - 2026-08-02
+### Modifié
+- **Optimisation** : gestion des exceptions resserrée sur les appels réseau (`urllib`) et de parsing JSON dans `wfs_loader.py`, ainsi que sur les lectures/écritures de fichiers (`layer_order.json`, `settings.json`, `TODO.md`) — `except Exception` remplacé par des types précis (`urllib.error.URLError`, `OSError`, `json.JSONDecodeError`, `ValueError`). Les quelques frontières volontairement larges restantes (thread d'arrière-plan QGIS, opérations géométriques complexes) sont désormais documentées par un commentaire expliquant pourquoi.
+
 # [0.15.15] - 2026-08-02
 ### Modifié
 - **Optimisation** : suppression de la boucle d'attente active (`time.sleep(0.05)` en boucle) lors du chargement parallèle des couches WFS/WMS — remplacée par une boucle d'événements Qt (`QEventLoop`) qui se termine directement au signal de fin de tâche, sans scruter le CPU inutilement.
+
+# [0.15.14] - 2026-08-02
+### Modifié
+- **Refactoring interne** : `voirie_communale.py` (~3250 lignes) scindé en modules dédiés — `styles.py` (symbologie BD TOPO/BAN/OSM/MagOSM), `wfs_loader.py` (chargement réseau WFS/WMS/XYZ) et `layer_order.py` (ordonnancement et regroupement des couches). `voirie_communale.py` ne contient plus que l'orchestration du plugin. Aucun changement fonctionnel pour l'utilisateur.
+- `package.py` et `build.bat` mis à jour pour inclure/vérifier les nouveaux modules.
 
 # [0.15.12] - 2026-04-04
 ### Modifié

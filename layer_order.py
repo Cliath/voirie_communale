@@ -141,6 +141,10 @@ class LayerOrderMixin:
             return mem_layer
 
         except Exception as exc:
+            # Frontière volontairement large : de nombreuses opérations QGIS
+            # (géométrie, provider mémoire, arbre des couches) peuvent échouer
+            # ici pour des raisons variées ; on préfère renvoyer la couche
+            # d'origine non clippée plutôt que d'interrompre le chargement.
             QgsMessageLog.logMessage(
                 f"Clip commune : erreur sur '{layer.name()}' : {exc}",
                 "VoirieCommunale", Qgis.Warning
@@ -166,7 +170,7 @@ class LayerOrderMixin:
             if not commune_group or not root:
                 raise ValueError("Clés 'commune_group' ou 'root' manquantes ou vides")
             return commune_group, root
-        except Exception as exc:
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
             QgsMessageLog.logMessage(
                 f"layer_order.json illisible ({exc}) — ordre canonique par défaut utilisé",
                 "VoirieCommunale", Qgis.Warning

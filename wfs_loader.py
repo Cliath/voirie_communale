@@ -13,6 +13,7 @@ import time
 import json
 import urllib.parse
 import urllib.request
+import urllib.error
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsMessageLog,
@@ -38,6 +39,9 @@ class WfsLoadTask(QgsTask):
         self.error_msg = None
 
     def run(self):
+        # Frontière volontairement large : ce code s'exécute dans un thread
+        # secondaire QGIS. Toute exception non interceptée ici ferait planter
+        # QGIS, donc on capture tout et on remonte le message via error_msg.
         try:
             self.success, self.vsimem_path, self.error_msg = self._fetch_fn()
             return self.success
@@ -156,6 +160,10 @@ class WfsLoaderMixin:
                     Qgis.Warning
                 )
                 return False, []
+        # Frontière volontairement large : QgsRasterLayer/QgsProject peuvent
+        # lever des erreurs variées selon le provider ('wms'/xyz) et l'état du
+        # projet ; on journalise et on retourne un échec plutôt que de
+        # laisser une exception interrompre le chargement des autres couches.
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Erreur chargement tuiles XYZ {display_name} : {str(e)}",
@@ -478,7 +486,7 @@ class WfsLoaderMixin:
         try:
             with urllib.request.urlopen(url, timeout=60) as resp:
                 payload = resp.read()
-        except Exception as exc:
+        except (urllib.error.URLError, OSError) as exc:
             QgsMessageLog.logMessage(f"✗ Téléchargement WFS BBOX {typename}: {exc}", "VoirieCommunale", Qgis.Warning)
             return False, None
 
@@ -530,7 +538,7 @@ class WfsLoaderMixin:
                 req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
                 with urllib.request.urlopen(req, timeout=120) as resp:
                     fc = json.loads(resp.read().decode('utf-8'))
-            except Exception as exc:
+            except (urllib.error.URLError, OSError, json.JSONDecodeError) as exc:
                 return False, None, str(exc)
             batch = fc.get('features', [])
             if crs_ref is None:
@@ -571,7 +579,7 @@ class WfsLoaderMixin:
         try:
             with urllib.request.urlopen(url, timeout=60) as resp:
                 payload = resp.read()
-        except Exception as exc:
+        except (urllib.error.URLError, OSError) as exc:
             return False, None, str(exc)
         vsimem_path = f"/vsimem/{typename.replace(':', '_').replace('.', '_')}_bbox_par.json"
         gdal.FileFromMemBuffer(vsimem_path, payload)
@@ -604,7 +612,7 @@ class WfsLoaderMixin:
                 req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
                 with urllib.request.urlopen(req, timeout=180) as resp:
                     fc = json.loads(resp.read().decode('utf-8'))
-            except Exception as exc:
+            except (urllib.error.URLError, OSError, json.JSONDecodeError) as exc:
                 return False, None, str(exc)
             batch = fc.get('features', [])
             if crs_ref is None:
@@ -653,11 +661,11 @@ class WfsLoaderMixin:
             )
             with urllib.request.urlopen(request, timeout=180) as response:
                 payload = response.read().decode("utf-8")
-        except Exception as exc:
+        except (urllib.error.URLError, OSError) as exc:
             return False, None, str(exc)
         try:
             data_json = json.loads(payload)
-        except Exception as exc:
+        except json.JSONDecodeError as exc:
             return False, None, f"Parsing Overpass JSON: {exc}"
 
         elements = data_json.get("elements", [])
@@ -817,7 +825,7 @@ class WfsLoaderMixin:
                 req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
                 with urllib.request.urlopen(req, timeout=120) as resp:
                     fc = json.loads(resp.read().decode('utf-8'))
-            except Exception as exc:
+            except (urllib.error.URLError, OSError, json.JSONDecodeError) as exc:
                 QgsMessageLog.logMessage(
                     f"✗ WFS paginé {typename} (startIndex={start_index}) : {exc}",
                     "VoirieCommunale", Qgis.Critical
@@ -1025,7 +1033,7 @@ class WfsLoaderMixin:
                 if not after:
                     break
 
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             QgsMessageLog.logMessage(
                 f"MAJIC : erreur API Koumoul : {e}",
                 "VoirieCommunale", Qgis.Critical
@@ -1089,7 +1097,7 @@ class WfsLoaderMixin:
                     break
                 start_index += 1000
 
-        except Exception as e:
+        except (urllib.error.URLError, OSError, json.JSONDecodeError) as e:
             QgsMessageLog.logMessage(
                 f"MAJIC : erreur WFS IGN parcelles : {e}",
                 "VoirieCommunale", Qgis.Critical
@@ -1243,7 +1251,7 @@ class WfsLoaderMixin:
             )
             with urllib.request.urlopen(request, timeout=180) as response:
                 payload = response.read().decode("utf-8")
-        except Exception as exc:
+        except (urllib.error.URLError, OSError) as exc:
             QgsMessageLog.logMessage(
                 f"Erreur Overpass OSM: {exc}",
                 "VoirieCommunale",
@@ -1259,7 +1267,7 @@ class WfsLoaderMixin:
 
         try:
             data_json = json.loads(payload)
-        except Exception as exc:
+        except json.JSONDecodeError as exc:
             QgsMessageLog.logMessage(
                 f"Erreur parsing JSON Overpass: {exc}",
                 "VoirieCommunale",
@@ -1409,7 +1417,7 @@ class WfsLoaderMixin:
                 req = urllib.request.Request(url, headers={'User-Agent': 'QGIS-VoirieCommunale/1.0'})
                 with urllib.request.urlopen(req, timeout=180) as resp:
                     fc = json.loads(resp.read().decode('utf-8'))
-            except Exception as exc:
+            except (urllib.error.URLError, OSError, json.JSONDecodeError) as exc:
                 QgsMessageLog.logMessage(
                     f"✗ WFS MagOSM (startIndex={start_index}) : {exc}",
                     "VoirieCommunale", Qgis.Critical

@@ -157,7 +157,7 @@ class TodoDialog(QDialog):
         try:
             with open(self.todo_path, 'r', encoding='utf-8') as f:
                 self.editor.setPlainText(f.read())
-        except Exception as e:
+        except OSError:
             self.editor.setPlainText(f"# TODO\n")
 
     def _save(self):
@@ -169,7 +169,7 @@ class TodoDialog(QDialog):
             self.btn_save.setEnabled(False)
             # Réactiver après modification
             self.editor.textChanged.connect(self._on_modified)
-        except Exception as e:
+        except OSError as e:
             QMessageBox.warning(self, "Erreur", f"Impossible d'enregistrer :\n{e}")
 
     def _on_modified(self):
@@ -261,7 +261,7 @@ class SettingsDialog(QDialog):
             with open(cls._LAYER_ORDER_JSON, encoding='utf-8') as f:
                 data = json.load(f)
             return data.get('commune_group', []), data.get('root', [])
-        except Exception:
+        except (OSError, json.JSONDecodeError):
             return [], []
 
     @classmethod
@@ -270,7 +270,7 @@ class SettingsDialog(QDialog):
         try:
             with open(cls._LAYER_ORDER_JSON, encoding='utf-8') as f:
                 data = json.load(f)
-        except Exception:
+        except (OSError, json.JSONDecodeError):
             data = {}
         data['commune_group'] = commune_group
         data['root'] = root
@@ -512,7 +512,7 @@ class SettingsDialog(QDialog):
         ]
         try:
             self._write_layer_order(commune_group, root)
-        except Exception as exc:
+        except (OSError, TypeError, ValueError) as exc:
             QMessageBox.warning(
                 self,
                 "Erreur d’enregistrement",
