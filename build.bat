@@ -4,6 +4,12 @@ setlocal enabledelayedexpansion
 REM Script pour compiler et packager le plugin QGIS Voirie Communale
 REM Usage : build.bat [patch|minor|major]   (defaut : patch)
 
+REM Forcer l'UTF-8 pour tous les scripts Python appeles ci-dessous
+REM (evite les UnicodeEncodeError sur les caracteres accentues/symboles
+REM  quand la console Windows est en codepage cp1252)
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
+
 set BUMP=%1
 if "!BUMP!"=="" set BUMP=patch
 if /i "!BUMP!" NEQ "patch" if /i "!BUMP!" NEQ "minor" if /i "!BUMP!" NEQ "major" (

@@ -5,7 +5,7 @@ Recensement de la voirie communale (voies communales et chemins ruraux).
 Copyright (C) 2026 Yann Schwarz <yann.schwarz@ign.fr>
 Licence : GNU GPL v2+
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QEventLoop
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QMessageBox, QProgressDialog, QDialog, QApplication
 from qgis.core import (QgsProject, QgsVectorLayer, QgsMessageLog, Qgis, QgsApplication,
@@ -13,7 +13,6 @@ from qgis.core import (QgsProject, QgsVectorLayer, QgsMessageLog, Qgis, QgsAppli
 import re
 import os
 import os.path
-import time
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -556,10 +555,16 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
         tasks_done_count = [0]   # liste pour mutation dans closure
         task_objects = []
 
+        # Boucle d'événements locale : se termine dès que toutes les tâches
+        # sont terminées (signal taskDone), sans scruter activement (pas de
+        # time.sleep) tout en gardant l'UI réactive.
+        wait_loop = QEventLoop()
+
         def on_task_done(task):
             tasks_done_count[0] += 1
             advance(f"✓ {task.label} ({tasks_done_count[0]}/{parallel_count})")
-            QApplication.processEvents()
+            if tasks_done_count[0] >= parallel_count:
+                wait_loop.quit()
 
         for spec in parallel_specs:
             task = WfsLoadTask(spec['label'], spec['fetch_fn'])
@@ -568,10 +573,9 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin):
             QgsApplication.taskManager().addTask(task)
             task_objects.append(task)
 
-        # Attendre la fin de toutes les tâches (boucle non bloquante)
-        while tasks_done_count[0] < parallel_count:
-            QApplication.processEvents()
-            time.sleep(0.05)
+        # Attendre la fin de toutes les tâches (bloque uniquement s'il y en a)
+        if parallel_count > 0:
+            wait_loop.exec_()
 
         # ── Phase 3 : créer les couches sur le thread principal ───────────────
         deferred_warnings = []  # messages à afficher après progress.close()
