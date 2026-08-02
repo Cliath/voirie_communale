@@ -1,3 +1,9 @@
+# [0.16.5] - 2026-08-02
+### Corrigé
+- **README** : documentation de la structure du projet mise à jour (ajout de `styles.py`, `wfs_loader.py`, `layer_order.py` scindés depuis `voirie_communale.py`), ordre canonique des couches corrigé (Géofoncier en tête, MNT LiDAR HD ajouté), mention de la fonctionnalité de découpage sur emprise communale (buffer configurable), et MagOSM ajouté à la liste des couches à filtrage géographique/pagination.
+- **`layer_order.py`** : les valeurs de repli (utilisées si `layer_order.json` est illisible) étaient désynchronisées — "MagOSM Routes {code_insee}" manquait de `commune_group` et "Géofoncier public" manquait de `root`. Synchronisées avec le contenu actuel de `layer_order.json`.
+- **`couleurs_bdtopo.html`** : couleurs de prévisualisation obsolètes (désynchronisées de `styles.py` depuis une mise à jour de palette antérieure) — mises à jour avec les couleurs réellement utilisées, et fichier référencé depuis le README.
+
 # [0.16.4] - 2026-08-02
 ### Corrigé
 - **README** : ajout des liens sources manquants dans le tableau "Sources de données" — Emprise communale (Admin Express), Adresses BAN, Voirie communale/départementale DGCL, BD TOPO, OSM France (serveur de tuiles), CoSIA, BD ORTHO®, Photos aériennes historiques, SCAN 50® historique, Carte de Cassini, Carte de l'État-Major, MNT LiDAR HD (tous via cartes.gouv.fr). Waze et Plan IGN J+1 restent sans lien dédié (pas de page source officielle).

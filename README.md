@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.16.4** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.16.5** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -35,8 +35,8 @@ Ou via `build.bat` qui compile, package, push git et déploie en une commande :
 
 - **Barre de lancement** : le bouton du plugin ouvre 4 actions : *Charger des données*, *Numériser des données* (à venir), *Paramètres*, *À propos*
 - **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
-- **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, et ordre des couches configurable par glisser-déposer
-- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → MAJIC → Commune → Cadastre → Géofoncier → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → Photos aériennes → SCAN 50® → Cassini → État-Major
+- **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, découpage des couches sur l'emprise communale (buffer configurable 0–10 000 m), et ordre des couches configurable par glisser-déposer
+- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : Géofoncier → [groupe commune : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → MAJIC → Commune → Cadastre] → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → MNT LiDAR HD → Photos aériennes → SCAN 50® → Cassini → État-Major
 
 ### Données vectorielles (filtrées par code INSEE ou BBOX communale)
 
@@ -74,6 +74,8 @@ Le style utilise un `QgsRuleBasedRenderer` avec la chaîne de priorité suivante
 | Chemin | importance≥5 (sans cpx) + nature=Chemin | `#8C7274` |
 | Sentier | importance≥5 (sans cpx) + nature=Sentier | `#8C7274` (pointillés) |
 | Bac / Maritime | importance≥5 (sans cpx) + nature=Bac ou liaison maritime | `#5792C2` |
+
+> Aperçu visuel des couleurs : [couleurs_bdtopo.html](couleurs_bdtopo.html) (à ouvrir dans un navigateur).
 
 #### Routes OSM — catégorisation par `ref`
 
@@ -139,14 +141,17 @@ Service parfois lent — timeout 180 s par page, pagination 500 entités/page.
 4. Cochez les couches souhaitées
 5. Cliquez sur **Charger les données**
 
-Les couches nécessitant un filtre géographique (Voirie DGCL, OSM Routes, BD TOPO) chargent automatiquement l'emprise communale en premier pour délimiter la zone de requête. La BAN et les tronçons BD TOPO utilisent une pagination automatique (1 000 entités par page) pour contourner la limite serveur de la Géoplateforme IGN.
+Les couches nécessitant un filtre géographique (Voirie DGCL, OSM Routes, MagOSM Routes, BD TOPO) chargent automatiquement l'emprise communale en premier pour délimiter la zone de requête. La BAN et les tronçons BD TOPO utilisent une pagination automatique (1 000 entités par page) pour contourner la limite serveur de la Géoplateforme IGN ; MagOSM utilise une pagination similaire (500 entités par page).
 
 ## Structure du projet
 
 ```
 voirie_communale/
 ├── __init__.py                      # Point d'entrée du plugin
-├── voirie_communale.py                # Classe principale (logique métier)
+├── voirie_communale.py                # Classe principale (orchestration, cycle de vie du plugin)
+├── styles.py                         # Symbologie des couches (BD TOPO, BAN, OSM, MagOSM, MAJIC)
+├── wfs_loader.py                     # Chargement réseau (WFS/WMS/XYZ, tâches d'arrière-plan)
+├── layer_order.py                    # Ordonnancement/regroupement des couches, clip par emprise communale
 ├── voirie_communale_dialog.py         # Dialogues (LauncherDialog, VoirieCommunaleDialog, SettingsDialog…)
 ├── voirie_communale_dialog_base.ui    # Interface Qt Designer
 ├── voirie_communale_dialog_base.py    # [généré] Compilé depuis le .ui

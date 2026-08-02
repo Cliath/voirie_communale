@@ -182,6 +182,7 @@ class LayerOrderMixin:
                 "DGCL Voirie communale retenue DSR 2026 {code_insee}",
                 "DGCL Voirie d\u00e9partementale retenue DGF 2026 {code_insee}",
                 "OSM Routes {code_insee}",
+                "MagOSM Routes {code_insee}",
                 "Adresses BAN {code_insee}",
                 "Filaires de voie BAL {code_insee}",
                 "Parcelles MAJIC {code_insee}",
@@ -189,6 +190,7 @@ class LayerOrderMixin:
                 "Cadastre - {code_insee}",
             ]
             root = [
+                "G\u00e9ofoncier public",
                 "__COMMUNE_GROUP__",
                 "PLAN IGN J+1", "Waze", "OSM France",
                 "CoSIA (Couverture du Sol par IA)",
