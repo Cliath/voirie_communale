@@ -1,3 +1,7 @@
+# [0.15.17] - 2026-08-02
+### Modifié
+- **Optimisation** : factorisation de la logique commune de chargement de groupes de couches WMS (`load_cadastre_wms`, `load_geofoncier_wms`, `load_cosia_wms` dans `wfs_loader.py`) dans une méthode partagée `_load_wms_layer_group` — création du groupe, boucle de chargement avec vérification `isValid()`, collecte des erreurs. Réduit la duplication de code (~140 lignes économisées) sans changement de comportement.
+
 # [0.15.16] - 2026-08-02
 ### Modifié
 - **Optimisation** : gestion des exceptions resserrée sur les appels réseau (`urllib`) et de parsing JSON dans `wfs_loader.py`, ainsi que sur les lectures/écritures de fichiers (`layer_order.json`, `settings.json`, `TODO.md`) — `except Exception` remplacé par des types précis (`urllib.error.URLError`, `OSError`, `json.JSONDecodeError`, `ValueError`). Les quelques frontières volontairement larges restantes (thread d'arrière-plan QGIS, opérations géométriques complexes) sont désormais documentées par un commentaire expliquant pourquoi.

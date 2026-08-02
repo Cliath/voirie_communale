@@ -173,96 +173,87 @@ class WfsLoaderMixin:
             return False, []
 
 
+    def _load_wms_layer_group(self, group_name, wms_url, crs, layers_to_load, format_type="image/png"):
+        """Charge plusieurs couches WMS dans un groupe dédié (remplace le groupe existant s'il y en a un).
+
+        Centralise la logique commune à load_cadastre_wms / load_geofoncier_wms / load_cosia_wms :
+        création du groupe, boucle de chargement avec vérification isValid(), collecte des erreurs.
+        Si aucune couche n'a pu être chargée, le groupe (vide) est retiré de l'arbre.
+
+        Args:
+            group_name: nom du groupe dans l'arbre des couches
+            wms_url: URL de base du service WMS
+            crs: CRS demandé au serveur (ex: 'EPSG:2154')
+            layers_to_load: liste de (typename, display_name)
+            format_type: format d'image WMS (par défaut 'image/png')
+
+        Returns:
+            tuple: (created_layers: list, errors: list[str]) — noms des couches en échec
+        """
+        root = QgsProject.instance().layerTreeRoot()
+        self._remove_group_by_name(group_name)
+        group = root.addGroup(group_name)
+
+        created_layers = []
+        errors = []
+        for typename, display_name in layers_to_load:
+            uri = f"crs={crs}&format={format_type}&layers={typename}&styles&url={wms_url}"
+            layer = QgsRasterLayer(uri, display_name, 'wms')
+            if layer.isValid():
+                QgsProject.instance().addMapLayer(layer, False)
+                group.addLayer(layer)
+                created_layers.append(layer)
+                QgsMessageLog.logMessage(
+                    f"✓ {display_name} chargée avec succès", "VoirieCommunale", Qgis.Success
+                )
+            else:
+                errors.append(display_name)
+                QgsMessageLog.logMessage(
+                    f"✗ Échec du chargement de {display_name} : {layer.error().message()}",
+                    "VoirieCommunale", Qgis.Warning
+                )
+
+        if not created_layers:
+            root.removeChildNode(group)
+
+        return created_layers, errors
+
+
     def load_cadastre_wms(self, code_insee):
         """Charge les couches cadastrales WMS pour le code INSEE donné
-        
+
         Returns:
             tuple: (bool, list) - (succès, liste des couches chargées)
         """
-        
+
         # URL du service WMS INSPIRE du cadastre (DGFiP)
         wms_url = f"https://inspire.cadastre.gouv.fr/scpc/{code_insee}.wms"
-        
-        # Configuration des paramètres WMS communs
-        crs = "EPSG:2154"  # Lambert 93
-        format_type = "image/png"
-        
-        # Liste pour stocker les couches créées
-        created_layers = []
-        
+
         # Toutes les couches disponibles sur le service INSPIRE
         layers_to_load = [
-            {'name': 'CP.CadastralParcel', 'title': 'Parcelles cadastrales'},
-            {'name': 'BU.Building', 'title': 'Bâtiments'},
-            {'name': 'SUBFISCAL', 'title': 'Subdivisions fiscales'},
-            {'name': 'LIEUDIT', 'title': 'Lieux-dits'},
-            {'name': 'AMORCES_CAD', 'title': 'Amorces cadastrales'},
-            {'name': 'CLOTURE', 'title': 'Clôtures'},
-            {'name': 'DETAIL_TOPO', 'title': 'Détails topographiques'},
-            {'name': 'HYDRO', 'title': 'Hydrographie'},
-            {'name': 'VOIE_COMMUNICATION', 'title': 'Voies de communication'},
-            {'name': 'BORNE_REPERE', 'title': 'Bornes et repères'}
+            ('CP.CadastralParcel', 'Parcelles cadastrales'),
+            ('BU.Building', 'Bâtiments'),
+            ('SUBFISCAL', 'Subdivisions fiscales'),
+            ('LIEUDIT', 'Lieux-dits'),
+            ('AMORCES_CAD', 'Amorces cadastrales'),
+            ('CLOTURE', 'Clôtures'),
+            ('DETAIL_TOPO', 'Détails topographiques'),
+            ('HYDRO', 'Hydrographie'),
+            ('VOIE_COMMUNICATION', 'Voies de communication'),
+            ('BORNE_REPERE', 'Bornes et repères'),
         ]
-        
-        # Créer un groupe dans l'arbre des couches
-        root = QgsProject.instance().layerTreeRoot()
+
         group_name = f"Cadastre - {code_insee}"
-        self._remove_group_by_name(group_name)
-        cadastre_group = root.addGroup(group_name)
-        
-        loaded_count = 0
-        errors = []
-        
-        for layer_info in layers_to_load:
-            # Construction de l'URI WMS
-            uri = f"crs={crs}&format={format_type}&layers={layer_info['name']}&styles&url={wms_url}"
-            
-            QgsMessageLog.logMessage(
-                f"Tentative de chargement : {layer_info['title']}",
-                "VoirieCommunale",
-                Qgis.Info
-            )
-            QgsMessageLog.logMessage(
-                f"URI WMS : {uri}",
-                "VoirieCommunale",
-                Qgis.Info
-            )
-            
-            # Créer la couche WMS
-            wms_layer = QgsRasterLayer(uri, layer_info['title'], 'wms')
-            
-            if wms_layer.isValid():
-                # Ajouter la couche au projet sans l'afficher immédiatement
-                QgsProject.instance().addMapLayer(wms_layer, False)
-                # Ajouter la couche au groupe
-                cadastre_group.addLayer(wms_layer)
-                created_layers.append(wms_layer)
-                loaded_count += 1
-                QgsMessageLog.logMessage(
-                    f"✓ Couche {layer_info['title']} chargée avec succès",
-                    "VoirieCommunale",
-                    Qgis.Success
-                )
-            else:
-                error_msg = f"Échec du chargement de {layer_info['title']}"
-                errors.append(layer_info['title'])
-                QgsMessageLog.logMessage(
-                    f"✗ {error_msg}",
-                    "VoirieCommunale",
-                    Qgis.Warning
-                )
-                QgsMessageLog.logMessage(
-                    f"Erreur détaillée : {wms_layer.error().message()}",
-                    "VoirieCommunale",
-                    Qgis.Warning
-                )
-        
-        if loaded_count > 0:
+        created_layers, errors = self._load_wms_layer_group(
+            group_name, wms_url, "EPSG:2154", layers_to_load
+        )
+
+        if created_layers:
             if errors:
                 QMessageBox.warning(
                     self.iface.mainWindow(),
                     "Cadastre partiellement chargé",
-                    f"{loaded_count} couche(s) chargée(s), couches en erreur : {', '.join(errors)}\n\n"
+                    f"{len(created_layers)} couche(s) chargée(s), couches en erreur : {', '.join(errors)}\n\n"
                     "Consultez le journal des messages pour plus de détails."
                 )
             return True, created_layers
@@ -284,8 +275,6 @@ class WfsLoaderMixin:
             tuple: (bool, list) - (succès, liste des couches chargées)
         """
         WMS_URL = "https://api2.geofoncier.fr/api/referentielsoge/wxs?"
-        CRS = "EPSG:2154"
-        FORMAT = "image/png"
 
         layers_to_load = [
             ('RFU_LIMITES',        'RFU - Limites'),
@@ -295,27 +284,9 @@ class WfsLoaderMixin:
             ('PLANS_LOCALISANTS',  "Plans d'alignement - Localisants"),
         ]
 
-        root = QgsProject.instance().layerTreeRoot()
-        group_name = "Géofoncier public"
-        self._remove_group_by_name(group_name)
-        group = root.addGroup(group_name)
-
-        created_layers = []
-        errors = []
-
-        for layer_id, layer_title in layers_to_load:
-            uri = f"crs={CRS}&format={FORMAT}&layers={layer_id}&styles&url={WMS_URL}"
-            wms_layer = QgsRasterLayer(uri, layer_title, 'wms')
-            if wms_layer.isValid():
-                QgsProject.instance().addMapLayer(wms_layer, False)
-                group.addLayer(wms_layer)
-                created_layers.append(wms_layer)
-            else:
-                errors.append(layer_title)
-                QgsMessageLog.logMessage(
-                    f"Géofoncier : échec chargement {layer_title} — {wms_layer.error().message()}",
-                    "VoirieCommunale", Qgis.Warning
-                )
+        created_layers, errors = self._load_wms_layer_group(
+            "Géofoncier public", WMS_URL, "EPSG:2154", layers_to_load
+        )
 
         if created_layers:
             if errors:
@@ -345,35 +316,20 @@ class WfsLoaderMixin:
             tuple: (bool, list) - (au moins une couche chargée, liste des couches)
         """
         WMS_URL = "https://data.geopf.fr/wms-r"
-        group_name = "CoSIA (Couverture du Sol par IA)"
         millesimes = [
             ('IGNF_COSIA_2024-2026', 'CoSIA 2024-2026'),
             ('IGNF_COSIA_2021-2023', 'CoSIA 2021-2023'),
             ('IGNF_COSIA_2017-2020', 'CoSIA 2017-2020'),
         ]
 
-        root = QgsProject.instance().layerTreeRoot()
-        # Supprimer le groupe existant éventuellement présent
-        self._remove_group_by_name(group_name)
-        cosia_group = root.addGroup(group_name)
+        created_layers, errors = self._load_wms_layer_group(
+            "CoSIA (Couverture du Sol par IA)", WMS_URL, "EPSG:2154", millesimes
+        )
 
-        created_layers = []
-        for typename, display_name in millesimes:
-            uri = f"crs=EPSG:2154&format=image/png&layers={typename}&styles&url={WMS_URL}"
-            layer = QgsRasterLayer(uri, display_name, 'wms')
-            if layer.isValid():
-                QgsProject.instance().addMapLayer(layer, False)
-                cosia_group.addLayer(layer)
-                created_layers.append(layer)
-                QgsMessageLog.logMessage(f"✓ {display_name} chargée", "VoirieCommunale", Qgis.Success)
-            else:
-                QgsMessageLog.logMessage(f"✗ {display_name} : {layer.error().message()}", "VoirieCommunale", Qgis.Warning)
-
-        success = len(created_layers) > 0
-        if not success:
-            root.removeChildNode(cosia_group)
+        if not created_layers:
             QgsMessageLog.logMessage("Aucune couche CoSIA n'a pu être chargée", "VoirieCommunale", Qgis.Warning)
-        return success, created_layers
+
+        return len(created_layers) > 0, created_layers
 
 
     def load_scan_historique_wms(self, layer_name_wms, display_name):

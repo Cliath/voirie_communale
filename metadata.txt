@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.15.16
+version=0.15.17
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.15.16 (2026-08-02)
+changelog=    Version 0.15.17 (2026-08-02)
+    - Optimisation : factorisation de la logique commune de chargement de groupes de couches WMS (load_cadastre_wms, load_geofoncier_wms, load_cosia_wms dans wfs_loader.py) dans une méthode partagée _load_wms_layer_group — création du groupe, boucle de chargement avec vérification isValid(), collecte des erreurs. Réduit la duplication de code (~140 lignes économisées) sans changement de comportement.
+    Version 0.15.16 (2026-08-02)
     - Optimisation : gestion des exceptions resserrée sur les appels réseau (urllib) et de parsing JSON dans wfs_loader.py, ainsi que sur les lectures/écritures de fichiers (layer_order.json, settings.json, TODO.md) — except Exception remplacé par des types précis (urllib.error.URLError, OSError, json.JSONDecodeError, ValueError). Les quelques frontières volontairement larges restantes (thread d'arrière-plan QGIS, opérations géométriques complexes) sont désormais documentées par un commentaire expliquant pourquoi.
     Version 0.15.15 (2026-08-02)
     - Optimisation : suppression de la boucle d'attente active (time.sleep(0.05) en boucle) lors du chargement parallèle des couches WFS/WMS — remplacée par une boucle d'événements Qt (QEventLoop) qui se termine directement au signal de fin de tâche, sans scruter le CPU inutilement.
@@ -39,8 +41,6 @@ changelog=    Version 0.15.16 (2026-08-02)
     - BD TOPO tronçons : renommage Chemin rural -> Chemin, Desserte locale -> Desserte.
     - BD TOPO tronçons : ajout de la catégorie Liaison locale pour importance = 4 (anciennement inclus dans Départementale).
     - BD TOPO tronçons : Départementale restreinte à importance = 3 uniquement.
-    Version 0.15.6 (2026-04-03)
-    - BD TOPO tronçons : catégorie Voie communale (nature=Rond-point) supprimée. Le Rond-point est désormais intégré à Desserte locale (nature = Route à 1 chaussée OR Route à 2 chaussées OR Rond-point).
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png
