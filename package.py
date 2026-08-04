@@ -24,6 +24,7 @@ FILES_TO_INCLUDE = [
     'wfs_loader.py',
     'layer_order.py',
     'cache_manager.py',
+    'edigeo_loader.py',
     'voirie_communale_dialog.py',
     'voirie_communale_dialog_base.py',
     'resources.py',

@@ -1,3 +1,7 @@
+# [0.18.0] - 2026-08-02
+### Ajouté
+- **Voies EDIGEO (cadastre)** : nouvelle case à cocher chargeant les voies (`ZONCOMMUNI_id`) et les points de dénomination de voie (`VOIEP_id`) du plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr), pour toutes les sections cadastrales de la commune. Le nom de voie, historiquement fragmenté sur plusieurs champs (`TEX`, `TEX2`...`TEX10`) dans le format EDIGEO, est reconstitué en un seul attribut `nom` avant l'ajout au projet. Les 2 couches sont mises en cache dans le GeoPackage local (`edigeo_voies`, `edigeo_voiep`), en Lambert-93 (EPSG:2154, le CRS natif du plan cadastral vecteur). Nouveau module `edigeo_loader.py` (mixin `EdigeoLoaderMixin`) et nouvelles méthodes de style `apply_edigeo_voies_style`/`apply_edigeo_voiep_style` dans `styles.py`.
+
 # [0.17.4] - 2026-08-02
 ### Corrigé
 - **Cache** : la couche MAJIC chargée depuis le cache local GeoPackage conservait bien son style (v0.17.3), mais uniquement dans le cas d'un cache-miss (premier téléchargement) : la logique d'application du rendu catégorisé (par `groupe_personne`) n'était appelée que juste après le téléchargement Koumoul/WFS. Lors d'un chargement direct depuis le cache d'une session précédente (cas le plus fréquent), la couche gardait le style aléatoire par défaut de QGIS. La logique de style a été extraite en une méthode réutilisable (`apply_majic_style`) reconstruisant les catégories à partir des valeurs `groupe_personne` déjà présentes dans la couche, appelée aussi bien après téléchargement qu'après un chargement depuis le cache.

@@ -185,6 +185,8 @@ class LayerOrderMixin:
                 "MagOSM Routes {code_insee}",
                 "Adresses BAN {code_insee}",
                 "Filaires de voie BAL {code_insee}",
+                "Voies EDIGEO (cadastre) {code_insee}",
+                "D\u00e9nomination de voie EDIGEO (cadastre) {code_insee}",
                 "Parcelles MAJIC {code_insee}",
                 "Commune {code_insee}",
                 "Cadastre - {code_insee}",

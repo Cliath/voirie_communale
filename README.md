@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.17.4** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.18.0** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -19,7 +19,7 @@ Version actuelle : **0.17.4** — voir [CHANGELOG](CHANGELOG.md)
 - **Barre de lancement** : le bouton du plugin ouvre 4 actions : *Charger des données*, *Numériser des données* (à venir), *Paramètres*, *À propos*
 - **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
 - **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, découpage des couches sur l'emprise communale (buffer configurable 0–10 000 m), seuil d'alerte du cache local (jours), et ordre des couches configurable par glisser-déposer
-- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : Géofoncier → [groupe commune : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → MAJIC → Commune → Cadastre] → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → MNT LiDAR HD → Photos aériennes → SCAN 50® → Cassini → État-Major
+- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : Géofoncier → [groupe commune : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → Voies EDIGEO → Dénomination EDIGEO → MAJIC → Commune → Cadastre] → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → MNT LiDAR HD → Photos aériennes → SCAN 50® → Cassini → État-Major
 
 ### Données vectorielles (filtrées par code INSEE ou BBOX communale)
 
@@ -28,6 +28,8 @@ Version actuelle : **0.17.4** — voir [CHANGELOG](CHANGELOG.md)
 | **Emprise communale** | IGN Géoplateforme WFS — Admin Express | code INSEE |
 | **Adresses BAN** (paginée, toutes adresses) | IGN Géoplateforme WFS | code INSEE |
 | **Filaires de voie BAL** | Export national statique (S3, ~100 Mo) | code INSEE (filtrage client) |
+| **Voies EDIGEO** (cadastre, nom reconstitué) | Plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr) | code INSEE (toutes sections) |
+| **Dénomination de voie EDIGEO** (points) | Plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr) | code INSEE (toutes sections) |
 | **Voirie communale retenue DSR 2026 (DGCL)** | IGN Géoplateforme WFS | BBOX commune |
 | **Voirie départementale retenue DGF 2026 (DGCL)** | IGN Géoplateforme WFS | BBOX commune |
 | **Routes OSM** (CE / C / R) | Overpass API | BBOX commune |
@@ -38,10 +40,11 @@ Version actuelle : **0.17.4** — voir [CHANGELOG](CHANGELOG.md)
 
 #### Cache local (GeoPackage)
 
-Les 10 couches vecteur par commune ci-dessus (Emprise communale, BAN, Filaires BAL, Voirie
-communale/départementale, Routes OSM, MagOSM, BD TOPO routes nommées/tronçons, MAJIC) sont mises
-en cache automatiquement dans un fichier `voirie_{code_insee}.gpkg`, stocké dans le profil QGIS de
-l'utilisateur (invisible, géré par le plugin).
+Les 12 couches vecteur par commune ci-dessus (Emprise communale, BAN, Filaires BAL, Voies EDIGEO,
+Dénomination de voie EDIGEO, Voirie communale/départementale, Routes OSM, MagOSM, BD TOPO routes
+nommées/tronçons, MAJIC) sont mises en cache automatiquement dans un fichier
+`voirie_{code_insee}.gpkg`, stocké dans le profil QGIS de l'utilisateur (invisible, géré par le
+plugin).
 
 - **Transparent** : au chargement, le plugin réutilise le cache local s'il existe (pas de
   retéléchargement), sinon il télécharge puis alimente le cache pour la prochaine fois.
@@ -119,6 +122,15 @@ Service parfois lent — timeout 180 s par page, pagination 500 entités/page.
 
 Aucun style personnalisé n'est appliqué à cette couche : elle utilise le style aléatoire par défaut de QGIS pour les couches mémoire. Les attributs `nom` et `commune` sont disponibles pour un habillage manuel si besoin.
 
+#### Voies EDIGEO (cadastre) — nom reconstitué
+
+Le plan cadastral vecteur EDIGEO fragmente historiquement le nom d'une voie sur plusieurs champs texte (`TEX`, `TEX2`...`TEX10`, limite de longueur du format). Le plugin télécharge toutes les sections cadastrales de la commune, reconstitue le nom complet en concaténant ces fragments dans l'ordre, et produit deux couches :
+
+- **Voies EDIGEO** (lignes, couche `ZONCOMMUNI_id`) : trait simple `#8C7274`, étiqueté avec le nom complet reconstitué (champ `nom`) le long du tracé.
+- **Dénomination de voie EDIGEO** (points, couche `VOIEP_id`) : marqueur circulaire `#8C7274`, étiqueté autour du point avec le nom (déjà complet dans le fichier source, pas de reconstitution nécessaire).
+
+Les deux couches sont en projection Lambert-93 (EPSG:2154), le CRS natif du plan cadastral vecteur.
+
 ### Plans de fond
 
 | Plan | Source |
@@ -155,6 +167,7 @@ voirie_communale/
 ├── styles.py                         # Symbologie des couches (BD TOPO, BAN, OSM, MagOSM, MAJIC)
 ├── wfs_loader.py                     # Chargement réseau (WFS/WMS/XYZ, tâches d'arrière-plan)
 ├── layer_order.py                    # Ordonnancement/regroupement des couches, clip par emprise communale
+├── edigeo_loader.py                  # Chargement des voies EDIGEO (plan cadastral vecteur, EdigeoLoaderMixin)
 ├── voirie_communale_dialog.py         # Dialogues (LauncherDialog, VoirieCommunaleDialog, SettingsDialog…)
 ├── voirie_communale_dialog_base.ui    # Interface Qt Designer
 ├── voirie_communale_dialog_base.py    # [généré] Compilé depuis le .ui
@@ -192,6 +205,7 @@ voirie_communale/
 | API Koumoul (MAJIC) | `https://koumoul.com/data-fair/api/v1/datasets/parcelles-des-personnes-morales` |
 | Géofoncier WMS public | `https://api2.geofoncier.fr/api/referentielsoge/wxs` |
 | Filaires de voie des Bases Adresses Locales (data.gouv.fr) | [https://www.data.gouv.fr/datasets/filaires-de-voie-des-bases-adresses-locales-publiees-via-mes-adresses](https://www.data.gouv.fr/datasets/filaires-de-voie-des-bases-adresses-locales-publiees-via-mes-adresses) |
+| Plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr) | `https://cadastre.data.gouv.fr/bundler/pci-vecteur/communes/{codeINSEE}/edigeo` |
 | Emprise communale — Admin Express (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_ADMIN-EXPRESS](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_ADMIN-EXPRESS) |
 | Adresses BAN (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BAN-PLUS](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_BAN-PLUS) |
 | Voirie communale/départementale DGCL (cartes.gouv.fr) | [https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_VOIRIE-DGF](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_VOIRIE-DGF) |

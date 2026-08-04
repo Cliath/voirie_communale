@@ -26,9 +26,10 @@ from .styles import StylesMixin
 from .wfs_loader import WfsLoaderMixin, WfsLoadTask
 from .layer_order import LayerOrderMixin
 from .cache_manager import CacheManagerMixin
+from .edigeo_loader import EdigeoLoaderMixin
 
 
-class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManagerMixin):
+class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManagerMixin, EdigeoLoaderMixin):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -266,6 +267,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
         commune_checked = self.dlg.chkCommune.isChecked()
         ban_checked = self.dlg.chkBAN.isChecked()
         filaires_bal_checked = hasattr(self.dlg, 'chkFilairesBAL') and self.dlg.chkFilairesBAL.isChecked()
+        edigeo_checked = hasattr(self.dlg, 'chkEdigeoVoies') and self.dlg.chkEdigeoVoies.isChecked()
         voirie_checked = self.dlg.chkVoirie.isChecked()
         voirie_dep_checked = self.dlg.chkVoirieDep.isChecked()
         osm_routes_checked = self.dlg.chkOsmRoutes.isChecked()
@@ -293,6 +295,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
         # Pour les données sans BBOX (WMS globaux, cadastre, BAN, MAJIC), forcer le
         # chargement de la commune pour le zoom uniquement si elle n'est pas déjà dans le projet
         needs_zoom = (cadastre_checked or ban_checked or filaires_bal_checked or majic_checked or
+                      edigeo_checked or
                       scan_etat_major_checked or scan_cassini_checked or scan50_1950_checked or
                       waze_tiles_checked or osmfr_checked or cosia_checked or
                       bd_ortho_checked or mnt_lidar_checked or plan_ign_checked or
@@ -306,7 +309,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
             if not commune_already_loaded:
                 commune_checked = True
         
-        if not cadastre_checked and not commune_checked and not ban_checked and not filaires_bal_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not magosm_checked and not bdtopo_routesnom_checked and not bdtopo_troncons_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not osmfr_checked and not cosia_checked and not photo_aeriennes_checked and not bd_ortho_checked and not mnt_lidar_checked and not plan_ign_checked and not geofoncier_checked:
+        if not cadastre_checked and not commune_checked and not ban_checked and not filaires_bal_checked and not edigeo_checked and not voirie_checked and not voirie_dep_checked and not osm_routes_checked and not magosm_checked and not bdtopo_routesnom_checked and not bdtopo_troncons_checked and not majic_checked and not scan_etat_major_checked and not scan_cassini_checked and not scan50_1950_checked and not waze_tiles_checked and not osmfr_checked and not cosia_checked and not photo_aeriennes_checked and not bd_ortho_checked and not mnt_lidar_checked and not plan_ign_checked and not geofoncier_checked:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Sélection requise",
@@ -358,11 +361,20 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
                 ('bdtopo_troncons',       bdtopo_troncons_checked,   f"BD TOPO Tronçons de route {code_insee}"),
                 ('majic',                 majic_checked,             f"Parcelles MAJIC {code_insee}"),
                 ('filaires_bal',          filaires_bal_checked,      f"Filaires de voie BAL {code_insee}"),
+                ('edigeo_voies',          edigeo_checked,            f"Voies EDIGEO (cadastre) {code_insee}"),
+                ('edigeo_voiep',          edigeo_checked,            f"Dénomination de voie EDIGEO (cadastre) {code_insee}"),
             ]:
                 if checked:
                     cached = self._load_layer_from_cache(code_insee, key, layer_name)
                     if cached:
                         cache_hits[key] = cached
+
+        # Les 2 couches EDIGEO proviennent d'un seul téléchargement : on ne considère
+        # le cache "valide" que si les deux sont présentes, sinon on retélécharge tout.
+        edigeo_cache_hit = 'edigeo_voies' in cache_hits and 'edigeo_voiep' in cache_hits
+        if edigeo_checked and not edigeo_cache_hit:
+            cache_hits.pop('edigeo_voies', None)
+            cache_hits.pop('edigeo_voiep', None)
 
         if cache_hits:
             cache_age = self._cache_age_days(code_insee)
@@ -403,6 +415,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
             bdtopo_routesnom_checked and 'bdtopo_routesnom' not in cache_hits,
             bdtopo_troncons_checked and 'bdtopo_troncons' not in cache_hits,
             majic_checked and 'majic' not in cache_hits,
+            edigeo_checked and not edigeo_cache_hit,
             scan_etat_major_checked and not skip_scan_etat_major,
             scan_cassini_checked    and not skip_scan_cassini,
             scan50_1950_checked     and not skip_scan50,
@@ -723,6 +736,53 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
                         "Impossible de charger les filaires de voie BAL pour la commune sélectionnée.\n\n"
                         "Vérifiez la connexion internet, ou consultez le journal des messages pour plus de détails."
                     ))
+
+        if edigeo_checked:
+            if edigeo_cache_hit:
+                edigeo_voies_layer = cache_hits['edigeo_voies']
+                self.apply_edigeo_voies_style(edigeo_voies_layer)
+                self._remove_layers_by_name(f"Voies EDIGEO (cadastre) {code_insee}")
+                QgsProject.instance().addMapLayer(edigeo_voies_layer, False)
+                QgsProject.instance().layerTreeRoot().addLayer(edigeo_voies_layer)
+                loaded_layers.append(edigeo_voies_layer)
+
+                edigeo_voiep_layer = cache_hits['edigeo_voiep']
+                self.apply_edigeo_voiep_style(edigeo_voiep_layer)
+                self._remove_layers_by_name(f"Dénomination de voie EDIGEO (cadastre) {code_insee}")
+                QgsProject.instance().addMapLayer(edigeo_voiep_layer, False)
+                QgsProject.instance().layerTreeRoot().addLayer(edigeo_voiep_layer)
+                loaded_layers.append(edigeo_voiep_layer)
+
+                results.append(('Voies EDIGEO (cadastre)', True))
+            else:
+                advance(f"Chargement des voies EDIGEO (cadastre) ({code_insee})...")
+                edigeo_success, edigeo_voies_layer, edigeo_voiep_layer, edigeo_no_data = self.load_edigeo_voies(code_insee)
+                results.append(('Voies EDIGEO (cadastre)', edigeo_success))
+                if edigeo_voies_layer:
+                    if self._save_layer_to_cache(code_insee, 'edigeo_voies', edigeo_voies_layer):
+                        edigeo_voies_layer = self._reload_layer_from_cache_preserving_style(
+                            code_insee, 'edigeo_voies', edigeo_voies_layer, f"Voies EDIGEO (cadastre) {code_insee}"
+                        )
+                    loaded_layers.append(edigeo_voies_layer)
+                if edigeo_voiep_layer:
+                    if self._save_layer_to_cache(code_insee, 'edigeo_voiep', edigeo_voiep_layer):
+                        edigeo_voiep_layer = self._reload_layer_from_cache_preserving_style(
+                            code_insee, 'edigeo_voiep', edigeo_voiep_layer, f"Dénomination de voie EDIGEO (cadastre) {code_insee}"
+                        )
+                    loaded_layers.append(edigeo_voiep_layer)
+                if not edigeo_voies_layer and not edigeo_voiep_layer:
+                    if edigeo_no_data:
+                        deferred_warnings.append((
+                            "Aucune donnée EDIGEO",
+                            "Aucune voie n'est disponible pour cette commune dans le plan cadastral "
+                            "vecteur (EDIGEO).\n\nVérifiez que la commune dispose bien d'un cadastre numérisé."
+                        ))
+                    elif not edigeo_success:
+                        deferred_warnings.append((
+                            "Erreur Voies EDIGEO",
+                            "Impossible de charger les voies EDIGEO pour la commune sélectionnée.\n\n"
+                            "Vérifiez la connexion internet, ou consultez le journal des messages pour plus de détails."
+                        ))
 
         if scan_etat_major_checked:
             if skip_scan_etat_major:

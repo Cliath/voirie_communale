@@ -10,7 +10,7 @@ categorises sur les couches chargees (BD TOPO, BAN, OSM, MagOSM).
 """
 from qgis.PyQt.QtGui import QColor
 from qgis.core import (Qgis, QgsMessageLog,
-                       QgsMarkerSymbol,
+                       QgsMarkerSymbol, QgsSingleSymbolRenderer,
                        QgsPalLayerSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling,
                        QgsTextBufferSettings)
 
@@ -592,6 +592,79 @@ class StylesMixin:
 
         QgsMessageLog.logMessage(
             "Style différencié appliqué à la couche MagOSM (highway)",
+            "VoirieCommunale", Qgis.Success
+        )
+
+    def apply_edigeo_voies_style(self, layer):
+        """Applique un style simple (ligne + étiquette) à la couche des voies EDIGEO
+        (ZONCOMMUNI_id), avec le nom complet reconstitué affiché le long de la ligne.
+
+        Args:
+            layer: La couche QgsVectorLayer des voies EDIGEO à styliser
+        """
+        from qgis.core import QgsLineSymbol
+
+        sym = QgsLineSymbol.createSimple({
+            'line_color': '#8C7274', 'line_width': '0.4', 'line_style': 'dash'
+        })
+        layer.setRenderer(QgsSingleSymbolRenderer(sym))
+
+        lbl = QgsPalLayerSettings()
+        lbl.isExpression = False
+        lbl.fieldName = 'nom'
+        lbl.enabled = True
+        lbl.placement = QgsPalLayerSettings.Line
+        fmt = QgsTextFormat()
+        fmt.setSize(8)
+        fmt.setColor(QColor(0, 0, 0))
+        buf = QgsTextBufferSettings()
+        buf.setEnabled(True)
+        buf.setSize(0.5)
+        buf.setColor(QColor(255, 255, 255))
+        fmt.setBuffer(buf)
+        lbl.setFormat(fmt)
+        layer.setLabeling(QgsVectorLayerSimpleLabeling(lbl))
+        layer.setLabelsEnabled(True)
+        layer.triggerRepaint()
+
+        QgsMessageLog.logMessage(
+            "Style appliqué à la couche Voies EDIGEO (cadastre)",
+            "VoirieCommunale", Qgis.Success
+        )
+
+    def apply_edigeo_voiep_style(self, layer):
+        """Applique un style simple (point + étiquette) à la couche des points de
+        dénomination de voie EDIGEO (VOIEP_id).
+
+        Args:
+            layer: La couche QgsVectorLayer des points de dénomination EDIGEO à styliser
+        """
+        sym = QgsMarkerSymbol.createSimple({
+            'name': 'circle', 'color': '#8C7274', 'size': '2',
+            'outline_color': '#6B5557', 'outline_width': '0.3'
+        })
+        layer.setRenderer(QgsSingleSymbolRenderer(sym))
+
+        lbl = QgsPalLayerSettings()
+        lbl.isExpression = False
+        lbl.fieldName = 'nom'
+        lbl.enabled = True
+        lbl.placement = QgsPalLayerSettings.AroundPoint
+        fmt = QgsTextFormat()
+        fmt.setSize(8)
+        fmt.setColor(QColor(0, 0, 0))
+        buf = QgsTextBufferSettings()
+        buf.setEnabled(True)
+        buf.setSize(0.5)
+        buf.setColor(QColor(255, 255, 255))
+        fmt.setBuffer(buf)
+        lbl.setFormat(fmt)
+        layer.setLabeling(QgsVectorLayerSimpleLabeling(lbl))
+        layer.setLabelsEnabled(True)
+        layer.triggerRepaint()
+
+        QgsMessageLog.logMessage(
+            "Style appliqué à la couche Dénomination de voie EDIGEO (cadastre)",
             "VoirieCommunale", Qgis.Success
         )
 
