@@ -71,10 +71,8 @@ class WfsLoaderMixin:
         Returns:
             tuple: (bool, QgsVectorLayer ou None)
         """
-        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
-        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'
-        regex_chemin = self._get_regex_setting('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
-        regex_voie   = self._get_regex_setting('ban_regex_voie',   _BAN_REGEX_VOIE_DEFAULT)
+        regex_chemin = self._get_regex_setting('ban_regex_chemin')
+        regex_voie   = self._get_regex_setting('ban_regex_voie')
 
         layer_name = f"BD TOPO Tronçons de route {code_insee}"
         success, layer = self._load_wfs_paginated(
@@ -880,12 +878,8 @@ class WfsLoaderMixin:
             crs="EPSG:4326",
             style_callback=lambda lyr: self.apply_ban_style(
                 lyr,
-                regex_chemin=self._get_regex_setting(
-                    'ban_regex_chemin', r'(?i)\b(?:ch(?:e(?:m(?:in(?:ement)?)?)?|in)?|sen(?:t(?:e|ier)?)?)\.?\s+r(?:u(?:r(?:al?e?)?)?|al|le)\b|\bC\.?R\.?\b'
-                ),
-                regex_voie=self._get_regex_setting(
-                    'ban_regex_voie', r'(?i)\b(?:voi(?:e)?|ch(?:e(?:m(?:in(?:ement)?)?)?)?|rout(?:e)?)\.?\s+c(?:om(?:m(?:un(?:al?e?)?)?)?|al?e?|le)\b|\bV\.?C\.?\b'
-                ),
+                regex_chemin=self._get_regex_setting('ban_regex_chemin'),
+                regex_voie=self._get_regex_setting('ban_regex_voie'),
             )
         )
 
@@ -1511,10 +1505,8 @@ class WfsLoaderMixin:
         self._remove_layers_by_name(layer_name)
         QgsProject.instance().addMapLayer(layer, False); QgsProject.instance().layerTreeRoot().addLayer(layer)
 
-        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
-        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'
-        regex_chemin = self._get_regex_setting('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
-        regex_voie   = self._get_regex_setting('ban_regex_voie',   _BAN_REGEX_VOIE_DEFAULT)
+        regex_chemin = self._get_regex_setting('ban_regex_chemin')
+        regex_voie   = self._get_regex_setting('ban_regex_voie')
         self._apply_magosm_style(layer, regex_chemin=regex_chemin, regex_voie=regex_voie)
 
         QgsMessageLog.logMessage(

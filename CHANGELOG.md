@@ -1,3 +1,7 @@
+# [0.18.5] - 2026-08-05
+### Modifié
+- **Regex « Chemin rural » / « Voie communale »** : la valeur par défaut, jusqu'ici recopiée littéralement dans 9 endroits du code (`styles.py` ×4, `voirie_communale.py`, `wfs_loader.py` ×3, `voirie_communale_dialog.py`), est désormais centralisée dans une unique source de vérité (`SettingsDialog._DEFAULTS`). Toutes les fonctions de style et tous les points d'appel la lisent depuis là au lieu de la redéfinir, éliminant le risque de divergence entre copies (une incohérence de ce type, passée inaperçue, a d'ailleurs été corrigée au passage sur le chargement BAN). Aucun changement de comportement pour l'utilisateur.
+
 # [0.18.4] - 2026-08-05
 ### Corrigé
 - **Regex « Voie communale »** : retrait de la gestion des pluriels (« Voies Communales », « Chemins Communaux »...) ajoutée à tort en v0.18.3, non demandée. Seule la variante singulier « Chemin Communal » reste ajoutée, en plus de « Voie Communale » et « V.C. ». Migration automatique pour les utilisateurs ayant déjà reçu la valeur par défaut pluriel de la v0.18.3 (les regex personnalisées ne sont pas affectées).

@@ -343,8 +343,8 @@ class SettingsDialog(QDialog):
         # --- Catégorisation Chemin rural / Voie communale ---
         lay_general.addWidget(QLabel("<b>Catégorisation Chemin rural / Voie communale</b>"))
 
-        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
-        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'
+        _BAN_REGEX_CHEMIN_DEFAULT = SettingsDialog._DEFAULTS['ban_regex_chemin']
+        _BAN_REGEX_VOIE_DEFAULT   = SettingsDialog._DEFAULTS['ban_regex_voie']
 
         # Charger les valeurs stockées ; si corrompues (regex invalide), restaurer le défaut
         # et corriger settings.json pour éviter l'erreur lors du prochain chargement BAN.

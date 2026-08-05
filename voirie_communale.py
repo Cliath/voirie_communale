@@ -496,10 +496,8 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
         clip_to_commune = SettingsDialog.get('clip_to_commune', False, bool)
         clip_buffer_m = SettingsDialog.get('clip_buffer_m', 25, int)
 
-        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
-        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'
-        regex_chemin = self._get_regex_setting('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
-        regex_voie   = self._get_regex_setting('ban_regex_voie',   _BAN_REGEX_VOIE_DEFAULT)
+        regex_chemin = self._get_regex_setting('ban_regex_chemin')
+        regex_voie   = self._get_regex_setting('ban_regex_voie')
 
         # Définir les specs de toutes les tâches WFS à lancer en parallèle.
         # Chaque spec : label, result_key, layer_name, fetch_fn, style_cb, needs_clip, cache_key

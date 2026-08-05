@@ -193,9 +193,7 @@ class StylesMixin:
             cat_styles.append(QgsRendererCategory(g, symbol, libelle))
         layer.setRenderer(QgsCategorizedSymbolRenderer('groupe_personne', cat_styles))
 
-    def _apply_bdtopo_troncons_style(self, layer,
-                                      regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                                      regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
+    def _apply_bdtopo_troncons_style(self, layer, regex_chemin=None, regex_voie=None):
         """Style à règles : regex de filtrage (chemin rural / voie communale) en priorité
         sur le champ 'nom_1_gauche', puis catégorisation par 'nature'.
         """
@@ -203,6 +201,8 @@ class StylesMixin:
             QgsRuleBasedRenderer, QgsSymbol,
             QgsLineSymbol
         )
+        regex_chemin = regex_chemin or SettingsDialog._DEFAULTS['ban_regex_chemin']
+        regex_voie = regex_voie or SettingsDialog._DEFAULTS['ban_regex_voie']
 
         def make_line(color, width, dash=False):
             props = {'color': color, 'width': str(width)}
@@ -321,17 +321,20 @@ class StylesMixin:
 
 
     @staticmethod
-    def _get_regex_setting(key, default):
+    def _get_regex_setting(key, default=None):
         """Lit une regex depuis settings.json, valide, et restaure le défaut si corrompue.
 
         Args:
             key:     Clé (sans préfixe).
-            default: Valeur par défaut (raw string recommandé).
+            default: Valeur par défaut. Si omis, prise depuis SettingsDialog._DEFAULTS[key]
+                     (source unique de vérité, cf. voirie_communale_dialog.py).
 
         Returns:
             str: Expression régulière valide.
         """
         import re as _re
+        if default is None:
+            default = SettingsDialog._DEFAULTS[key]
         val = SettingsDialog.get(key, default)
         try:
             _re.compile(val)
@@ -369,9 +372,7 @@ class StylesMixin:
     # ------------------------------------------------------------------
 
 
-    def apply_ban_style(self, layer,
-                         regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                         regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
+    def apply_ban_style(self, layer, regex_chemin=None, regex_voie=None):
         """Applique un style différencié à la couche BAN selon le type de voie
 
         Args:
@@ -383,6 +384,8 @@ class StylesMixin:
         # Créer une expression qui catégorise les voies
         # Recherche dans le champ nom_voie les mots-clés
         field_name = 'nom_voie'
+        regex_chemin = regex_chemin or SettingsDialog._DEFAULTS['ban_regex_chemin']
+        regex_voie = regex_voie or SettingsDialog._DEFAULTS['ban_regex_voie']
         
         # Vérifier que le champ existe
         if layer.fields().indexOf(field_name) == -1:
@@ -507,9 +510,7 @@ class StylesMixin:
         layer.setLabelsEnabled(True)
         layer.triggerRepaint()
 
-    def _apply_magosm_style(self, layer,
-                             regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                             regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
+    def _apply_magosm_style(self, layer, regex_chemin=None, regex_voie=None):
         """Style à règles pour la couche MagOSM highways_line.
 
         Même structure que BD TOPO tronçons :
@@ -517,6 +518,8 @@ class StylesMixin:
         2. Catégorisation par valeur du champ 'highway' (à la place de 'nature')
         """
         from qgis.core import QgsRuleBasedRenderer, QgsLineSymbol
+        regex_chemin = regex_chemin or SettingsDialog._DEFAULTS['ban_regex_chemin']
+        regex_voie = regex_voie or SettingsDialog._DEFAULTS['ban_regex_voie']
 
         def make_line(color, width, dash=False):
             props = {
@@ -595,9 +598,7 @@ class StylesMixin:
             "VoirieCommunale", Qgis.Success
         )
 
-    def apply_edigeo_voies_style(self, layer,
-                                  regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                                  regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
+    def apply_edigeo_voies_style(self, layer, regex_chemin=None, regex_voie=None):
         """Style à règles pour la couche des voies EDIGEO (ZONCOMMUNI_id) : mêmes
         regex de catégorisation (Chemin rural / Voie communale) que BAN, BD TOPO
         tronçons et MagOSM, appliquées sur le nom complet reconstitué (champ 'nom').
@@ -608,6 +609,8 @@ class StylesMixin:
             regex_voie: Expression régulière QGIS pour détecter les voies communales
         """
         from qgis.core import QgsRuleBasedRenderer, QgsLineSymbol
+        regex_chemin = regex_chemin or SettingsDialog._DEFAULTS['ban_regex_chemin']
+        regex_voie = regex_voie or SettingsDialog._DEFAULTS['ban_regex_voie']
 
         def make_line(color, width, dash=False):
             props = {'color': color, 'width': str(width)}

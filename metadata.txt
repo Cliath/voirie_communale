@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.18.4
+version=0.18.5
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.18.4 (2026-08-05)
+changelog=    Version 0.18.5 (2026-08-05)
+    - Regex « Chemin rural » / « Voie communale » : la valeur par défaut, jusqu'ici recopiée littéralement dans 9 endroits du code (styles.py ×4, voirie_communale.py, wfs_loader.py ×3, voirie_communale_dialog.py), est désormais centralisée dans une unique source de vérité (SettingsDialog._DEFAULTS). Toutes les fonctions de style et tous les points d'appel la lisent depuis là au lieu de la redéfinir, éliminant le risque de divergence entre copies (une incohérence de ce type, passée inaperçue, a d'ailleurs été corrigée au passage sur le chargement BAN). Aucun changement de comportement pour l'utilisateur.
+    Version 0.18.4 (2026-08-05)
     - Regex « Voie communale » : retrait de la gestion des pluriels (« Voies Communales », « Chemins Communaux »...) ajoutée à tort en v0.18.3, non demandée. Seule la variante singulier « Chemin Communal » reste ajoutée, en plus de « Voie Communale » et « V.C. ». Migration automatique pour les utilisateurs ayant déjà reçu la valeur par défaut pluriel de la v0.18.3 (les regex personnalisées ne sont pas affectées).
     Version 0.18.3 (2026-08-05)
     - Regex « Voie communale » : élargie pour reconnaître aussi les variantes « Chemin Communal(e/aux) » (ex. « Chemin Communal nº 5 »), en plus de « Voie(s) Communale(s) » et « V.C. ». Migration automatique de l'ancienne valeur par défaut vers la nouvelle au chargement des réglages (les regex personnalisées par l'utilisateur ne sont pas modifiées). Le libellé de la section des réglages passe de « Catégorisation des adresses BAN » à « Catégorisation Chemin rural / Voie communale », reflétant son usage désormais partagé par les couches BAN, BD TOPO tronçons, MagOSM et Voies EDIGEO (cadastre).
@@ -35,10 +37,6 @@ changelog=    Version 0.18.4 (2026-08-05)
     - Cache : la couche MAJIC (et Filaires de voie BAL) apparaissait comme « couche temporaire » dans QGIS lors d'un premier téléchargement (ou après « Forcer le rechargement »), car elle était construite avec le provider memory. Après écriture réussie dans le cache GeoPackage, la couche du projet est désormais rechargée depuis le fichier .gpkg (provider ogr), avec conservation du style et de sa position dans l'arbre des couches — elle n'est plus signalée comme temporaire.
     Version 0.17.1 (2026-08-02)
     - Packaging : cache_manager.py manquait dans la liste des fichiers empaquetés (package.py), rendant le ZIP v0.17.0 inutilisable (erreur d'import au chargement du plugin). Le fichier est désormais bien inclus dans le ZIP.
-    Version 0.17.0 (2026-08-02)
-    - Cache local GeoPackage par commune : les 10 couches vecteur par commune (Emprise communale, BAN, Filaires BAL, Voirie communale/départementale DGCL, Routes OSM, MagOSM, BD TOPO routes nommées/tronçons, MAJIC) sont désormais mises en cache automatiquement dans un fichier voirie_{code_insee}.gpkg stocké dans le profil QGIS de l'utilisateur. Le cache est transparent : réutilisé s'il existe, alimenté après chaque téléchargement réussi. Aucune expiration automatique — un message d'alerte s'affiche si le cache dépasse un seuil configurable (30 jours par défaut, réglable dans les Paramètres), sans jamais bloquer.
-    - Bouton « Forcer le rechargement » dans la fenêtre de chargement : ignore le cache local et retélécharge systématiquement toutes les données sélectionnées depuis leurs sources d'origine.
-    - Nouveau module cache_manager.py (mixin CacheManagerMixin) et nouveau paramètre cache_warning_days.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png
