@@ -183,10 +183,10 @@
           <item>
            <widget class="QCheckBox" name="chkEdigeoVoies">
             <property name="text">
-             <string>Voies et dénominations (cadastre EDIGEO)</string>
+             <string>Voies (cadastre EDIGEO)</string>
             </property>
             <property name="toolTip">
-             <string>Charge les voies et points de dénomination du plan cadastral vecteur (toutes sections), avec le nom complet reconstitué&#10;Licence Ouverte 2.0 (Etalab) — © DGFiP</string>
+             <string>Charge les voies du plan cadastral vecteur (toutes sections), avec le nom complet reconstitué&#10;Licence Ouverte 2.0 (Etalab) — © DGFiP</string>
             </property>
            </widget>
           </item>

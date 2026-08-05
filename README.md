@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.18.0** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.18.1** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -19,7 +19,7 @@ Version actuelle : **0.18.0** — voir [CHANGELOG](CHANGELOG.md)
 - **Barre de lancement** : le bouton du plugin ouvre 4 actions : *Charger des données*, *Numériser des données* (à venir), *Paramètres*, *À propos*
 - **Mémorisation** : dernier code INSEE et sélection des couches restaurés automatiquement à l'ouverture
 - **Paramètres** : zoom automatique, réordonnancement automatique, regex de filtrage des voies, découpage des couches sur l'emprise communale (buffer configurable 0–10 000 m), seuil d'alerte du cache local (jours), et ordre des couches configurable par glisser-déposer
-- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : Géofoncier → [groupe commune : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → Voies EDIGEO → Dénomination EDIGEO → MAJIC → Commune → Cadastre] → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → MNT LiDAR HD → Photos aériennes → SCAN 50® → Cassini → État-Major
+- **Ordre canonique** configurable via `layer_order.json` (haut → bas) : Géofoncier → [groupe commune : BD TOPO Tronçons → BD TOPO Routes → Voirie comm. → Voirie dép. → OSM Routes → MagOSM Routes → BAN → Filaires BAL → Voies EDIGEO → MAJIC → Commune → Cadastre] → PLAN IGN → Waze → OSM France → CoSIA → BD ORTHO® → MNT LiDAR HD → Photos aériennes → SCAN 50® → Cassini → État-Major
 
 ### Données vectorielles (filtrées par code INSEE ou BBOX communale)
 
@@ -29,7 +29,6 @@ Version actuelle : **0.18.0** — voir [CHANGELOG](CHANGELOG.md)
 | **Adresses BAN** (paginée, toutes adresses) | IGN Géoplateforme WFS | code INSEE |
 | **Filaires de voie BAL** | Export national statique (S3, ~100 Mo) | code INSEE (filtrage client) |
 | **Voies EDIGEO** (cadastre, nom reconstitué) | Plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr) | code INSEE (toutes sections) |
-| **Dénomination de voie EDIGEO** (points) | Plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr) | code INSEE (toutes sections) |
 | **Voirie communale retenue DSR 2026 (DGCL)** | IGN Géoplateforme WFS | BBOX commune |
 | **Voirie départementale retenue DGF 2026 (DGCL)** | IGN Géoplateforme WFS | BBOX commune |
 | **Routes OSM** (CE / C / R) | Overpass API | BBOX commune |
@@ -40,8 +39,8 @@ Version actuelle : **0.18.0** — voir [CHANGELOG](CHANGELOG.md)
 
 #### Cache local (GeoPackage)
 
-Les 12 couches vecteur par commune ci-dessus (Emprise communale, BAN, Filaires BAL, Voies EDIGEO,
-Dénomination de voie EDIGEO, Voirie communale/départementale, Routes OSM, MagOSM, BD TOPO routes
+Les 11 couches vecteur par commune ci-dessus (Emprise communale, BAN, Filaires BAL, Voies EDIGEO,
+Voirie communale/départementale, Routes OSM, MagOSM, BD TOPO routes
 nommées/tronçons, MAJIC) sont mises en cache automatiquement dans un fichier
 `voirie_{code_insee}.gpkg`, stocké dans le profil QGIS de l'utilisateur (invisible, géré par le
 plugin).
@@ -124,12 +123,11 @@ Aucun style personnalisé n'est appliqué à cette couche : elle utilise le styl
 
 #### Voies EDIGEO (cadastre) — nom reconstitué
 
-Le plan cadastral vecteur EDIGEO fragmente historiquement le nom d'une voie sur plusieurs champs texte (`TEX`, `TEX2`...`TEX10`, limite de longueur du format). Le plugin télécharge toutes les sections cadastrales de la commune, reconstitue le nom complet en concaténant ces fragments dans l'ordre, et produit deux couches :
+Le plan cadastral vecteur EDIGEO fragmente historiquement le nom d'une voie sur plusieurs champs texte (`TEX`, `TEX2`...`TEX10`, limite de longueur du format). Le plugin télécharge toutes les sections cadastrales de la commune, reconstitue le nom complet en concaténant ces fragments dans l'ordre, et produit une couche lignes (`ZONCOMMUNI_id`) : trait simple `#8C7274`, étiquetée avec le nom complet reconstitué (champ `nom`) le long du tracé.
 
-- **Voies EDIGEO** (lignes, couche `ZONCOMMUNI_id`) : trait simple `#8C7274`, étiqueté avec le nom complet reconstitué (champ `nom`) le long du tracé.
-- **Dénomination de voie EDIGEO** (points, couche `VOIEP_id`) : marqueur circulaire `#8C7274`, étiqueté autour du point avec le nom (déjà complet dans le fichier source, pas de reconstitution nécessaire).
+La couche est en projection Lambert-93 (EPSG:2154), le CRS natif du plan cadastral vecteur.
 
-Les deux couches sont en projection Lambert-93 (EPSG:2154), le CRS natif du plan cadastral vecteur.
+> **Note** : le format EDIGEO expose aussi une couche `VOIEP_id` (points), mais celle-ci mélange en réalité des toponymes divers (lieux-dits, bâtiments remarquables, points cotés d'altitude, repères géodésiques) sans champ permettant de les distinguer des noms de voie — elle n'est donc volontairement pas exploitée par le plugin.
 
 ### Plans de fond
 

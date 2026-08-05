@@ -4,13 +4,17 @@ Voirie Communale - Chargement des voies EDIGEO (plan cadastral vecteur)
 Copyright (C) 2026 Yann Schwarz <yann.schwarz@gmail.com>
 Licence : GNU GPL v2+
 
-Ce module charge les voies (ZONCOMMUNI_id) et les points de dénomination de
-voie (VOIEP_id) du plan cadastral informatisé au format EDIGEO, distribué par
-section cadastrale sur cadastre.data.gouv.fr. Toutes les sections de la
-commune sont téléchargées, décompressées en mémoire (/vsimem) puis fusionnées
-en deux couches communales uniques. Le nom de voie, fragmenté sur plusieurs
-champs (TEX, TEX2...TEX10) dans ZONCOMMUNI_id, est reconstitué en un seul
-attribut avant l'ajout au projet.
+Ce module charge les voies (ZONCOMMUNI_id) du plan cadastral informatisé au
+format EDIGEO, distribué par section cadastrale sur cadastre.data.gouv.fr.
+Toutes les sections de la commune sont téléchargées, décompressées en
+mémoire (/vsimem) puis fusionnées en une couche communale unique. Le nom de
+voie, fragmenté sur plusieurs champs (TEX, TEX2...TEX10), est reconstitué en
+un seul attribut avant l'ajout au projet.
+
+Note : la couche VOIEP_id du même format mélange en réalité des toponymes
+divers (lieux-dits, bâtiments remarquables, points cotés d'altitude, repères
+géodésiques) sans champ permettant de les distinguer des noms de voie —
+elle n'est donc pas exploitée ici.
 """
 import io
 import os
@@ -34,7 +38,7 @@ EDIGEO_CRS = 'EPSG:2154'
 
 
 class EdigeoLoaderMixin:
-    """Chargement des voies et dénominations de voie du plan cadastral EDIGEO
+    """Chargement des voies du plan cadastral EDIGEO
     (cadastre.data.gouv.fr/bundler/pci-vecteur), en complément des sources
     WFS/OSM/BD TOPO existantes.
     """
@@ -53,16 +57,14 @@ class EdigeoLoaderMixin:
         return ' '.join(parts)
 
     def load_edigeo_voies(self, code_insee):
-        """Télécharge et fusionne les couches EDIGEO ZONCOMMUNI_id (voies, lignes)
-        et VOIEP_id (points de dénomination) pour toutes les sections cadastrales
-        d'une commune.
+        """Télécharge et fusionne la couche EDIGEO ZONCOMMUNI_id (voies, lignes)
+        pour toutes les sections cadastrales d'une commune.
 
         Args:
             code_insee: Code INSEE de la commune (5 caractères)
 
         Returns:
-            tuple: (bool succès, QgsVectorLayer voies ou None, QgsVectorLayer voiep
-                ou None, bool aucune_donnee)
+            tuple: (bool succès, QgsVectorLayer voies ou None, bool aucune_donnee)
         """
         from osgeo import gdal, ogr
 
@@ -82,18 +84,18 @@ class EdigeoLoaderMixin:
                     f"EDIGEO : aucune donnée disponible pour {code_insee} (404)",
                     "VoirieCommunale", Qgis.Warning
                 )
-                return False, None, None, True
+                return False, None, True
             QgsMessageLog.logMessage(f"EDIGEO : erreur HTTP {e.code} : {e}", "VoirieCommunale", Qgis.Critical)
-            return False, None, None, False
+            return False, None, False
         except (urllib.error.URLError, OSError) as e:
             QgsMessageLog.logMessage(f"EDIGEO : erreur de téléchargement : {e}", "VoirieCommunale", Qgis.Critical)
-            return False, None, None, False
+            return False, None, False
 
         try:
             zf = zipfile.ZipFile(io.BytesIO(zip_bytes))
         except zipfile.BadZipFile as e:
             QgsMessageLog.logMessage(f"EDIGEO : archive ZIP invalide : {e}", "VoirieCommunale", Qgis.Critical)
-            return False, None, None, False
+            return False, None, False
 
         section_members = [n for n in zf.namelist() if n.lower().endswith('.tar.bz2')]
         if not section_members:
@@ -101,10 +103,9 @@ class EdigeoLoaderMixin:
                 f"EDIGEO : aucune section cadastrale trouvée pour {code_insee}",
                 "VoirieCommunale", Qgis.Warning
             )
-            return False, None, None, True
+            return False, None, True
 
         voies_features = []   # (QgsGeometry, nom)
-        voiep_features = []   # (QgsGeometry, nom)
         vsimem_dir = f"/vsimem/edigeo_{code_insee}"
 
         for member_name in section_members:
@@ -162,34 +163,17 @@ class EdigeoLoaderMixin:
                         nom = self._edigeo_reconstruct_name(feat, field_names)
                         voies_features.append((geom, nom))
 
-                voiep = ds.GetLayerByName('VOIEP_id')
-                if voiep is not None:
-                    field_names = [
-                        voiep.GetLayerDefn().GetFieldDefn(i).GetName()
-                        for i in range(voiep.GetLayerDefn().GetFieldCount())
-                    ]
-                    voiep.ResetReading()
-                    for feat in voiep:
-                        geom_ref = feat.GetGeometryRef()
-                        if geom_ref is None:
-                            continue
-                        geom = QgsGeometry.fromWkt(geom_ref.ExportToWkt())
-                        if geom.isNull() or geom.isEmpty():
-                            continue
-                        nom = self._edigeo_reconstruct_name(feat, field_names)
-                        voiep_features.append((geom, nom))
-
                 ds = None
             finally:
                 for p in written_paths:
                     gdal.Unlink(p)
 
-        if not voies_features and not voiep_features:
+        if not voies_features:
             QgsMessageLog.logMessage(
                 f"EDIGEO : aucune voie trouvée pour {code_insee}",
                 "VoirieCommunale", Qgis.Warning
             )
-            return False, None, None, True
+            return False, None, True
 
         voies_layer = self._edigeo_build_layer(
             voies_features, f"MultiLineString?crs={EDIGEO_CRS}&field=nom:string",
@@ -201,22 +185,11 @@ class EdigeoLoaderMixin:
             QgsProject.instance().addMapLayer(voies_layer, False)
             QgsProject.instance().layerTreeRoot().addLayer(voies_layer)
 
-        voiep_layer = self._edigeo_build_layer(
-            voiep_features, f"Point?crs={EDIGEO_CRS}&field=nom:string",
-            f"Dénomination de voie EDIGEO (cadastre) {code_insee}"
-        )
-        if voiep_layer:
-            self.apply_edigeo_voiep_style(voiep_layer)
-            self._remove_layers_by_name(f"Dénomination de voie EDIGEO (cadastre) {code_insee}")
-            QgsProject.instance().addMapLayer(voiep_layer, False)
-            QgsProject.instance().layerTreeRoot().addLayer(voiep_layer)
-
         QgsMessageLog.logMessage(
-            f"EDIGEO : {len(voies_features)} voie(s), {len(voiep_features)} dénomination(s) "
-            f"chargée(s) pour {code_insee}",
+            f"EDIGEO : {len(voies_features)} voie(s) chargée(s) pour {code_insee}",
             "VoirieCommunale", Qgis.Success
         )
-        return True, voies_layer, voiep_layer, False
+        return True, voies_layer, False
 
     @staticmethod
     def _edigeo_build_layer(features_in, uri, layer_name):

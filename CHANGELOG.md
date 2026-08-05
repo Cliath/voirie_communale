@@ -1,6 +1,10 @@
+# [0.18.1] - 2026-08-02
+### Corrigé
+- **Voies EDIGEO (cadastre)** : la couche `VOIEP_id` (« Dénomination de voie EDIGEO ») ajoutée en v0.18.0 a été retirée. Après vérification exhaustive sur l'ensemble des sections cadastrales d'une commune test, cette couche s'est révélée mélanger des toponymes divers (lieux-dits, bâtiments remarquables comme « Mairie »/« Poste », points cotés d'altitude, repères géodésiques) sans aucun champ permettant de distinguer un nom de voie des autres entrées. Seule la couche `ZONCOMMUNI_id` (voies, lignes) est donc conservée et chargée par la case à cocher « Voies (cadastre EDIGEO) ».
+
 # [0.18.0] - 2026-08-02
 ### Ajouté
-- **Voies EDIGEO (cadastre)** : nouvelle case à cocher chargeant les voies (`ZONCOMMUNI_id`) et les points de dénomination de voie (`VOIEP_id`) du plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr), pour toutes les sections cadastrales de la commune. Le nom de voie, historiquement fragmenté sur plusieurs champs (`TEX`, `TEX2`...`TEX10`) dans le format EDIGEO, est reconstitué en un seul attribut `nom` avant l'ajout au projet. Les 2 couches sont mises en cache dans le GeoPackage local (`edigeo_voies`, `edigeo_voiep`), en Lambert-93 (EPSG:2154, le CRS natif du plan cadastral vecteur). Nouveau module `edigeo_loader.py` (mixin `EdigeoLoaderMixin`) et nouvelles méthodes de style `apply_edigeo_voies_style`/`apply_edigeo_voiep_style` dans `styles.py`.
+- **Voies EDIGEO (cadastre)** : nouvelle case à cocher chargeant les voies (`ZONCOMMUNI_id`) du plan cadastral vecteur EDIGEO (cadastre.data.gouv.fr), pour toutes les sections cadastrales de la commune. Le nom de voie, historiquement fragmenté sur plusieurs champs (`TEX`, `TEX2`...`TEX10`) dans le format EDIGEO, est reconstitué en un seul attribut `nom` avant l'ajout au projet. La couche est mise en cache dans le GeoPackage local (`edigeo_voies`), en Lambert-93 (EPSG:2154, le CRS natif du plan cadastral vecteur). Nouveau module `edigeo_loader.py` (mixin `EdigeoLoaderMixin`) et nouvelle méthode de style `apply_edigeo_voies_style` dans `styles.py`.
 
 # [0.17.4] - 2026-08-02
 ### Corrigé
