@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.18.2
+version=0.18.3
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,9 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.18.2 (2026-08-05)
+changelog=    Version 0.18.3 (2026-08-05)
+    - Regex « Voie communale » : élargie pour reconnaître aussi les variantes « Chemin Communal(e/aux) » (ex. « Chemin Communal nº 5 »), en plus de « Voie(s) Communale(s) » et « V.C. ». Migration automatique de l'ancienne valeur par défaut vers la nouvelle au chargement des réglages (les regex personnalisées par l'utilisateur ne sont pas modifiées). Le libellé de la section des réglages passe de « Catégorisation des adresses BAN » à « Catégorisation Chemin rural / Voie communale », reflétant son usage désormais partagé par les couches BAN, BD TOPO tronçons, MagOSM et Voies EDIGEO (cadastre).
+    Version 0.18.2 (2026-08-05)
     - Voies EDIGEO (cadastre) : style désormais catégorisé par regex (Chemin rural / Voie communale / Autre) sur le nom complet reconstitué, avec les mêmes expressions régulières (configurables via les mêmes clés de réglages ban_regex_chemin/ban_regex_voie) que celles déjà utilisées pour les couches BAN, BD TOPO tronçons et MagOSM. Auparavant la couche utilisait un style simple à trait unique.
     Version 0.18.1 (2026-08-02)
     - Voies EDIGEO (cadastre) : la couche VOIEP_id (« Dénomination de voie EDIGEO ») ajoutée en v0.18.0 a été retirée. Après vérification exhaustive sur l'ensemble des sections cadastrales d'une commune test, cette couche s'est révélée mélanger des toponymes divers (lieux-dits, bâtiments remarquables comme « Mairie »/« Poste », points cotés d'altitude, repères géodésiques) sans aucun champ permettant de distinguer un nom de voie des autres entrées. Seule la couche ZONCOMMUNI_id (voies, lignes) est donc conservée et chargée par la case à cocher « Voies (cadastre EDIGEO) ».
@@ -37,8 +39,6 @@ changelog=    Version 0.18.2 (2026-08-05)
     - Nouveau module cache_manager.py (mixin CacheManagerMixin) et nouveau paramètre cache_warning_days.
     Version 0.16.7 (2026-08-02)
     - README : suppression de la section « En mode développement » (déploiement manuel via lien symbolique / build.bat), jugée peu utile pour les utilisateurs du plugin. L'installation depuis un ZIP reste documentée.
-    Version 0.16.6 (2026-08-02)
-    - README : ajout d'une sous-section « Filaires de voie BAL — style par défaut » précisant qu'aucun style personnalisé n'est appliqué à cette couche (style aléatoire QGIS par défaut), pour compléter la documentation des styles déjà présente pour BD TOPO, OSM, BAN et MagOSM.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png

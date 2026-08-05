@@ -496,8 +496,8 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
         clip_to_commune = SettingsDialog.get('clip_to_commune', False, bool)
         clip_buffer_m = SettingsDialog.get('clip_buffer_m', 25, int)
 
-        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)\b(?:ch(?:e(?:m(?:in(?:ement)?)?)?|in)?|sen(?:t(?:e|ier)?)?)\.?\s+r(?:u(?:r(?:al?e?)?)?|al|le)\b|\bC\.?R\.?\b'
-        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)\b(?:voi(?:e)?|ch(?:e(?:m(?:in(?:ement)?)?)?)?|rout(?:e)?)\.?\s+c(?:om(?:m(?:un(?:al?e?)?)?)?|al?e?|le)\b|\bV\.?C\.?\b'
+        _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
+        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b'
         regex_chemin = self._get_regex_setting('ban_regex_chemin', _BAN_REGEX_CHEMIN_DEFAULT)
         regex_voie   = self._get_regex_setting('ban_regex_voie',   _BAN_REGEX_VOIE_DEFAULT)
 

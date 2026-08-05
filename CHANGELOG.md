@@ -1,3 +1,7 @@
+# [0.18.3] - 2026-08-05
+### Modifié
+- **Regex « Voie communale »** : élargie pour reconnaître aussi les variantes « Chemin Communal(e/aux) » (ex. « Chemin Communal nº 5 »), en plus de « Voie(s) Communale(s) » et « V.C. ». Migration automatique de l'ancienne valeur par défaut vers la nouvelle au chargement des réglages (les regex personnalisées par l'utilisateur ne sont pas modifiées). Le libellé de la section des réglages passe de « Catégorisation des adresses BAN » à « Catégorisation Chemin rural / Voie communale », reflétant son usage désormais partagé par les couches BAN, BD TOPO tronçons, MagOSM et Voies EDIGEO (cadastre).
+
 # [0.18.2] - 2026-08-05
 ### Ajouté
 - **Voies EDIGEO (cadastre)** : style désormais catégorisé par regex (Chemin rural / Voie communale / Autre) sur le nom complet reconstitué, avec les mêmes expressions régulières (configurables via les mêmes clés de réglages `ban_regex_chemin`/`ban_regex_voie`) que celles déjà utilisées pour les couches BAN, BD TOPO tronçons et MagOSM. Auparavant la couche utilisait un style simple à trait unique.

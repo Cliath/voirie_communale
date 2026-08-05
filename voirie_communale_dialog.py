@@ -132,10 +132,18 @@ class SettingsDialog(QDialog):
         "clip_to_commune":   False,
         "clip_buffer_m":     25,
         "ban_regex_chemin":  r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-        "ban_regex_voie":    r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b',
+        "ban_regex_voie":    r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b',
         "last_insee":        "",
         "checked_layers":    [],
         "cache_warning_days": 30,
+    }
+
+    # Anciennes valeurs par défaut de 'ban_regex_voie', migrées automatiquement vers
+    # la valeur courante de _DEFAULTS lors du chargement (voir _load) si l'utilisateur
+    # n'a pas personnalisé son réglage. Permet d'élargir les regex sans casser les
+    # personnalisations existantes ni exiger de réinitialisation manuelle.
+    _LEGACY_BAN_REGEX_VOIE = {
+        r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b',
     }
 
     @staticmethod
@@ -146,7 +154,8 @@ class SettingsDialog(QDialog):
     @staticmethod
     def _load():
         """Charge settings.json, complète les clés manquantes avec les défauts,
-        et sauvegarde si des clés ont été ajoutées."""
+        migre les anciennes valeurs par défaut connues vers la valeur courante,
+        et sauvegarde si des clés ont été ajoutées ou migrées."""
         path = SettingsDialog._settings_path()
         data = {}
         if os.path.isfile(path):
@@ -155,10 +164,18 @@ class SettingsDialog(QDialog):
                     data = json.load(f)
             except (json.JSONDecodeError, OSError):
                 data = {}
+        changed = False
         # Injecter les défauts pour les clés absentes
         missing = {k: v for k, v in SettingsDialog._DEFAULTS.items() if k not in data}
         if missing:
             data.update(missing)
+            changed = True
+        # Migrer 'ban_regex_voie' si l'utilisateur a toujours une ancienne valeur
+        # par défaut (jamais personnalisée) vers la valeur par défaut courante.
+        if data.get('ban_regex_voie') in SettingsDialog._LEGACY_BAN_REGEX_VOIE:
+            data['ban_regex_voie'] = SettingsDialog._DEFAULTS['ban_regex_voie']
+            changed = True
+        if changed:
             SettingsDialog._save(data)
         return data
 
@@ -322,11 +339,11 @@ class SettingsDialog(QDialog):
         lay_general.addWidget(sep2)
         lay_general.addSpacing(4)
 
-        # --- Catégorisation des adresses BAN ---
-        lay_general.addWidget(QLabel("<b>Catégorisation des adresses BAN</b>"))
+        # --- Catégorisation Chemin rural / Voie communale ---
+        lay_general.addWidget(QLabel("<b>Catégorisation Chemin rural / Voie communale</b>"))
 
         _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
-        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'
+        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b'
 
         # Charger les valeurs stockées ; si corrompues (regex invalide), restaurer le défaut
         # et corriger settings.json pour éviter l'erreur lors du prochain chargement BAN.
@@ -362,7 +379,8 @@ class SettingsDialog(QDialog):
 
         note_ban = QLabel(
             "<small><i>Expressions régulières utilisées pour identifier les chemins ruraux "
-            "et voies communales dans le champ <tt>nom_voie</tt> de la couche BAN.</i></small>"
+            "et voies communales (y compris variantes « Chemin Communal ») dans les couches "
+            "BAN, BD TOPO tronçons, MagOSM et Voies EDIGEO (cadastre).</i></small>"
         )
         note_ban.setWordWrap(True)
         lay_general.addWidget(note_ban)
