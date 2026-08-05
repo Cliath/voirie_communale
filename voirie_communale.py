@@ -19,7 +19,7 @@ from .resources import *
 # Import the code for the dialog
 from .voirie_communale_dialog import VoirieCommunaleDialog, PhotoAeriennesDialog, LauncherDialog, SettingsDialog
 # Import version information
-from .version import __version__, get_changelog
+from .version import __version__
 
 # Mixins extraits dans des modules dédiés (styles, réseau/chargement, arbre des couches)
 from .styles import StylesMixin

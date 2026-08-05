@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.18.5** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.19.0** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 

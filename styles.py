@@ -17,131 +17,6 @@ from qgis.core import (Qgis, QgsMessageLog,
 from .voirie_communale_dialog import SettingsDialog
 
 
-# Dictionnaire fixe : forme_juridique_abregee → (libellé_complet, couleur_hex)
-# Groupes sémantiques par couleur :
-#   blues foncés  → État / institutions nationales
-#   blues clairs  → Collectivités territoriales
-#   bleus-gris    → Établissements publics
-#   teals         → Intercommunalité / syndicats
-#   verts         → Associations / fondations / mutuelles
-#   oranges/ambre → Agriculture / foncier
-#   rouges        → Sociétés commerciales de capitaux
-#   roses/violets → Sociétés civiles / coopératives
-#   gris          → Divers / non identifié
-MAJIC_FORMES_JURIDIQUES = {
-    # ── État et institutions nationales ──────────────────────────────────────
-    'ETAT':  ("État",                                          '#0d3b6e'),
-    'BDF':   ("Banque de France",                              '#174b82'),
-    'INP':   ("Institut national public",                      '#1e5799'),
-    # ── Collectivités territoriales ──────────────────────────────────────────
-    'DEPT':  ("Département",                                   '#2471a3'),
-    'MET':   ("Métropole",                                     '#2e86c1'),
-    'COM':   ("Commune",                                       '#3498db'),
-    'COMU':  ("Communauté urbaine",                            '#5dade2'),
-    'CCOM':  ("Communauté de communes",                        '#76c4e8'),
-    'COME':  ("Commune (établissement)",                       '#5dade2'),
-    'CCMU':  ("Communauté de communes (fiscalité multiple)",   '#5dade2'),
-    'COLL':  ("Collectivité",                                  '#7fb3d3'),
-    'CTOM':  ("Collectivité d'outre-mer",                      '#aed6f1'),
-    '7510':  ("Commune (code INSEE 7510)",                     '#3498db'),
-    '7520':  ("Commune associée / déléguée (code INSEE 7520)", '#5dade2'),
-    # ── Établissements publics ───────────────────────────────────────────────
-    'EP':    ("Établissement public",                          '#1a5276'),
-    'EPA':   ("Établissement public administratif",            '#1f618d'),
-    'EPIC':  ("Établissement public industriel et commercial", '#2874a6'),
-    'EPLS':  ("Établissement public local spécialisé",        '#2e86c1'),
-    'REGI':  ("Régie",                                        '#3498db'),
-    'CCAS':  ("Centre communal d'action sociale",              '#4fa3d1'),
-    'CIAS':  ("Centre intercommunal d'action sociale",         '#6cb6da'),
-    'HOSP':  ("Hôpital / établissement de santé public",       '#85c1e9'),
-    'SDIS':  ("Service départemental d'incendie et de secours",'#a9cce3'),
-    'MSA':   ("Mutualité sociale agricole",                    '#abebc6'),
-    'ORGI':  ("Organisme de gestion immobilière public",       '#7fb3d3'),
-    'EE':    ("Établissement d'enseignement public",           '#5b9bd5'),
-    'EN':    ("École nationale",                               '#5b9bd5'),
-    'IDE':   ("Établissement de droit public divers",          '#7fb3d3'),
-    # ── Intercommunalité / syndicats ─────────────────────────────────────────
-    'SIVU':  ("Syndicat intercommunal à vocation unique",      '#148f77'),
-    'SIVO':  ("Syndicat intercommunal à vocation multiple",    '#1abc9c'),
-    'SYCO':  ("Syndicat de communes",                         '#1abc9c'),
-    'SYMC':  ("Syndicat mixte de communes",                    '#17a589'),
-    'SYMI':  ("Syndicat mixte",                                '#1abc9c'),
-    'SIH':   ("Syndicat intercommunal hospitalier",            '#76d7c4'),
-    'PETR':  ("Pôle d'équilibre territorial et rural",         '#a2d9ce'),
-    'GIP':   ("Groupement d'intérêt public",                   '#7dcea0'),
-    'GCS':   ("Groupement de coopération sanitaire",           '#a9dfb8'),
-    'GCSP':  ("Groupement de coopération sanitaire privé",     '#a9dfb8'),
-    'CE':    ("Communauté d'établissements / chef d'exploitation", '#27ae60'),
-    'CEP':   ("Communauté d'établissements public",            '#2ecc71'),
-    'CCAM':  ("Chambre consulaire des arts et métiers",        '#82e0aa'),
-    'CCM':   ("Chambre de commerce et de métiers",             '#82e0aa'),
-    'SEM':   ("Société d'économie mixte",                      '#117a65'),
-    'OHLM':  ("Office HLM",                                    '#1d8348'),
-    'OPRO':  ("Office professionnel",                          '#1d8348'),
-    # ── Associations / fondations / mutuelles ────────────────────────────────
-    'ASS':   ("Association",                                   '#229954'),
-    'FON':   ("Fondation",                                     '#52be80'),
-    'MUT':   ("Mutuelle",                                      '#7dcea0'),
-    'ACEE':  ("Association loi 1901 (établissement)",          '#a9dfb8'),
-    'GIE':   ("Groupement d'intérêt économique",               '#27ae60'),
-    'GPAS':  ("Groupement pastoral",                           '#58d68d'),
-    'SSRG':  ("Société sportive à responsabilité garantie",    '#82e0aa'),
-    'SSRS':  ("Société sportive (autre)",                      '#a9dfb8'),
-    'IRC':   ("Institution de retraite complémentaire",        '#7dcea0'),
-    'IRE':   ("Institution de retraite d'entreprise",          '#7dcea0'),
-    '6412':  ("Société d'assurance mutuelle",                  '#5d6d7e'),
-    # ── Agriculture / foncier ────────────────────────────────────────────────
-    'GAEC':  ("Groupement agricole d'exploitation en commun",  '#e67e22'),
-    'EARL':  ("Exploitation agricole à responsabilité limitée",'#f39c12'),
-    'GFA':   ("Groupement foncier agricole",                   '#f0a500'),
-    'GFR':   ("Groupement foncier rural",                      '#f5b041'),
-    'GFO':   ("Groupement foncier",                            '#f8c471'),
-    'GAF':   ("Groupement agri-forestier",                     '#fad7a0'),
-    'SCEA':  ("Société civile d'exploitation agricole",        '#f9e79f'),
-    'SICA':  ("Société d'intérêt collectif agricole",          '#f7dc6f'),
-    'CUMA':  ("Coopérative d'utilisation de matériel agricole",'#f4d03f'),
-    'COAG':  ("Coopérative agricole",                          '#d4ac0d'),
-    'AFR':   ("Association foncière de remembrement",          '#b7950b'),
-    'AFU':   ("Association foncière urbaine",                  '#9a7d0a'),
-    'EXP':   ("Exploitation agricole individuelle",            '#f0b27a'),
-    # ── Sociétés commerciales de capitaux ────────────────────────────────────
-    'SA':    ("Société anonyme",                               '#c0392b'),
-    'SAM':   ("Société anonyme mutualiste",                    '#e74c3c'),
-    'SAFR':  ("Société anonyme fermière rurale",               '#ec7063'),
-    'SARL':  ("Société à responsabilité limitée",              '#e74c3c'),
-    'SAS':   ("Société par actions simplifiée",                '#ec7063'),
-    'SNC':   ("Société en nom collectif",                      '#f1948a'),
-    'SCA':   ("Société en commandite par actions",             '#cd6155'),
-    'SE':    ("Société européenne",                            '#a93226'),
-    'SLRL':  ("Société libre à responsabilité limitée",        '#e74c3c'),
-    'STE':   ("Société (autre)",                               '#f1948a'),
-    # ── Sociétés civiles / coopératives ──────────────────────────────────────
-    'SC':    ("Société civile",                                '#8e44ad'),
-    'SCI':   ("Société civile immobilière",                    '#9b59b6'),
-    'SCM':   ("Société civile de moyens",                      '#a569bd'),
-    'SCCP':  ("Société civile de construction-vente",          '#af7ac5'),
-    'SCOP':  ("Société coopérative ouvrière de production",    '#7d3c98'),
-    'SCPI':  ("Société civile de placement immobilier",        '#6c3483'),
-    'SCOM':  ("Société coopérative et mutualiste",             '#5b2c6f'),
-    # ── Divers identifiés ──────────────────────────────────────────────────────
-    'CSBI':  ("Caisse scolaire de bienfaisance",                '#717d7e'),
-    'DISU':  ("Divers (usage inconnu)",                         '#717d7e'),
-    'PM':    ("Personne morale (divers)",                       '#717d7e'),
-    'RAC':   ("Régie autonome communale",                       '#717d7e'),
-    'RV':    ("Résidence / divers",                             '#717d7e'),
-    'AUDA':  ("Autre administration",                           '#717d7e'),
-    'AUDP':  ("Autre de droit privé",                           '#717d7e'),
-    'AUEP':  ("Autre entité publique",                          '#717d7e'),
-    'AUPE':  ("Autre personne étrangère",                       '#717d7e'),
-    'AUPM':  ("Autre personne morale",                          '#717d7e'),
-    'AURS':  ("Autre à régime spécial",                         '#717d7e'),
-    'AUTA':  ("Autre titre administratif",                      '#717d7e'),
-    'AUTC':  ("Autre titre collectif",                          '#717d7e'),
-    'INR':   ("Institut national de recherche",                 '#717d7e'),
-}
-# Couleur par défaut pour les codes non répertoriés
-_MAJIC_COLOR_UNKNOWN = '#95a5a6'
-
 # Groupes et couleurs exacts de l'application Koumoul
 # Source : configuration de https://koumoul.com/data-fair/app/carte-des-parcelles-des-personnes-morales-majic
 # Le champ groupe_personne est un entier (0-9)
@@ -162,6 +37,46 @@ _MAJIC_GROUPE_DEFAULT_COLOR = "#A337F5"
 
 class StylesMixin:
     """Regroupe les methodes de symbologie (styles, couleurs, regles) du plugin."""
+
+    @staticmethod
+    def _make_line_symbol(color, width, dash=False, rounded=False):
+        """Crée un QgsLineSymbol simple (couleur, largeur, tirets optionnels).
+
+        Utilisé par les styles à règles (BD TOPO tronçons, MagOSM, EDIGEO Voies)
+        pour éviter de dupliquer la même fonction locale dans chaque méthode.
+        """
+        from qgis.core import QgsLineSymbol
+        props = {'color': color, 'width': str(width)}
+        if dash:
+            props['line_style'] = 'dash'
+        if rounded:
+            props['capstyle'] = 'round'
+            props['joinstyle'] = 'round'
+        return QgsLineSymbol.createSimple(props)
+
+    @staticmethod
+    def _apply_simple_line_labels(layer, field_name, size=8):
+        """Applique un étiquetage simple (champ brut, buffer blanc) sur une couche
+        de lignes. Factorise le bloc QgsPalLayerSettings/QgsTextFormat/
+        QgsTextBufferSettings dupliqué dans les styles à règles.
+        """
+        lbl = QgsPalLayerSettings()
+        lbl.isExpression = False
+        lbl.fieldName = field_name
+        lbl.enabled = True
+        lbl.placement = QgsPalLayerSettings.Line
+        fmt = QgsTextFormat()
+        fmt.setSize(size)
+        fmt.setColor(QColor(0, 0, 0))
+        buf = QgsTextBufferSettings()
+        buf.setEnabled(True)
+        buf.setSize(0.5)
+        buf.setColor(QColor(255, 255, 255))
+        fmt.setBuffer(buf)
+        lbl.setFormat(fmt)
+        layer.setLabeling(QgsVectorLayerSimpleLabeling(lbl))
+        layer.setLabelsEnabled(True)
+        layer.triggerRepaint()
 
     def apply_majic_style(self, layer):
         """Applique le rendu catégorisé MAJIC (par 'groupe_personne') à `layer`.
@@ -197,19 +112,11 @@ class StylesMixin:
         """Style à règles : regex de filtrage (chemin rural / voie communale) en priorité
         sur le champ 'nom_1_gauche', puis catégorisation par 'nature'.
         """
-        from qgis.core import (
-            QgsRuleBasedRenderer, QgsSymbol,
-            QgsLineSymbol
-        )
+        from qgis.core import QgsRuleBasedRenderer
         regex_chemin = regex_chemin or SettingsDialog._DEFAULTS['ban_regex_chemin']
         regex_voie = regex_voie or SettingsDialog._DEFAULTS['ban_regex_voie']
 
-        def make_line(color, width, dash=False):
-            props = {'color': color, 'width': str(width)}
-            if dash:
-                props['line_style'] = 'dash'
-            sym = QgsLineSymbol.createSimple(props)
-            return sym
+        make_line = self._make_line_symbol
 
         root_rule = QgsRuleBasedRenderer.Rule(None)  # règle racine (conteneur)
 
@@ -281,23 +188,7 @@ class StylesMixin:
         # ---- Étiquettes : champ brut, aucune regex ----
         # Le renderer gère déjà la catégorisation. Le labeling affiche simplement
         # nom_collaboratif_gauche ; QGIS n'affiche rien si le champ est null/vide.
-        lbl = QgsPalLayerSettings()
-        lbl.isExpression = False
-        lbl.fieldName = nom_field
-        lbl.enabled = True
-        lbl.placement = QgsPalLayerSettings.Line
-        fmt = QgsTextFormat()
-        fmt.setSize(8)
-        fmt.setColor(QColor(0, 0, 0))
-        buf = QgsTextBufferSettings()
-        buf.setEnabled(True)
-        buf.setSize(0.5)
-        buf.setColor(QColor(255, 255, 255))
-        fmt.setBuffer(buf)
-        lbl.setFormat(fmt)
-        layer.setLabeling(QgsVectorLayerSimpleLabeling(lbl))
-        layer.setLabelsEnabled(True)
-        layer.triggerRepaint()
+        self._apply_simple_line_labels(layer, nom_field)
 
 
     def _apply_bdtopo_routesnom_style(self, layer):
@@ -517,18 +408,12 @@ class StylesMixin:
         1. Règles regex CR/VC sur le champ 'name' (prioritaires)
         2. Catégorisation par valeur du champ 'highway' (à la place de 'nature')
         """
-        from qgis.core import QgsRuleBasedRenderer, QgsLineSymbol
+        from qgis.core import QgsRuleBasedRenderer
         regex_chemin = regex_chemin or SettingsDialog._DEFAULTS['ban_regex_chemin']
         regex_voie = regex_voie or SettingsDialog._DEFAULTS['ban_regex_voie']
 
         def make_line(color, width, dash=False):
-            props = {
-                'color': color, 'width': str(width),
-                'capstyle': 'round', 'joinstyle': 'round',
-            }
-            if dash:
-                props['line_style'] = 'dash'
-            return QgsLineSymbol.createSimple(props)
+            return self._make_line_symbol(color, width, dash=dash, rounded=True)
 
         nom_field = 'name'
         root_rule = QgsRuleBasedRenderer.Rule(None)
@@ -575,23 +460,7 @@ class StylesMixin:
         layer.setRenderer(QgsRuleBasedRenderer(root_rule))
 
         # ---- Étiquettes : champ 'name' ----
-        lbl = QgsPalLayerSettings()
-        lbl.isExpression = False
-        lbl.fieldName = nom_field
-        lbl.enabled = True
-        lbl.placement = QgsPalLayerSettings.Line
-        fmt = QgsTextFormat()
-        fmt.setSize(8)
-        fmt.setColor(QColor(0, 0, 0))
-        buf = QgsTextBufferSettings()
-        buf.setEnabled(True)
-        buf.setSize(0.5)
-        buf.setColor(QColor(255, 255, 255))
-        fmt.setBuffer(buf)
-        lbl.setFormat(fmt)
-        layer.setLabeling(QgsVectorLayerSimpleLabeling(lbl))
-        layer.setLabelsEnabled(True)
-        layer.triggerRepaint()
+        self._apply_simple_line_labels(layer, nom_field)
 
         QgsMessageLog.logMessage(
             "Style différencié appliqué à la couche MagOSM (highway)",
@@ -608,15 +477,11 @@ class StylesMixin:
             regex_chemin: Expression régulière QGIS pour détecter les chemins ruraux
             regex_voie: Expression régulière QGIS pour détecter les voies communales
         """
-        from qgis.core import QgsRuleBasedRenderer, QgsLineSymbol
+        from qgis.core import QgsRuleBasedRenderer
         regex_chemin = regex_chemin or SettingsDialog._DEFAULTS['ban_regex_chemin']
         regex_voie = regex_voie or SettingsDialog._DEFAULTS['ban_regex_voie']
 
-        def make_line(color, width, dash=False):
-            props = {'color': color, 'width': str(width)}
-            if dash:
-                props['line_style'] = 'dash'
-            return QgsLineSymbol.createSimple(props)
+        make_line = self._make_line_symbol
 
         nom_field = 'nom'
         root_rule = QgsRuleBasedRenderer.Rule(None)
@@ -642,23 +507,7 @@ class StylesMixin:
 
         layer.setRenderer(QgsRuleBasedRenderer(root_rule))
 
-        lbl = QgsPalLayerSettings()
-        lbl.isExpression = False
-        lbl.fieldName = 'nom'
-        lbl.enabled = True
-        lbl.placement = QgsPalLayerSettings.Line
-        fmt = QgsTextFormat()
-        fmt.setSize(8)
-        fmt.setColor(QColor(0, 0, 0))
-        buf = QgsTextBufferSettings()
-        buf.setEnabled(True)
-        buf.setSize(0.5)
-        buf.setColor(QColor(255, 255, 255))
-        fmt.setBuffer(buf)
-        lbl.setFormat(fmt)
-        layer.setLabeling(QgsVectorLayerSimpleLabeling(lbl))
-        layer.setLabelsEnabled(True)
-        layer.triggerRepaint()
+        self._apply_simple_line_labels(layer, nom_field)
 
         QgsMessageLog.logMessage(
             "Style différencié appliqué à la couche Voies EDIGEO (cadastre) (Chemin rural / Voie communale)",

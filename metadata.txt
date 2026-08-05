@@ -3,7 +3,7 @@ name=Voirie Communale
 qgisMinimumVersion=3.0
 tags=voirie,commune,chemin rural,voie communale,cadastre,BAN,OSM,IGN
 description=Plugin d'aide pour le recensement de la voirie communale (voies communales et chemins ruraux)
-version=0.18.5
+version=0.19.0
 author=Yann Schwarz
 email=yann.schwarz@gmail.com
 
@@ -17,7 +17,15 @@ repository=https://github.com/Cliath/voirie_communale
 
 # Recommended items:
 hasProcessingProvider=no
-changelog=    Version 0.18.5 (2026-08-05)
+changelog=    Version 0.19.0 (2026-08-06)
+    - Code mort massif retiré suite à une revue complète du code (aucun changement de comportement) :
+    - wfs_loader.py (1519 -> 1064 lignes) : suppression de 8 méthodes jamais appelées, restes de l'ancienne architecture de chargement synchrone remplacée depuis par le chargement parallèle asynchrone (WfsLoadTask + _fetch_*_to_vsimem) : load_bdtopo_troncons_wfs, load_bdtopo_routesnom_wfs, load_wms_epsg3857, load_ban_wfs, load_voirie_wfs, load_voirie_dep_wfs, load_osm_roads, load_magosm_wfs. La branche bbox de load_wfs_layer (devenue inatteignable, plus aucun appelant vivant ne fournissant de bbox) ainsi que la méthode _load_wfs_bbox ont également été retirées ; seul le chemin code_insee (utilisé par load_commune_wfs) est conservé.
+    - styles.py (668 -> 517 lignes) : suppression du dictionnaire MAJIC_FORMES_JURIDIQUES (110 lignes, jamais référencé ailleurs — seul MAJIC_GROUPES sert réellement au rendu) et de la constante _MAJIC_COLOR_UNKNOWN inutilisée. Extraction de deux méthodes partagées (_make_line_symbol, _apply_simple_line_labels) pour éliminer la duplication du helper make_line et du bloc d'étiquetage répétés à l'identique dans _apply_bdtopo_troncons_style, _apply_magosm_style et apply_edigeo_voies_style.
+    - version.py (744 -> 19 lignes) : suppression du dictionnaire VERSION_HISTORY (dupliquait intégralement ce changelog sans jamais être affiché dans l'interface) ainsi que de la fonction get_changelog(), inutilisée. Les fonctions get_version()/get_version_info() sont conservées.
+    - test_regex.py supprimé : fichier de test manuel obsolète, testant une ancienne formulation de la regex (avec gestion des pluriels) ne correspondant plus du tout aux valeurs par défaut actuelles (SettingsDialog._DEFAULTS).
+    - Imports inutilisés retirés (get_changelog dans voirie_communale.py, QSizePolicy dans voirie_communale_dialog.py).
+    - Validation : ast.parse et pyflakes sans erreur sur tous les fichiers modifiés, vérification de l'absence de mojibake.
+    Version 0.18.5 (2026-08-05)
     - Regex « Chemin rural » / « Voie communale » : la valeur par défaut, jusqu'ici recopiée littéralement dans 9 endroits du code (styles.py ×4, voirie_communale.py, wfs_loader.py ×3, voirie_communale_dialog.py), est désormais centralisée dans une unique source de vérité (SettingsDialog._DEFAULTS). Toutes les fonctions de style et tous les points d'appel la lisent depuis là au lieu de la redéfinir, éliminant le risque de divergence entre copies (une incohérence de ce type, passée inaperçue, a d'ailleurs été corrigée au passage sur le chargement BAN). Aucun changement de comportement pour l'utilisateur.
     Version 0.18.4 (2026-08-05)
     - Regex « Voie communale » : retrait de la gestion des pluriels (« Voies Communales », « Chemins Communaux »...) ajoutée à tort en v0.18.3, non demandée. Seule la variante singulier « Chemin Communal » reste ajoutée, en plus de « Voie Communale » et « V.C. ». Migration automatique pour les utilisateurs ayant déjà reçu la valeur par défaut pluriel de la v0.18.3 (les regex personnalisées ne sont pas affectées).
@@ -35,8 +43,6 @@ changelog=    Version 0.18.5 (2026-08-05)
     - Cache : la correction précédente (v0.17.2) recréait une nouvelle couche depuis le GeoPackage et ne recopiait que le renderer et l'opacité, perdant les autres aspects du style (étiquettes, mode de fusion, jointures...). La bascule vers le cache utilise désormais QgsVectorLayer.setDataSource() sur la couche existante : le style est conservé intégralement puisqu'il s'agit du même objet couche (même id, même renderer, mêmes labels), seule la source de données change de memory vers le fichier GeoPackage.
     Version 0.17.2 (2026-08-02)
     - Cache : la couche MAJIC (et Filaires de voie BAL) apparaissait comme « couche temporaire » dans QGIS lors d'un premier téléchargement (ou après « Forcer le rechargement »), car elle était construite avec le provider memory. Après écriture réussie dans le cache GeoPackage, la couche du projet est désormais rechargée depuis le fichier .gpkg (provider ogr), avec conservation du style et de sa position dans l'arbre des couches — elle n'est plus signalée comme temporaire.
-    Version 0.17.1 (2026-08-02)
-    - Packaging : cache_manager.py manquait dans la liste des fichiers empaquetés (package.py), rendant le ZIP v0.17.0 inutilisable (erreur d'import au chargement du plugin). Le fichier est désormais bien inclus dans le ZIP.
 homepage=https://github.com/votre-username/voirie_communale
 category=Plugins
 icon=icon.png

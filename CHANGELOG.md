@@ -1,3 +1,13 @@
+# [0.19.0] - 2026-08-06
+### Nettoyé
+- **Code mort massif retiré** suite à une revue complète du code (aucun changement de comportement) :
+  - `wfs_loader.py` (1519 → 1064 lignes) : suppression de 8 méthodes jamais appelées, restes de l'ancienne architecture de chargement synchrone remplacée depuis par le chargement parallèle asynchrone (`WfsLoadTask` + `_fetch_*_to_vsimem`) : `load_bdtopo_troncons_wfs`, `load_bdtopo_routesnom_wfs`, `load_wms_epsg3857`, `load_ban_wfs`, `load_voirie_wfs`, `load_voirie_dep_wfs`, `load_osm_roads`, `load_magosm_wfs`. La branche `bbox` de `load_wfs_layer` (devenue inatteignable, plus aucun appelant vivant ne fournissant de `bbox`) ainsi que la méthode `_load_wfs_bbox` ont également été retirées ; seul le chemin `code_insee` (utilisé par `load_commune_wfs`) est conservé.
+  - `styles.py` (668 → 517 lignes) : suppression du dictionnaire `MAJIC_FORMES_JURIDIQUES` (110 lignes, jamais référencé ailleurs — seul `MAJIC_GROUPES` sert réellement au rendu) et de la constante `_MAJIC_COLOR_UNKNOWN` inutilisée. Extraction de deux méthodes partagées (`_make_line_symbol`, `_apply_simple_line_labels`) pour éliminer la duplication du helper `make_line` et du bloc d'étiquetage répétés à l'identique dans `_apply_bdtopo_troncons_style`, `_apply_magosm_style` et `apply_edigeo_voies_style`.
+  - `version.py` (744 → 19 lignes) : suppression du dictionnaire `VERSION_HISTORY` (dupliquait intégralement ce changelog sans jamais être affiché dans l'interface) ainsi que de la fonction `get_changelog()`, inutilisée. Les fonctions `get_version()`/`get_version_info()` sont conservées.
+  - `test_regex.py` supprimé : fichier de test manuel obsolète, testant une ancienne formulation de la regex (avec gestion des pluriels) ne correspondant plus du tout aux valeurs par défaut actuelles (`SettingsDialog._DEFAULTS`).
+  - Imports inutilisés retirés (`get_changelog` dans `voirie_communale.py`, `QSizePolicy` dans `voirie_communale_dialog.py`).
+- Validation : `ast.parse` et `pyflakes` sans erreur sur tous les fichiers modifiés, vérification de l'absence de mojibake.
+
 # [0.18.5] - 2026-08-05
 ### Modifié
 - **Regex « Chemin rural » / « Voie communale »** : la valeur par défaut, jusqu'ici recopiée littéralement dans 9 endroits du code (`styles.py` ×4, `voirie_communale.py`, `wfs_loader.py` ×3, `voirie_communale_dialog.py`), est désormais centralisée dans une unique source de vérité (`SettingsDialog._DEFAULTS`). Toutes les fonctions de style et tous les points d'appel la lisent depuis là au lieu de la redéfinir, éliminant le risque de divergence entre copies (une incohérence de ce type, passée inaperçue, a d'ailleurs été corrigée au passage sur le chargement BAN). Aucun changement de comportement pour l'utilisateur.

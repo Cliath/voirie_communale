@@ -10,7 +10,7 @@ import re
 import json
 from qgis.PyQt.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QSizePolicy, QMessageBox, QCheckBox, QFrame,
+    QPushButton, QLabel, QMessageBox, QCheckBox, QFrame,
     QToolButton, QLineEdit, QTabWidget, QListWidget, QListWidgetItem, QAbstractItemView,
     QSpinBox
 )
