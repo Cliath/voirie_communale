@@ -1,3 +1,7 @@
+# [0.18.4] - 2026-08-05
+### Corrigé
+- **Regex « Voie communale »** : retrait de la gestion des pluriels (« Voies Communales », « Chemins Communaux »...) ajoutée à tort en v0.18.3, non demandée. Seule la variante singulier « Chemin Communal » reste ajoutée, en plus de « Voie Communale » et « V.C. ». Migration automatique pour les utilisateurs ayant déjà reçu la valeur par défaut pluriel de la v0.18.3 (les regex personnalisées ne sont pas affectées).
+
 # [0.18.3] - 2026-08-05
 ### Modifié
 - **Regex « Voie communale »** : élargie pour reconnaître aussi les variantes « Chemin Communal(e/aux) » (ex. « Chemin Communal nº 5 »), en plus de « Voie(s) Communale(s) » et « V.C. ». Migration automatique de l'ancienne valeur par défaut vers la nouvelle au chargement des réglages (les regex personnalisées par l'utilisateur ne sont pas modifiées). Le libellé de la section des réglages passe de « Catégorisation des adresses BAN » à « Catégorisation Chemin rural / Voie communale », reflétant son usage désormais partagé par les couches BAN, BD TOPO tronçons, MagOSM et Voies EDIGEO (cadastre).

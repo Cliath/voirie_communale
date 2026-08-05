@@ -132,7 +132,7 @@ class SettingsDialog(QDialog):
         "clip_to_commune":   False,
         "clip_buffer_m":     25,
         "ban_regex_chemin":  r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-        "ban_regex_voie":    r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b',
+        "ban_regex_voie":    r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b',
         "last_insee":        "",
         "checked_layers":    [],
         "cache_warning_days": 30,
@@ -144,6 +144,7 @@ class SettingsDialog(QDialog):
     # personnalisations existantes ni exiger de réinitialisation manuelle.
     _LEGACY_BAN_REGEX_VOIE = {
         r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b',
+        r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b',
     }
 
     @staticmethod
@@ -343,7 +344,7 @@ class SettingsDialog(QDialog):
         lay_general.addWidget(QLabel("<b>Catégorisation Chemin rural / Voie communale</b>"))
 
         _BAN_REGEX_CHEMIN_DEFAULT = r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b'
-        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b'
+        _BAN_REGEX_VOIE_DEFAULT   = r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'
 
         # Charger les valeurs stockées ; si corrompues (regex invalide), restaurer le défaut
         # et corriger settings.json pour éviter l'erreur lors du prochain chargement BAN.

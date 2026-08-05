@@ -195,7 +195,7 @@ class StylesMixin:
 
     def _apply_bdtopo_troncons_style(self, layer,
                                       regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                                      regex_voie=r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b'):
+                                      regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
         """Style à règles : regex de filtrage (chemin rural / voie communale) en priorité
         sur le champ 'nom_1_gauche', puis catégorisation par 'nature'.
         """
@@ -371,7 +371,7 @@ class StylesMixin:
 
     def apply_ban_style(self, layer,
                          regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                         regex_voie=r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b'):
+                         regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
         """Applique un style différencié à la couche BAN selon le type de voie
 
         Args:
@@ -509,7 +509,7 @@ class StylesMixin:
 
     def _apply_magosm_style(self, layer,
                              regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                             regex_voie=r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b'):
+                             regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
         """Style à règles pour la couche MagOSM highways_line.
 
         Même structure que BD TOPO tronçons :
@@ -597,7 +597,7 @@ class StylesMixin:
 
     def apply_edigeo_voies_style(self, layer,
                                   regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
-                                  regex_voie=r'(?i)\b(?:voi(?:es?)?|che(?:mins?)?)\.?\s+com(?:m(?:un(?:al(?:e|es)?|aux))?)?\.?\b|\bV\.?C\.?\b'):
+                                  regex_voie=r'(?i)(voi(?:e)?|che(?:min)?) (com(?:munal)?)|\bV\.?C\.?\b'):
         """Style à règles pour la couche des voies EDIGEO (ZONCOMMUNI_id) : mêmes
         regex de catégorisation (Chemin rural / Voie communale) que BAN, BD TOPO
         tronçons et MagOSM, appliquées sur le nom complet reconstitué (champ 'nom').
