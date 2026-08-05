@@ -56,12 +56,16 @@ class EdigeoLoaderMixin:
                     parts.append(str(value).strip())
         return ' '.join(parts)
 
-    def load_edigeo_voies(self, code_insee):
+    def load_edigeo_voies(self, code_insee, regex_chemin=None, regex_voie=None):
         """Télécharge et fusionne la couche EDIGEO ZONCOMMUNI_id (voies, lignes)
         pour toutes les sections cadastrales d'une commune.
 
         Args:
             code_insee: Code INSEE de la commune (5 caractères)
+            regex_chemin: Expression régulière QGIS pour détecter les chemins ruraux
+                (transmise à apply_edigeo_voies_style ; défaut de la méthode si None)
+            regex_voie: Expression régulière QGIS pour détecter les voies communales
+                (transmise à apply_edigeo_voies_style ; défaut de la méthode si None)
 
         Returns:
             tuple: (bool succès, QgsVectorLayer voies ou None, bool aucune_donnee)
@@ -180,7 +184,12 @@ class EdigeoLoaderMixin:
             f"Voies EDIGEO (cadastre) {code_insee}"
         )
         if voies_layer:
-            self.apply_edigeo_voies_style(voies_layer)
+            style_kwargs = {}
+            if regex_chemin is not None:
+                style_kwargs['regex_chemin'] = regex_chemin
+            if regex_voie is not None:
+                style_kwargs['regex_voie'] = regex_voie
+            self.apply_edigeo_voies_style(voies_layer, **style_kwargs)
             self._remove_layers_by_name(f"Voies EDIGEO (cadastre) {code_insee}")
             QgsProject.instance().addMapLayer(voies_layer, False)
             QgsProject.instance().layerTreeRoot().addLayer(voies_layer)

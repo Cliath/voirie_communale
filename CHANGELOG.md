@@ -1,3 +1,7 @@
+# [0.18.2] - 2026-08-05
+### Ajouté
+- **Voies EDIGEO (cadastre)** : style désormais catégorisé par regex (Chemin rural / Voie communale / Autre) sur le nom complet reconstitué, avec les mêmes expressions régulières (configurables via les mêmes clés de réglages `ban_regex_chemin`/`ban_regex_voie`) que celles déjà utilisées pour les couches BAN, BD TOPO tronçons et MagOSM. Auparavant la couche utilisait un style simple à trait unique.
+
 # [0.18.1] - 2026-08-02
 ### Corrigé
 - **Voies EDIGEO (cadastre)** : la couche `VOIEP_id` (« Dénomination de voie EDIGEO ») ajoutée en v0.18.0 a été retirée. Après vérification exhaustive sur l'ensemble des sections cadastrales d'une commune test, cette couche s'est révélée mélanger des toponymes divers (lieux-dits, bâtiments remarquables comme « Mairie »/« Poste », points cotés d'altitude, repères géodésiques) sans aucun champ permettant de distinguer un nom de voie des autres entrées. Seule la couche `ZONCOMMUNI_id` (voies, lignes) est donc conservée et chargée par la case à cocher « Voies (cadastre EDIGEO) ».

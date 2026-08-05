@@ -732,7 +732,7 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
         if edigeo_checked:
             if 'edigeo_voies' in cache_hits:
                 edigeo_voies_layer = cache_hits['edigeo_voies']
-                self.apply_edigeo_voies_style(edigeo_voies_layer)
+                self.apply_edigeo_voies_style(edigeo_voies_layer, regex_chemin=regex_chemin, regex_voie=regex_voie)
                 self._remove_layers_by_name(f"Voies EDIGEO (cadastre) {code_insee}")
                 QgsProject.instance().addMapLayer(edigeo_voies_layer, False)
                 QgsProject.instance().layerTreeRoot().addLayer(edigeo_voies_layer)
@@ -740,7 +740,9 @@ class VoirieCommunale(LayerOrderMixin, WfsLoaderMixin, StylesMixin, CacheManager
                 loaded_layers.append(edigeo_voies_layer)
             else:
                 advance(f"Chargement des voies EDIGEO (cadastre) ({code_insee})...")
-                edigeo_success, edigeo_voies_layer, edigeo_no_data = self.load_edigeo_voies(code_insee)
+                edigeo_success, edigeo_voies_layer, edigeo_no_data = self.load_edigeo_voies(
+                    code_insee, regex_chemin=regex_chemin, regex_voie=regex_voie
+                )
                 results.append(('Voies EDIGEO (cadastre)', edigeo_success))
                 if edigeo_voies_layer:
                     if self._save_layer_to_cache(code_insee, 'edigeo_voies', edigeo_voies_layer):

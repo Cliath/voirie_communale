@@ -1,7 +1,7 @@
 # Voirie Communale - Plugin QGIS
 
 Plugin QGIS pour le recensement de la voirie communale (voies communales et chemins ruraux).  
-Version actuelle : **0.18.1** — voir [CHANGELOG](CHANGELOG.md)
+Version actuelle : **0.18.2** — voir [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
@@ -123,7 +123,13 @@ Aucun style personnalisé n'est appliqué à cette couche : elle utilise le styl
 
 #### Voies EDIGEO (cadastre) — nom reconstitué
 
-Le plan cadastral vecteur EDIGEO fragmente historiquement le nom d'une voie sur plusieurs champs texte (`TEX`, `TEX2`...`TEX10`, limite de longueur du format). Le plugin télécharge toutes les sections cadastrales de la commune, reconstitue le nom complet en concaténant ces fragments dans l'ordre, et produit une couche lignes (`ZONCOMMUNI_id`) : trait simple `#8C7274`, étiquetée avec le nom complet reconstitué (champ `nom`) le long du tracé.
+Le plan cadastral vecteur EDIGEO fragmente historiquement le nom d'une voie sur plusieurs champs texte (`TEX`, `TEX2`...`TEX10`, limite de longueur du format). Le plugin télécharge toutes les sections cadastrales de la commune, reconstitue le nom complet en concaténant ces fragments dans l'ordre, et produit une couche lignes (`ZONCOMMUNI_id`) stylée par règles selon le nom reconstitué (champ `nom`), avec les mêmes regex de catégorisation que les couches BAN / BD TOPO tronçons / MagOSM :
+
+- **Chemin rural** (nom matchant `ban_regex_chemin`) : trait tireté `#8C7274`.
+- **Voie communale** (nom matchant `ban_regex_voie`) : trait tireté `#FCF6B5`.
+- **Autre** (aucune correspondance) : trait tireté `#8C7274` plus fin.
+
+Chaque catégorie est étiquetée avec le nom complet reconstitué le long du tracé.
 
 La couche est en projection Lambert-93 (EPSG:2154), le CRS natif du plan cadastral vecteur.
 

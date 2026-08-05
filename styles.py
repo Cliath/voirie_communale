@@ -10,7 +10,7 @@ categorises sur les couches chargees (BD TOPO, BAN, OSM, MagOSM).
 """
 from qgis.PyQt.QtGui import QColor
 from qgis.core import (Qgis, QgsMessageLog,
-                       QgsMarkerSymbol, QgsSingleSymbolRenderer,
+                       QgsMarkerSymbol,
                        QgsPalLayerSettings, QgsTextFormat, QgsVectorLayerSimpleLabeling,
                        QgsTextBufferSettings)
 
@@ -595,19 +595,49 @@ class StylesMixin:
             "VoirieCommunale", Qgis.Success
         )
 
-    def apply_edigeo_voies_style(self, layer):
-        """Applique un style simple (ligne + étiquette) à la couche des voies EDIGEO
-        (ZONCOMMUNI_id), avec le nom complet reconstitué affiché le long de la ligne.
+    def apply_edigeo_voies_style(self, layer,
+                                  regex_chemin=r'(?i)(che(?:min)?|sen(?:tier)?) rural|\bC\.?R\.?\b',
+                                  regex_voie=r'(?i)(voi(?:e)?) (com(?:munale)?)|\bV\.?C\.?\b'):
+        """Style à règles pour la couche des voies EDIGEO (ZONCOMMUNI_id) : mêmes
+        regex de catégorisation (Chemin rural / Voie communale) que BAN, BD TOPO
+        tronçons et MagOSM, appliquées sur le nom complet reconstitué (champ 'nom').
 
         Args:
             layer: La couche QgsVectorLayer des voies EDIGEO à styliser
+            regex_chemin: Expression régulière QGIS pour détecter les chemins ruraux
+            regex_voie: Expression régulière QGIS pour détecter les voies communales
         """
-        from qgis.core import QgsLineSymbol
+        from qgis.core import QgsRuleBasedRenderer, QgsLineSymbol
 
-        sym = QgsLineSymbol.createSimple({
-            'line_color': '#8C7274', 'line_width': '0.4', 'line_style': 'dash'
-        })
-        layer.setRenderer(QgsSingleSymbolRenderer(sym))
+        def make_line(color, width, dash=False):
+            props = {'color': color, 'width': str(width)}
+            if dash:
+                props['line_style'] = 'dash'
+            return QgsLineSymbol.createSimple(props)
+
+        nom_field = 'nom'
+        root_rule = QgsRuleBasedRenderer.Rule(None)
+
+        rule_cr = QgsRuleBasedRenderer.Rule(make_line('#8C7274', 0.7, dash=True))
+        rule_cr.setLabel('Chemin rural (nom)')
+        rule_cr.setFilterExpression(
+            f"regexp_match(\"{nom_field}\", '{self._qgis_expr_regex(regex_chemin)}') > 0"
+        )
+        root_rule.appendChild(rule_cr)
+
+        rule_vc = QgsRuleBasedRenderer.Rule(make_line('#FCF6B5', 0.7, dash=True))
+        rule_vc.setLabel('Voie communale (nom)')
+        rule_vc.setFilterExpression(
+            f"regexp_match(\"{nom_field}\", '{self._qgis_expr_regex(regex_voie)}') > 0"
+        )
+        root_rule.appendChild(rule_vc)
+
+        rule_autre = QgsRuleBasedRenderer.Rule(make_line('#8C7274', 0.4, dash=True))
+        rule_autre.setLabel('(autre)')
+        rule_autre.setIsElse(True)
+        root_rule.appendChild(rule_autre)
+
+        layer.setRenderer(QgsRuleBasedRenderer(root_rule))
 
         lbl = QgsPalLayerSettings()
         lbl.isExpression = False
@@ -628,7 +658,7 @@ class StylesMixin:
         layer.triggerRepaint()
 
         QgsMessageLog.logMessage(
-            "Style appliqué à la couche Voies EDIGEO (cadastre)",
+            "Style différencié appliqué à la couche Voies EDIGEO (cadastre) (Chemin rural / Voie communale)",
             "VoirieCommunale", Qgis.Success
         )
 
